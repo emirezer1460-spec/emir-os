@@ -19,7 +19,7 @@
     }
     .wrapper {
       width: 100%;
-      max-width: 1100px;
+      max-width: 1200px;
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -27,11 +27,18 @@
     header {
       background: #16253d;
       color: #ffffff;
-      padding: 16px 20px;
+      padding: 14px 20px;
       border-radius: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
     .logo-badge {
       width: 40px;
@@ -46,12 +53,37 @@
       font-size: 20px;
       border: 1px solid #b38f4d;
     }
+    .nav-tabs {
+      display: flex;
+      gap: 6px;
+      background: #0f1a2b;
+      padding: 4px;
+      border-radius: 8px;
+    }
+    .nav-tab-btn {
+      background: transparent;
+      border: none;
+      color: #cbd5e1;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .nav-tab-btn.active {
+      background: #b38f4d;
+      color: #0f1a2b;
+    }
+    .section-view { display: none; }
+    .section-view.active { display: block; }
+
+    /* DASHBOARD GRID */
     .grid {
       display: grid;
-      grid-template-columns: 1fr 1.4fr;
+      grid-template-columns: 1fr 1.3fr;
       gap: 16px;
     }
-    @media (max-width: 800px) {
+    @media (max-width: 850px) {
       .grid { grid-template-columns: 1fr; }
     }
     .card {
@@ -70,8 +102,9 @@
       padding-bottom: 6px;
       display: flex;
       justify-content: space-between;
+      align-items: center;
     }
-    input[type="text"], textarea {
+    input[type="text"], input[type="number"], textarea, select {
       width: 100%;
       border: 1px solid #e2ddd3;
       border-radius: 6px;
@@ -92,6 +125,7 @@
       font-weight: 600;
       cursor: pointer;
     }
+    .btn:hover { background: #243b5a; }
     .btn-light {
       background: #eee8dc;
       color: #16253d;
@@ -122,78 +156,214 @@
       border: 1px solid #e2ddd3;
       border-radius: 8px;
       background: #ffffff;
-      height: 350px;
+      height: 320px;
       position: relative;
       touch-action: none;
     }
     canvas { width: 100%; height: 100%; display: block; }
+
+    /* KÜTÜPHANE SAYFASI */
+    .library-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 900px) {
+      .library-layout { grid-template-columns: 1fr; }
+    }
+    .book-item {
+      background: #faf8f5;
+      border: 1px solid #e2ddd3;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .book-item:hover, .book-item.selected {
+      border-color: #16253d;
+      background: #ffffff;
+    }
+    .book-progress-bar {
+      height: 5px;
+      background: #e2ddd3;
+      border-radius: 4px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .book-progress-fill {
+      height: 100%;
+      background: #b38f4d;
+    }
+    .reader-container {
+      background: #ffffff;
+      border: 1px solid #e2ddd3;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      height: 750px;
+      overflow: hidden;
+    }
+    .reader-header {
+      padding: 10px 16px;
+      background: #f1ece2;
+      border-bottom: 1px solid #e2ddd3;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .reader-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+    }
+    @media (max-width: 800px) {
+      .reader-body { grid-template-columns: 1fr; }
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #525659;
+    }
+    .reader-notes {
+      padding: 14px;
+      border-left: 1px solid #e2ddd3;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #faf8f5;
+    }
   </style>
 </head>
 <body>
   <div class="wrapper">
     <header>
-      <div style="display:flex; align-items:center; gap:12px;">
+      <div class="brand">
         <div class="logo-badge">E</div>
         <div>
-          <h1 style="font-size:20px;">EMIR OS</h1>
-          <p style="font-size:12px; color:#cbd5e1;">Kişisel Yaşam & Çalışma Alanı</p>
+          <h1 style="font-size:18px;">EMIR OS</h1>
+          <p style="font-size:11px; color:#cbd5e1;">Kişisel Bilgi & Akademik Çalışma Alanı</p>
         </div>
       </div>
+      
+      <!-- NAVİGASYON -->
+      <div class="nav-tabs">
+        <button class="nav-tab-btn active" onclick="switchMainTab('dashboard')">Dashboard</button>
+        <button class="nav-tab-btn" onclick="switchMainTab('library')">PDF Kütüphanesi</button>
+      </div>
+
       <div style="text-align:right;">
-        <div id="liveDate" style="font-weight:600; color:#f7f1e5; font-size:14px;"></div>
-        <div id="liveClock" style="font-size:12px; opacity:0.8;"></div>
+        <div id="liveDate" style="font-weight:600; color:#f7f1e5; font-size:13px;"></div>
+        <div id="liveClock" style="font-size:11px; opacity:0.8;"></div>
       </div>
     </header>
 
-    <div class="grid">
-      <!-- SOL TARAF -->
-      <div>
-        <div class="card">
-          <div class="card-title"><span>Bugünün Hedefleri</span></div>
-          <div style="display:flex; gap:6px;">
-            <input type="text" id="newTodoInput" placeholder="Görev ekle...">
-            <button class="btn" onclick="addTodo()">Ekle</button>
+    <!-- DASHBOARD GÖRÜNÜMÜ -->
+    <div id="view-dashboard" class="section-view active">
+      <div class="grid">
+        <!-- SOL SÜTUN -->
+        <div>
+          <div class="card">
+            <div class="card-title"><span>Bugünün Hedefleri</span></div>
+            <div style="display:flex; gap:6px;">
+              <input type="text" id="newTodoInput" placeholder="Görev ekle...">
+              <button class="btn" onclick="addTodo()">Ekle</button>
+            </div>
+            <div id="todoList" style="margin-top:8px;"></div>
           </div>
-          <div id="todoList" style="margin-top:8px;"></div>
+
+          <div class="card">
+            <div class="card-title"><span>Kelime Defteri (EN / ES)</span></div>
+            <div style="display:flex; gap:6px;">
+              <input type="text" id="vocabWord" placeholder="Kelime...">
+              <input type="text" id="vocabMeaning" placeholder="Anlamı...">
+              <button class="btn" onclick="addVocab()">Ekle</button>
+            </div>
+            <div id="vocabContainer" style="margin-top:8px;"></div>
+          </div>
         </div>
 
-        <div class="card">
-          <div class="card-title"><span>Kelime Defteri (EN / ES)</span></div>
-          <div style="display:flex; gap:6px;">
-            <input type="text" id="vocabWord" placeholder="Kelime...">
-            <input type="text" id="vocabMeaning" placeholder="Anlamı...">
-            <button class="btn" onclick="addVocab()">Ekle</button>
+        <!-- SAĞ SÜTUN -->
+        <div>
+          <div class="card">
+            <div class="card-title">
+              <span>Hızlı Not</span>
+              <span id="saveStatus" style="font-size:12px; font-weight:normal; color:#888;">Otomatik kaydeder</span>
+            </div>
+            <input type="text" id="noteTitle" placeholder="Başlık...">
+            <textarea id="noteContent" rows="4" placeholder="Notunu yaz..."></textarea>
+            <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:8px;">
+              <button class="btn btn-light" onclick="newNote()">Temizle</button>
+              <button class="btn" onclick="saveCurrentNote()">Kaydet</button>
+            </div>
+            <div id="notesList" style="margin-top:10px;"></div>
           </div>
-          <div id="vocabContainer" style="margin-top:8px;"></div>
-        </div>
-      </div>
 
-      <!-- SAĞ TARAF -->
-      <div>
-        <div class="card">
-          <div class="card-title">
-            <span>Hızlı Not</span>
-            <span id="saveStatus" style="font-size:12px; font-weight:normal; color:#888;">Otomatik kaydeder</span>
-          </div>
-          <input type="text" id="noteTitle" placeholder="Başlık...">
-          <textarea id="noteContent" rows="4" placeholder="Notunu yaz..."></textarea>
-          <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:8px;">
-            <button class="btn btn-light" onclick="newNote()">Temizle</button>
-            <button class="btn" onclick="saveCurrentNote()">Kaydet</button>
-          </div>
-          <div id="notesList" style="margin-top:10px;"></div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">
-            <span>Çizim Tahtası (Stylus / Kalem)</span>
-            <div>
-              <button class="btn btn-light" style="padding:2px 8px; font-size:11px;" onclick="clearCanvas()">Temizle</button>
-              <button class="btn" style="padding:2px 8px; font-size:11px;" onclick="downloadDrawing()">İndir</button>
+          <div class="card">
+            <div class="card-title">
+              <span>Çizim Tahtası (Stylus / Kalem)</span>
+              <div>
+                <button class="btn btn-light" style="padding:2px 8px; font-size:11px;" onclick="clearCanvas()">Temizle</button>
+                <button class="btn" style="padding:2px 8px; font-size:11px;" onclick="downloadDrawing()">İndir</button>
+              </div>
+            </div>
+            <div class="wb-box">
+              <canvas id="mainCanvas"></canvas>
             </div>
           </div>
-          <div class="wb-box">
-            <canvas id="mainCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- PDF KÜTÜPHANESİ GÖRÜNÜMÜ -->
+    <div id="view-library" class="section-view">
+      <div class="library-layout">
+        <!-- SOL: KİTAP LİSTESİ & YÜKLEME -->
+        <div>
+          <div class="card">
+            <div class="card-title"><span>Kitap / Makale Ekle</span></div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <input type="text" id="bookTitle" placeholder="Eser Adı...">
+              <input type="text" id="bookAuthor" placeholder="Yazar / Yıl...">
+              <select id="bookCategory">
+                <option value="ELT / Dil Eğitimi">ELT / Dil Eğitimi</option>
+                <option value="Araştırma / Makale">Araştırma / Makale</option>
+                <option value="Kitap">Kitap</option>
+                <option value="Kişisel">Kişisel Gelişim</option>
+              </select>
+              <input type="file" id="pdfFileInput" accept="application/pdf" style="font-size:12px;">
+              <button class="btn" onclick="addNewBook()">Kütüphaneye Ekle</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span>Kayıtlı Kaynaklar</span></div>
+            <div id="booksList"></div>
+          </div>
+        </div>
+
+        <!-- SAĞ: PDF OKUYUCU VE KAYNAK NOTLARI -->
+        <div class="reader-container">
+          <div class="reader-header">
+            <div>
+              <strong id="activeBookTitle" style="color:#16253d; font-size:14px;">Henüz bir eser seçilmedi</strong>
+              <div id="activeBookMeta" style="font-size:11px; color:#666;">Soldan bir esere tıklayın veya PDF yükleyin</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:12px;">İlerleme: %</span>
+              <input type="number" id="readingProgressInput" min="0" max="100" style="width:60px; padding:4px;" onchange="updateProgress(this.value)">
+            </div>
+          </div>
+
+          <div class="reader-body">
+            <iframe id="pdfViewerFrame" src="about:blank"></iframe>
+            
+            <div class="reader-notes">
+              <strong style="font-size:13px; color:#16253d;">Bu Kaynağa Ait Notlar</strong>
+              <p style="font-size:11px; color:#666;">Okurken karşılaştığın fikirleri ve alıntıları buraya kaydet.</p>
+              <textarea id="bookSpecificNotes" style="flex:1;" placeholder="Kaynak notları..." oninput="saveBookNote()"></textarea>
+            </div>
           </div>
         </div>
       </div>
@@ -201,6 +371,21 @@
   </div>
 
   <script>
+    // SEKME GEÇİŞİ
+    function switchMainTab(tab) {
+      document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.section-view').forEach(v => v.classList.remove('active'));
+      if(tab === 'dashboard') {
+        document.querySelectorAll('.nav-tab-btn')[0].classList.add('active');
+        document.getElementById('view-dashboard').classList.add('active');
+        resizeCanvas();
+      } else {
+        document.querySelectorAll('.nav-tab-btn')[1].classList.add('active');
+        document.getElementById('view-library').classList.add('active');
+      }
+    }
+
+    // SAAT
     function updateClock() {
       const now = new Date();
       document.getElementById('liveDate').textContent = now.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -310,7 +495,7 @@
       renderNotes();
     }
 
-    // CANVAS
+    // CANVAS (WHITEBOARD)
     const canvas = document.getElementById('mainCanvas');
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
@@ -361,9 +546,115 @@
       a.click();
     }
 
+    // PDF KÜTÜPHANESİ MANTIĞI
+    let books = JSON.parse(localStorage.getItem('emir_os_books') || '[]');
+    let currentBookId = null;
+
+    function renderBooks() {
+      const el = document.getElementById('booksList');
+      el.innerHTML = '';
+      if(books.length === 0) {
+        el.innerHTML = '<div style="font-size:12px; color:#888;">Henüz kayıtlı kaynak yok.</div>';
+        return;
+      }
+      books.forEach(b => {
+        const item = document.createElement('div');
+        item.className = 'book-item' + (b.id === currentBookId ? ' selected' : '');
+        item.innerHTML = `
+          <div onclick="selectBook('${b.id}')">
+            <strong style="color:#16253d; font-size:13px;">${b.title}</strong>
+            <div style="font-size:11px; color:#666;">${b.author || ''} · <span style="color:#b38f4d;">${b.category}</span></div>
+            <div class="book-progress-bar">
+              <div class="book-progress-fill" style="width: ${b.progress || 0}%;"></div>
+            </div>
+            <div style="font-size:10px; color:#888; text-align:right; margin-top:2px;">%${b.progress || 0} okundu</div>
+          </div>
+          <button style="border:none; background:none; color:#c2413a; cursor:pointer; font-size:11px; margin-top:4px;" onclick="deleteBook('${b.id}')">Sil</button>
+        `;
+        el.appendChild(item);
+      });
+    }
+
+    function addNewBook() {
+      const t = document.getElementById('bookTitle').value.trim();
+      const a = document.getElementById('bookAuthor').value.trim();
+      const c = document.getElementById('bookCategory').value;
+      const file = document.getElementById('pdfFileInput').files[0];
+
+      if (!t) return alert('Lütfen eser adını girin');
+
+      const id = Date.now().toString();
+      let pdfUrl = '';
+      if (file) {
+        pdfUrl = URL.createObjectURL(file);
+      }
+
+      const newB = { id, title: t, author: a, category: c, progress: 0, notes: '', pdfUrl };
+      books.unshift(newB);
+      localStorage.setItem('emir_os_books', JSON.stringify(books));
+      
+      document.getElementById('bookTitle').value = '';
+      document.getElementById('bookAuthor').value = '';
+      document.getElementById('pdfFileInput').value = '';
+      renderBooks();
+      selectBook(id);
+    }
+
+    function selectBook(id) {
+      currentBookId = id;
+      const b = books.find(x => x.id === id);
+      if (!b) return;
+
+      document.getElementById('activeBookTitle').textContent = b.title;
+      document.getElementById('activeBookMeta').textContent = `${b.author || ''} (${b.category})`;
+      document.getElementById('readingProgressInput').value = b.progress || 0;
+      document.getElementById('bookSpecificNotes').value = b.notes || '';
+
+      const frame = document.getElementById('pdfViewerFrame');
+      if (b.pdfUrl) {
+        frame.src = b.pdfUrl;
+      } else {
+        frame.src = 'about:blank';
+      }
+      renderBooks();
+    }
+
+    function updateProgress(val) {
+      if (!currentBookId) return;
+      const b = books.find(x => x.id === currentBookId);
+      if (b) {
+        b.progress = Math.min(100, Math.max(0, parseInt(val) || 0));
+        localStorage.setItem('emir_os_books', JSON.stringify(books));
+        renderBooks();
+      }
+    }
+
+    function saveBookNote() {
+      if (!currentBookId) return;
+      const b = books.find(x => x.id === currentBookId);
+      if (b) {
+        b.notes = document.getElementById('bookSpecificNotes').value;
+        localStorage.setItem('emir_os_books', JSON.stringify(books));
+      }
+    }
+
+    function deleteBook(id) {
+      books = books.filter(x => x.id !== id);
+      localStorage.setItem('emir_os_books', JSON.stringify(books));
+      if (currentBookId === id) {
+        currentBookId = null;
+        document.getElementById('activeBookTitle').textContent = 'Henüz bir eser seçilmedi';
+        document.getElementById('pdfViewerFrame').src = 'about:blank';
+        document.getElementById('bookSpecificNotes').value = '';
+      }
+      renderBooks();
+    }
+
+    // BAŞLATMA
     renderTodos();
     renderVocabs();
     renderNotes();
+    renderBooks();
   </script>
 </body>
 </html>
