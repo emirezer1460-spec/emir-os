@@ -23,8 +23,8 @@
       --text: #1a202c;
       --muted: #718096;
       --shadow-lg: 0 10px 30px rgba(22, 37, 61, 0.08);
-      --radius-lg: 20px;
-      --radius-md: 14px;
+      --radius-app: 24px;
+      --radius-panel: 22px;
       --yellow: #f59e0b;
       --blue: #2563eb;
       --red: #dc2626;
@@ -46,26 +46,27 @@
       gap: 14px;
     }
     .os-topbar {
-      height: 60px;
+      height: 56px;
       background: var(--navy);
       color: #fff;
-      border-radius: var(--radius-md);
-      padding: 0 20px;
+      border-radius: 16px;
+      padding: 0 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       box-shadow: var(--shadow-lg);
       flex-shrink: 0;
+      z-index: 20;
     }
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       cursor: pointer;
     }
     .os-logo {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       background: #0d1726;
       border: 1.5px solid var(--gold);
       color: var(--gold);
@@ -74,72 +75,83 @@
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 20px;
+      font-size: 18px;
     }
-    .brand-title { font-size: 19px; font-weight: 800; letter-spacing: 0.5px; }
+    .brand-title { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
 
     .sync-status {
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 12px;
+      font-size: 11px;
       background: rgba(255,255,255,0.12);
       padding: 4px 10px;
       border-radius: 8px;
       color: #cbd5e1;
     }
 
-    /* DOCK CAROUSEL */
+    /* BÜYÜK YUVARLAK UYGULAMA DOCKU (AÇIKLAMASIZ SADECE İKON VE BAŞLIK) */
     .dock-carousel {
       display: flex;
       gap: 16px;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      padding: 4px 2px 14px 2px;
+      padding: 4px 2px 10px 2px;
       flex-shrink: 0;
       scrollbar-width: none;
+      z-index: 10;
     }
     .dock-carousel::-webkit-scrollbar { display: none; }
-    .carousel-card {
-      flex: 0 0 270px;
-      height: 170px;
+    
+    .app-icon-card {
+      flex: 0 0 170px;
+      height: 140px;
       background: var(--card);
       border: 1.5px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px;
+      border-radius: var(--radius-app);
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
       cursor: pointer;
       scroll-snap-align: start;
       box-shadow: var(--shadow-lg);
-      transition: transform 0.2s, border-color 0.2s;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+      user-select: none;
+      -webkit-user-select: none;
     }
-    .carousel-card:hover { transform: translateY(-3px); border-color: var(--navy); }
-    .carousel-card:active { transform: scale(0.97); }
-    .card-icon-badge {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
+    .app-icon-card:active { transform: scale(0.92); border-color: var(--navy); }
+    
+    .app-round-badge {
+      width: 66px;
+      height: 66px;
+      border-radius: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 32px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
-    .card-title { font-size: 19px; font-weight: 800; color: var(--navy); }
-    .card-desc { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+    .app-label {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+      text-align: center;
+    }
 
     /* WORKSPACE */
     .workspace-area {
       flex: 1;
       background: var(--card);
       border: 1.5px solid var(--border);
-      border-radius: var(--radius-lg);
+      border-radius: var(--radius-panel);
       box-shadow: var(--shadow-lg);
       display: flex;
       flex-direction: column;
       overflow: hidden;
       position: relative;
+      z-index: 5;
     }
     .view-layer {
       position: absolute;
@@ -147,11 +159,13 @@
       background: var(--card);
       display: none;
       flex-direction: column;
+      z-index: 1;
     }
-    .view-layer.active { display: flex; }
+    .view-layer.active { display: flex; z-index: 10; }
+    
     .view-header {
-      height: 58px;
-      padding: 0 20px;
+      height: 56px;
+      padding: 0 18px;
       background: #faf8f3;
       border-bottom: 1.5px solid var(--border);
       display: flex;
@@ -171,7 +185,7 @@
     }
     .view-body {
       flex: 1;
-      padding: 20px;
+      padding: 18px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -221,7 +235,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      width: 280px;
+      width: 260px;
     }
     .tree-tab-group {
       display: flex;
@@ -242,10 +256,7 @@
       border-radius: 8px;
       cursor: pointer;
     }
-    .tree-tab-btn.active {
-      background: #fff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-    }
+    .tree-tab-btn.active { background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
     .folder-item {
       padding: 10px 12px;
       border-radius: 10px;
@@ -286,7 +297,7 @@
       position: relative;
     }
     .reader-toolbar {
-      height: 54px;
+      height: 52px;
       background: #1e2430;
       color: #fff;
       padding: 0 16px;
@@ -402,7 +413,6 @@
         <div class="os-logo">E</div>
         <div>
           <div class="brand-title">EMIR OS</div>
-          <div style="font-size:11px; color:#cbd5e1;">Akademik Araştırma & Bulut Entegre İstasyon</div>
         </div>
       </div>
 
@@ -411,52 +421,42 @@
           <span>☁️</span> <span id="syncText">Bulut Hazır</span>
         </div>
         <div style="text-align:right;">
-          <div id="liveDate" style="font-weight:600; font-size:13px; color:#fbf7ee;">Bugün</div>
+          <div id="liveDate" style="font-weight:600; font-size:12px; color:#fbf7ee;">Bugün</div>
           <div id="liveClock" style="font-size:11px; opacity:0.8;">--:--</div>
         </div>
       </div>
     </div>
 
-    <!-- CAROUSEL -->
+    <!-- BÜYÜK YUVARLAK UYGULAMA İKONLARI (AÇIKLAMASIZ) -->
     <div class="dock-carousel">
-      <div class="carousel-card" onclick="openLayer('library')">
-        <div class="card-icon-badge" style="background:#f9f5e6; color:#876719;">📚</div>
-        <div>
-          <div class="card-title">Kütüphane & Okuma</div>
-          <div class="card-desc">Makaleler, Hoca klasörleri ve el yazısıyla anında işaretleme.</div>
-        </div>
+      <!-- 1. Kütüphane -->
+      <div class="app-icon-card" onclick="openLayer('library')">
+        <div class="app-round-badge" style="background:#f9f5e6; color:#876719;">📚</div>
+        <div class="app-label">Kütüphane</div>
       </div>
 
-      <div class="carousel-card" onclick="openLayer('master-notebook')">
-        <div class="card-icon-badge" style="background:#fdf2e9; color:#b25e1a;">📖</div>
-        <div>
-          <div class="card-title">Ana Defter</div>
-          <div class="card-desc">Günün sonunda derlenen zihin haritaları, kavramlar ve el yazısı tuvali.</div>
-        </div>
+      <!-- 2. Ana Defter -->
+      <div class="app-icon-card" onclick="openLayer('master-notebook')">
+        <div class="app-round-badge" style="background:#fdf2e9; color:#b25e1a;">📖</div>
+        <div class="app-label">Ana Defter</div>
       </div>
 
-      <div class="carousel-card" onclick="openLayer('notes')">
-        <div class="card-icon-badge" style="background:#e8effa; color:#1b4d89;">✍️</div>
-        <div>
-          <div class="card-title">Hızlı Notlar (Kalem)</div>
-          <div class="card-desc">Stylus el yazısı çizimi ve klavye notlarının bir arada olduğu alan.</div>
-        </div>
+      <!-- 3. Hızlı Notlar -->
+      <div class="app-icon-card" onclick="openLayer('notes')">
+        <div class="app-round-badge" style="background:#e8effa; color:#1b4d89;">✍️</div>
+        <div class="app-label">Hızlı Notlar</div>
       </div>
 
-      <div class="carousel-card" onclick="openLayer('vocab')">
-        <div class="card-icon-badge" style="background:#e8f7ee; color:#1d6e3c;">🔤</div>
-        <div>
-          <div class="card-title">Kelime Defteri</div>
-          <div class="card-desc">Maviyle taranan akademik terimler ve İngilizce açıklamaları.</div>
-        </div>
+      <!-- 4. Kelime Defteri -->
+      <div class="app-icon-card" onclick="openLayer('vocab')">
+        <div class="app-round-badge" style="background:#e8f7ee; color:#1d6e3c;">🔤</div>
+        <div class="app-label">Kelimeler</div>
       </div>
 
-      <div class="carousel-card" onclick="openLayer('todos')">
-        <div class="card-icon-badge" style="background:#f4ebf9; color:#68278f;">🎯</div>
-        <div>
-          <div class="card-title">Hedefler</div>
-          <div class="card-desc">Günün öncelikleri ve akademik çalışma planı.</div>
-        </div>
+      <!-- 5. Hedefler -->
+      <div class="app-icon-card" onclick="openLayer('todos')">
+        <div class="app-round-badge" style="background:#f4ebf9; color:#68278f;">🎯</div>
+        <div class="app-label">Hedefler</div>
       </div>
     </div>
 
@@ -636,9 +636,7 @@
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-    // ==========================================
-    // SUPABASE CANLI BULUT SENKRONİZASYONU
-    // ==========================================
+    // SUPABASE BULUT ENTEGRASYONU
     const SUPABASE_URL = 'https://rexoyhcaureiknzwqmbs.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_p6Qu12fVRmD49G-dPBPSjw_L1g3uXtM';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -668,7 +666,7 @@
         if (error) throw error;
         notifyCloudSync('Bulut: Senkronize ✓');
       } catch (err) {
-        notifyCloudSync('Yerel Kaydedildi (Bulut Beklemede)');
+        notifyCloudSync('Yerel Kaydedildi');
       }
     }
 
@@ -712,20 +710,22 @@
       }
     }
 
-    // ==========================================
-    // GENEL GÖRÜNÜM
-    // ==========================================
+    // GÖRÜNÜM VE PENCERE AÇMA (KESİN TETİKLEYİCİ)
     function openLayer(id) {
       document.querySelectorAll('.view-layer').forEach(l => l.classList.remove('active'));
       const target = document.getElementById('layer-' + id);
-      if (target) target.classList.add('active');
-      if (id === 'master-notebook') resizeMasterCanvas();
-      if (id === 'notes' && noteMode === 'draw') resizeHandCanvas();
+      if (target) {
+        target.classList.add('active');
+      }
+      if (id === 'master-notebook') setTimeout(resizeMasterCanvas, 50);
+      if (id === 'notes' && noteMode === 'draw') setTimeout(resizeHandCanvas, 50);
     }
+
     function showHome() {
       openLayer('home');
       renderHomeSummary();
     }
+
     function tick() {
       const n = new Date();
       document.getElementById('liveDate').textContent = n.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -733,9 +733,7 @@
     }
     setInterval(tick, 1000); tick();
 
-    // ==========================================
-    // KLASÖR & KÜTÜPHANE
-    // ==========================================
+    // KÜTÜPHANE
     let currentRoot = 'articles';
     let currentFolderId = 'root_articles';
     const teachers = ['Serkan Hoca', 'Doğan Hoca', 'Banu Hoca', 'Mehmet Hoca'];
@@ -864,9 +862,7 @@
       triggerAutoSync();
     }
 
-    // ==========================================
-    // PDF OKUYUCU
-    // ==========================================
+    // PDF RENDER
     let pdfDoc = null;
     let pageNum = 1;
     let scale = 1.35;
@@ -1036,9 +1032,7 @@
       saveLibrary();
     }
 
-    // ==========================================
-    // OKUMAYI BİTİR & ANA DEFTER
-    // ==========================================
+    // OKUMAYI BİTİR
     function finishReadingSession() {
       if (!currentPub) return;
 
@@ -1100,9 +1094,7 @@
       openLayer('master-notebook');
     }
 
-    // ==========================================
-    // ANA DEFTER OVERLAY
-    // ==========================================
+    // MASTER CANVAS
     const masterCanvas = document.getElementById('masterCanvasOverlay');
     const masterCtx = masterCanvas.getContext('2d');
     let isMasterDrawing = false;
@@ -1162,9 +1154,7 @@
       masterCtx.clearRect(0, 0, masterCanvas.width, masterCanvas.height);
     }
 
-    // ==========================================
     // HIZLI NOTLAR
-    // ==========================================
     let noteMode = 'keyboard';
     const handCanvas = document.getElementById('noteHandCanvas');
     const handCtx = handCanvas.getContext('2d');
@@ -1307,9 +1297,7 @@
       triggerAutoSync();
     }
 
-    // ==========================================
-    // KELİMELER & HEDEFLER
-    // ==========================================
+    // VOCAB & HEDEFLER
     function renderVocabList() {
       const vocabs = JSON.parse(localStorage.getItem('emir_os_vocabs') || '[]');
       const el = document.getElementById('vocabDeck');
@@ -1390,14 +1378,12 @@
       }
     }
 
-    // ==========================================
     // BAŞLATMA
-    // ==========================================
     renderTreeMenu();
     renderNotesList();
     renderVocabList();
     renderTodos();
-    pullFromCloud(); // İlk açılışta buluttan verileri otomatik çek
+    pullFromCloud();
   </script>
 </body>
 </html>
