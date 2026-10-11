@@ -9,294 +9,87 @@
   <meta name="theme-color" content="#16253d">
   <style>
     :root {
-      --bg: #f9f7f1;
+      --bg: #f5f2eb;
       --card-bg: #ffffff;
       --navy: #16253d;
-      --navy-light: #243b5a;
+      --navy-light: #223755;
       --gold: #b38f4d;
-      --border: #e2ded4;
-      --text-main: #1f242e;
-      --text-muted: #6b7280;
+      --gold-light: #f7f1e5;
+      --border: #e2ddd3;
+      --text-main: #1c212a;
+      --text-muted: #64748b;
+      --accent-red: #c2413a;
+      --accent-green: #2e7d5b;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg);
       color: var(--text-main);
-      padding: 16px;
+      padding: 18px;
       display: flex;
       justify-content: center;
     }
-    .container {
+    .wrapper {
       width: 100%;
-      max-width: 900px;
+      max-width: 1200px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 18px;
     }
+
+    /* HEADER */
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 12px;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .logo-badge {
-      width: 40px;
-      height: 40px;
-      background: var(--navy);
-      color: var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 20px;
-      border: 1px solid var(--gold);
-    }
-    .brand-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--navy);
-      letter-spacing: 0.5px;
-    }
-    .brand-sub { font-size: 12px; color: var(--text-muted); }
-
-    /* Navigasyon Sekmeleri */
-    .nav-tabs {
-      display: flex;
-      gap: 8px;
-      background: #eae6dc;
-      padding: 4px;
-      border-radius: 8px;
-      width: fit-content;
-    }
-    .tab-btn {
-      padding: 8px 16px;
-      border: none;
-      background: none;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--navy);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .tab-btn.active {
-      background: var(--card-bg);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    /* Paneller */
-    .tab-content { display: none; }
-    .tab-content.active { display: flex; flex-direction: column; gap: 16px; }
-
-    /* Metin Editörü */
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    input[type="text"], textarea {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px;
-      font-size: 15px;
-      background: #faf9f6;
-      color: var(--text-main);
-      outline: none;
-      font-family: inherit;
-    }
-    input[type="text"]:focus, textarea:focus {
-      border-color: var(--navy);
-      background: #fff;
-    }
-    textarea { min-height: 140px; resize: vertical; margin-top: 8px; }
-    .editor-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 10px;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    .btn {
       background: var(--navy);
       color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn:hover { background: var(--navy-light); }
-    .btn-secondary {
-      background: transparent;
-      color: var(--navy);
-      border: 1px solid var(--border);
-    }
-
-    /* Whiteboard */
-    .whiteboard-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .wb-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 8px;
-      background: #f1ede2;
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-    }
-    .color-dot {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid transparent;
-    }
-    .color-dot.active { border-color: var(--navy); transform: scale(1.1); }
-    #canvasWrapper {
-      width: 100%;
-      height: 600px;
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-      touch-action: none;
-    }
-    canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      cursor: crosshair;
-    }
-
-    /* Not Listesi */
-    .notes-list { display: flex; flex-direction: column; gap: 8px; }
-    .note-item {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 12px;
+      padding: 16px 20px;
+      border-radius: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(22, 37, 61, 0.12);
     }
-    .note-item:hover { border-color: var(--navy); }
-    .note-info h4 { font-size: 15px; color: var(--navy); margin-bottom: 4px; }
-    .note-info p { font-size: 12px; color: var(--text-muted); }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <header>
-      <div class="brand">
-        <div class="logo-badge">E</div>
-        <div>
-          <div class="brand-title">EMIR OS</div>
-          <div class="brand-sub">Kişisel Bilgi & Not Sistemi</div>
-        </div>
-      </div>
-      <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('notes')">Metin Notları</button>
-        <button class="tab-btn" onclick="switchTab('whiteboard')">Beyaz Tahta</button>
-      </div>
-    </header>
-
-    <!-- METİN NOTLARI BÖLÜMÜ -->
-    <div id="tab-notes" class="tab-content active">
-      <div class="card">
-        <input type="text" id="noteTitle" placeholder="Not başlığı...">
-        <textarea id="noteContent" placeholder="Aklındakileri buraya yaz..."></textarea>
-        <div class="editor-footer">
-          <span id="saveStatus">Otomatik kaydedilir</span>
-          <div style="display:flex; gap:6px;">
-            <button class="btn btn-secondary" onclick="newNote()">Yeni</button>
-            <button class="btn" onclick="saveCurrentNote()">Kaydet</button>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-top: 8px;">
-        <h3 style="font-size: 15px; color: var(--navy); margin-bottom: 8px;">Kayıtlı Notlar</h3>
-        <div id="notesList" class="notes-list"></div>
-      </div>
-    </div>
-
-    <!-- WHITEBOARD (ÇİZİM) BÖLÜMÜ -->
-    <div id="tab-whiteboard" class="tab-content">
-      <div class="whiteboard-container">
-        <div class="wb-toolbar">
-          <span style="font-size:12px; font-weight:600;">Renk:</span>
-          <div class="color-dot active" style="background: #16253d;" onclick="setColor('#16253d', this)"></div>
-          <div class="color-dot" style="background: #b38f4d;" onclick="setColor('#b38f4d', this)"></div>
-          <div class="color-dot" style="background: #c93b2b;" onclick="setColor('#c93b2b', this)"></div>
-          <div class="color-dot" style="background: #2b7ac9;" onclick="setColor('#2b7ac9', this)"></div>
-          
-          <div style="height: 20px; width: 1px; background: var(--border); margin: 0 4px;"></div>
-          
-          <button class="btn btn-secondary" style="padding:4px 8px;" onclick="setEraser(this)">Silgi</button>
-          <button class="btn btn-secondary" style="padding:4px 8px;" onclick="clearCanvas()">Temizle</button>
-          <button class="btn" style="padding:4px 10px; margin-left:auto;" onclick="downloadCanvas()">İndir (PNG)</button>
-        </div>
-        <div id="canvasWrapper">
-          <canvas id="wbCanvas"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // TAB GEÇİŞİ
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      if(tabId === 'notes') {
-        document.querySelectorAll('.tab-btn')[0].classList.add('active');
-        document.getElementById('tab-notes').classList.add('active');
-      } else {
-        document.querySelectorAll('.tab-btn')[1].classList.add('active');
-        document.getElementById('tab-whiteboard').classList.add('active');
-        resizeCanvas();
-      }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .logo-badge {
+      width: 44px;
+      height: 44px;
+      background: #0f1a2b;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 22px;
+      border: 1px solid var(--gold);
+    }
+    .header-title h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+    }
+    .header-title p {
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+    .header-right {
+      text-align: right;
+      font-size: 13px;
+      color: #e2e8f0;
+    }
+    .header-date {
+      font-weight: 600;
+      color: var(--gold-light);
     }
 
-    // METİN NOTLARI MANTIĞI
-    let notes = JSON.parse(localStorage.getItem('emir_os_notes') || '[]');
-    let currentNoteId = null;
-
-    const titleEl = document.getElementById('noteTitle');
-    const contentEl = document.getElementById('noteContent');
-    const statusEl = document.getElementById('saveStatus');
-
-    function renderNotes() {
-      const listEl = document.getElementById('notesList');
-      listEl.innerHTML = '';
-      if(notes.length === 0) {
-        listEl.innerHTML = '<div style="font-size:13px; color:#888;">Henüz not yok.</div>';
-        return;
-      }
-      notes.forEach(note => {
-        const item = document.createElement('div');
-        item.className = 'note-item';
-        item.innerHTML = `
-          <div class="note-info" onclick="loadNote('${note.id}')">
-            <h4>${note.title || 'Başlıksız Not'}</h4>
-            <p>${new Date(note.updatedAt).toLocaleDateString('tr-TR')} ·${note.content.substring(0, 45)}...</p>
-          </div>
-          <button
+    /* DASHBOARD GRID */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1.8fr;
+      gap: 18px;
+    }
+    @media
