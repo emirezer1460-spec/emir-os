@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "EMIR OS — Hızlı Not",
+  "short_name": "EMIR OS",
+  "description": "Krem ve lacivert temalı kişisel hızlı not defteri",
+  "lang": "tr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f4ec",
+  "theme_color": "#192d49",
+  "icons": [
+    {"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}

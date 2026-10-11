@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#192d49">
+<meta name="description" content="EMIR OS — hızlı not defteri">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>EMIR OS · Hızlı Not</title>
+<style>
+:root{--paper:#f7f4ec;--panel:#fffdf8;--navy:#192d49;--navy2:#2d4562;--ink:#27364a;--muted:#818a94;--line:#e7e1d6;--gold:#d8b779;--sage:#dfe8dc}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,textarea{font:inherit}button{cursor:pointer}.shell{max-width:920px;margin:auto;padding:22px 18px calc(30px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}.brand{display:flex;align-items:center;gap:11px}.mark{width:42px;height:42px;border-radius:13px;background:var(--navy);color:var(--gold);display:grid;place-items:center;font:25px Georgia,serif}.brand h1{font-size:14px;letter-spacing:2.6px;margin:0;color:var(--navy)}.brand p{font-size:10px;letter-spacing:1.4px;color:var(--muted);margin:4px 0 0;text-transform:uppercase}
+.status{font-size:11px;color:#6d7e70;display:flex;align-items:center;gap:6px}.dot{width:7px;height:7px;border-radius:50%;background:#7b9a7e}
+h2{font:normal clamp(28px,5vw,38px) Georgia,serif;color:var(--navy);margin:0 0 7px}.intro{font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 22px}
+.editor{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 12px 34px #192d4909}
+.title-input{border:0;outline:0;background:transparent;color:var(--navy);font:normal 23px Georgia,serif;width:100%;padding:5px 2px 12px}
+.body-input{display:block;width:100%;min-height:190px;resize:vertical;border:0;border-top:1px solid var(--line);outline:0;background:transparent;padding:15px 2px;color:var(--ink);font-size:15px;line-height:1.7}
+.editor-footer{display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid var(--line);padding-top:13px;flex-wrap:wrap}.hint{font-size:11px;color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#fffdf8;color:var(--navy);padding:10px 13px;border-radius:10px;font-size:12px}.btn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}.btn:active{transform:translateY(1px)}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:28px 0 13px}.toolbar h3{font:normal 21px Georgia,serif;color:var(--navy);margin:0}.search{width:min(260px,55%);border:1px solid var(--line);background:#fffdf8;border-radius:10px;padding:10px 12px;outline:0;font-size:12px}
+.notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.note{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:15px;min-width:0}.note h4{font:normal 17px Georgia,serif;color:var(--navy);margin:0 0 8px;overflow-wrap:anywhere}.note p{font-size:12px;line-height:1.65;color:#657180;margin:0;white-space:pre-wrap;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}.note small{display:block;font-size:10px;color:#969da3;margin-top:12px}.note-actions{display:flex;gap:7px;margin-top:12px}.note-actions button{font-size:10px;padding:7px 9px}
+.empty{grid-column:1/-1;text-align:center;padding:30px 15px;color:var(--muted);font-size:12px;line-height:1.7;background:#ffffff66;border:1px dashed var(--line);border-radius:13px}
+footer{font-size:10px;line-height:1.7;color:#92989b;text-align:center;margin:25px auto 0;max-width:600px}
+.toast{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--navy);color:white;padding:11px 16px;border-radius:11px;font-size:12px;opacity:0;pointer-events:none;transition:opacity .18s;max-width:90vw;text-align:center}.toast.show{opacity:1}
+@media(max-width:560px){.shell{padding:16px 13px calc(24px + env(safe-area-inset-bottom))}header{margin-bottom:22px}.status{font-size:0}.status .dot{width:8px;height:8px}.editor{padding:14px}.body-input{min-height:170px}.notes{grid-template-columns:1fr}.toolbar{align-items:flex-start;flex-direction:column}.search{width:100%;max-width:none}.title-input{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header>
+ <div class="brand"><div class="mark">E</div><div><h1>EMIR OS</h1><p>Quick notes · Personal workspace</p></div></div>
+ <div class="status"><span class="dot"></span><span id="saveStatus">Bu cihazda saklanır</span></div>
+</header>
+<main>
+ <h2>Aklındakini yakala.</h2>
+ <p class="intro">Aç, yaz, devam et. Notların otomatik olarak bu cihazdaki tarayıcıya kaydedilir.</p>
+ <section class="editor" aria-label="Hızlı not editörü">
+  <input class="title-input" id="noteTitle" placeholder="Notun başlığı…" maxlength="140" autocomplete="off">
+  <textarea class="body-input" id="noteBody" placeholder="Buraya yazmaya başla…"></textarea>
+  <div class="editor-footer">
+   <span class="hint" id="editorHint">Yazdıkça otomatik kaydeder</span>
+   <div class="actions">
+    <button class="btn" id="newBtn" type="button">Yeni not</button>
+    <button class="btn primary" id="saveBtn" type="button">Notu kaydet</button>
+   </div>
+  </div>
+ </section>
+ <div class="toolbar"><h3>Notlarım <span id="noteCount" style="font:12px system-ui;color:#8a929b"></span></h3><input class="search" id="search" placeholder="Notlarda ara…" autocomplete="off"></div>
+ <section class="notes" id="notesList"></section>
+</main>
+<footer>EMIR OS · İlk hızlı not sürümü. Notlar bu tarayıcıda ve bu cihazda saklanır; henüz bulut senkronizasyonu yok. Tarayıcı verilerini temizlemek notları silebilir. Düzenli yedek al.</footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const KEY='emir-os-quick-notes-v1';
+let notes=[], activeId=null, draftTimer=null;
+const $=id=>document.getElementById(id);
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');notes=Array.isArray(x)?x:[]}catch{notes=[]}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(notes));$('saveStatus').textContent='Kaydedildi';return true}catch(e){$('saveStatus').textContent='Kaydedilemedi';toast('Tarayıcı depolama alanı dolu olabilir. Yedeğini dışa aktar.');return false}}
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2200)}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function getEditor(){return {title:$('noteTitle').value.trim(),body:$('noteBody').value.trim()}}
+function scheduleSave(){ $('saveStatus').textContent='Kaydediliyor…'; clearTimeout(draftTimer);draftTimer=setTimeout(()=>{if(!$('noteTitle').value.trim()&&!$('noteBody').value.trim())return;saveCurrent(true)},450)}
+function saveCurrent(silent=false){const v=getEditor();if(!v.title&&!v.body){if(!silent)toast('Önce bir şeyler yaz.');return}
+ const now=new Date().toISOString();
+ if(activeId){const n=notes.find(n=>n.id===activeId);if(n){n.title=v.title||'Başlıksız not';n.body=v.body;n.updated=now}}
+ else{activeId=Date.now().toString();notes.unshift({id:activeId,title:v.title||'Başlıksız not',body:v.body,created:now,updated:now})}
+ persist();render();$('editorHint').textContent='Son kayıt: '+new Date(now).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});if(!silent)toast('Not kaydedildi')}
+function resetEditor(){activeId=null;$('noteTitle').value='';$('noteBody').value='';$('editorHint').textContent='Yazdıkça otomatik kaydeder';$('saveStatus').textContent='Yeni not';$('noteTitle').focus()}
+function editNote(id){const n=notes.find(n=>n.id===id);if(!n)return;activeId=id;$('noteTitle').value=n.title==='Başlıksız not'?'':n.title;$('noteBody').value=n.body||'';$('editorHint').textContent='Düzenleme modundasın';window.scrollTo({top:0,behavior:'smooth'});$('noteTitle').focus()}
+function removeNote(id){if(!confirm('Bu not silinsin mi?'))return;notes=notes.filter(n=>n.id!==id);if(activeId===id)resetEditor();persist();render();toast('Not silindi')}
+function render(){const q=$('search').value.trim().toLocaleLowerCase('tr');const list=notes.filter(n=>(n.title+' '+n.body).toLocaleLowerCase('tr').includes(q));$('noteCount').textContent='('+notes.length+')';$('notesList').innerHTML=list.length?list.map(n=>`<article class="note"><h4>${esc(n.title||'Başlıksız not')}</h4><p>${esc(n.body||'Boş not')}</p><small>Güncellendi · ${new Date(n.updated||n.created).toLocaleString('tr-TR',{dateStyle:'medium',timeStyle:'short'})}</small><div class="note-actions"><button class="btn" onclick="editNote('${n.id}')">Aç / düzenle</button><button class="btn" onclick="removeNote('${n.id}')">Sil</button></div></article>`).join(''):'<div class="empty">Henüz not yok ya da aramana uygun sonuç bulunamadı.<br>Yukarıdaki alana yazıp ilk notunu oluştur.</div>'}
+$('noteTitle').addEventListener('input',scheduleSave);$('noteBody').addEventListener('input',scheduleSave);$('saveBtn').addEventListener('click',()=>saveCurrent(false));$('newBtn').addEventListener('click',()=>{if($('noteTitle').value.trim()||$('noteBody').value.trim())saveCurrent(true);resetEditor()});$('search').addEventListener('input',render);
+load();render();
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body></html>
