@@ -18,11 +18,13 @@
       --bg: #f5f1e8;
       --card: #ffffff;
       --navy: #132136;
+      --navy-light: #1f3354;
       --gold: #c59b4c;
+      --gold-light: #fcf9f2;
       --border: #e2dbcd;
       --text: #1a202c;
       --muted: #64748b;
-      --shadow-app: 0 16px 36px rgba(19, 33, 54, 0.16);
+      --shadow-app: 0 20px 45px rgba(19, 33, 54, 0.18);
       --yellow: #f59e0b;
       --blue: #2563eb;
       --red: #dc2626;
@@ -44,39 +46,55 @@
       position: relative;
     }
 
-    /* STATUS / TOPBAR */
+    /* ÜST BAR & ORTADA YUVARLAK EO LOGO */
     .os-topbar {
-      height: 64px;
+      height: 70px;
       background: var(--navy);
       color: #fff;
-      padding: 0 24px;
+      padding: 0 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
       z-index: 50;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+      position: relative;
     }
-    .brand-group {
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .center-logo-wrap {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
       display: flex;
       align-items: center;
       gap: 14px;
       cursor: pointer;
     }
-    .eo-logo-badge {
-      width: 44px;
-      height: 44px;
-      background: linear-gradient(135deg, #0b1421 0%, #1a2d47 100%);
-      border: 1.5px solid var(--gold);
-      border-radius: 14px;
+    .eo-circle-logo {
+      width: 48px;
+      height: 48px;
+      background: radial-gradient(circle, #1a2d4a 0%, #0a1322 100%);
+      border: 2px solid var(--gold);
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 14px rgba(197, 155, 76, 0.35);
+      transition: transform 0.2s ease;
     }
-    .eo-svg-logo { width: 30px; height: 30px; }
-    .brand-title { font-size: 20px; font-weight: 800; letter-spacing: 1.2px; color: #fbf7ee; }
-    .brand-sub { font-size: 11px; letter-spacing: 0.8px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
+    .eo-circle-logo:active { transform: scale(0.92); }
+    .eo-svg { width: 30px; height: 30px; }
+    .os-title-text {
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #fbf7ee;
+    }
     .sync-status {
       display: flex;
       align-items: center;
@@ -88,61 +106,77 @@
       color: #cbd5e1;
     }
 
-    /* 1. ANA EKRAN LAUNCHPAD (DEVASA İKONLAR) */
+    /* 1. ANA EKRAN LAUNCHPAD (3 TANE DEV KOCAMAN BUTON) */
     #home-launcher {
       flex: 1;
       display: flex;
-      flex-direction: column;
+      align-items: center;
       justify-content: center;
-      align-items: center;
+      padding: 24px 36px;
       width: 100%;
-      height: calc(100vh - 64px);
+      height: calc(100vh - 70px);
     }
-    .app-grid {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-      gap: 48px;
-      max-width: 860px;
+    .tri-app-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
       width: 100%;
-      padding: 24px;
+      max-width: 1200px;
+      height: 75vh;
+      align-items: stretch;
     }
-    .app-launcher-btn {
+    @media (max-width: 900px) {
+      .tri-app-grid { grid-template-columns: 1fr; height: auto; overflow-y: auto; }
+    }
+    .giant-app-card {
+      background: var(--card);
+      border: 2.5px solid var(--border);
+      border-radius: 36px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 16px;
+      justify-content: center;
+      gap: 24px;
       cursor: pointer;
+      box-shadow: var(--shadow-app);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      position: relative;
+      overflow: hidden;
       user-select: none;
-      background: none;
-      border: none;
-      outline: none;
-      touch-action: manipulation;
-      transition: transform 0.12s ease;
     }
-    .app-launcher-btn:active { transform: scale(0.92); }
-    .app-icon-squircle {
-      width: 130px;
-      height: 130px;
-      border-radius: 38px;
+    .giant-app-card:active {
+      transform: scale(0.95);
+      border-color: var(--gold);
+      box-shadow: 0 10px 25px rgba(197, 155, 76, 0.25);
+    }
+    .giant-app-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 8px;
+      background: var(--gold);
+      opacity: 0.8;
+    }
+    .giant-icon-bubble {
+      width: 140px;
+      height: 140px;
+      border-radius: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 60px;
-      box-shadow: var(--shadow-app);
-      border: 3px solid rgba(255, 255, 255, 0.95);
+      font-size: 68px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+      border: 3px solid rgba(255,255,255,0.9);
       pointer-events: none;
     }
-    .app-name-text {
-      font-size: 19px;
+    .giant-label-text {
+      font-size: 26px;
       font-weight: 800;
       color: var(--navy);
-      text-align: center;
+      letter-spacing: 0.5px;
       pointer-events: none;
     }
 
-    /* 2. TAM EKRAN AÇILAN MODÜLLER (100% EKRAN) */
+    /* 2. TAM EKRAN AÇILAN MODÜLLER */
     .fullscreen-app-view {
       position: absolute;
       top: 0; left: 0; width: 100vw; height: 100vh;
@@ -153,31 +187,36 @@
       overflow: hidden;
     }
     .fullscreen-app-view.active { display: flex !important; }
-    
+
+    /* UYGULAMA İÇİ HOME BUTONLU BAR */
     .app-topbar {
-      height: 60px;
-      padding: 0 20px;
-      background: #faf8f3;
-      border-bottom: 2px solid var(--border);
+      height: 64px;
+      padding: 0 24px;
+      background: var(--navy);
+      color: #fff;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
     }
-    .topbar-back-hint {
+    .home-circle-btn {
+      width: 44px;
+      height: 44px;
+      background: radial-gradient(circle, #213554 0%, #0e1929 100%);
+      border: 1.5px solid var(--gold);
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--navy);
+      justify-content: center;
       cursor: pointer;
-      padding: 6px 12px;
-      border-radius: 10px;
-      background: #eee8dc;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: transform 0.15s ease;
     }
+    .home-circle-btn:active { transform: scale(0.9); }
+    .home-circle-btn svg { width: 24px; height: 24px; }
 
-    /* KÜTÜPHANE */
+    /* KÜTÜPHANE VE DERS DİZİNİ */
     .lib-layout {
       flex: 1;
       display: flex;
@@ -186,12 +225,12 @@
     .lib-tree-pane {
       background: #f7f4ed;
       border-right: 2px solid var(--border);
-      padding: 18px;
+      padding: 20px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      width: 320px;
+      gap: 12px;
+      width: 340px;
       flex-shrink: 0;
     }
     .tree-tab-group {
@@ -215,11 +254,11 @@
     }
     .tree-tab-btn.active { background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
     .folder-item {
-      padding: 12px 14px;
-      border-radius: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
       background: #ffffff;
       border: 1.5px solid var(--border);
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 700;
       color: var(--navy);
       display: flex;
@@ -230,11 +269,11 @@
     .folder-item.active { border-color: var(--gold); background: #fdfaf3; }
     .subfolder-item {
       margin-left: 20px;
-      padding: 10px 12px;
-      border-radius: 10px;
+      padding: 12px 14px;
+      border-radius: 12px;
       background: #fdfdfc;
       border: 1.5px dashed var(--border);
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--navy);
       display: flex;
@@ -257,7 +296,7 @@
       height: 56px;
       background: #18202c;
       color: #fff;
-      padding: 0 18px;
+      padding: 0 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -270,8 +309,8 @@
       align-items: center;
       gap: 6px;
       font-size: 12px;
-      font-weight: 600;
-      padding: 6px 10px;
+      font-weight: 700;
+      padding: 6px 12px;
       border-radius: 8px;
       background: rgba(255,255,255,0.12);
       cursor: pointer;
@@ -285,7 +324,7 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      padding: 20px;
+      padding: 24px;
       position: relative;
     }
     .page-stage {
@@ -296,120 +335,108 @@
     #pdfCanvas { display: block; }
     #drawingCanvas { position: absolute; top: 0; left: 0; touch-action: none; cursor: crosshair; }
 
-    /* ANA DEFTER (MASTER NOTEBOOK) */
-    .master-notebook-container {
+    /* 2 AYRI ANİMASYONLU KAYDIRMALI DEFTER (ANA DEFTER) */
+    .master-book-layout {
       flex: 1;
-      padding: 24px;
-      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .book-tabs-header {
+      height: 52px;
+      background: #e6dfd1;
       display: flex;
       justify-content: center;
-    }
-    .notebook-paper-pad {
-      max-width: 900px;
-      width: 100%;
-      background: #fbf9f4;
-      background-image: linear-gradient(#e6dfd1 1px, transparent 1px);
-      background-size: 100% 32px;
-      line-height: 32px;
-      border: 2px solid var(--border);
-      border-radius: 20px;
-      padding: 32px 40px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.06);
-      font-family: "Georgia", serif;
-      min-height: 85vh;
-      display: flex;
-      flex-direction: column;
       gap: 16px;
-      position: relative;
+      padding: 6px;
     }
-    .master-notes-editable {
-      outline: none;
+    .book-tab-pill {
       border: none;
       background: transparent;
-      font-size: 16px;
-      color: #1a202c;
-      width: 100%;
-      min-height: 140px;
-      font-family: inherit;
-      line-height: 32px;
-      white-space: pre-wrap;
+      padding: 8px 24px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--navy);
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-    #masterDrawingCanvas {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      touch-action: none; cursor: crosshair; pointer-events: auto;
+    .book-tab-pill.active {
+      background: var(--navy);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(19, 33, 54, 0.2);
     }
-
-    /* KELİME DEFTERİ (3D KART / FLIPBOOK) */
-    .vocab-book-stage {
+    .notebook-flipping-stage {
       flex: 1;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 20px;
       gap: 20px;
+      overflow: hidden;
     }
-    .vocab-3d-card {
+    .animated-paper-page {
       width: 90%;
-      max-width: 620px;
-      height: 400px;
-      background: #ffffff;
+      max-width: 880px;
+      height: 80vh;
+      background: #fbf9f4;
+      background-image: linear-gradient(#e6dfd1 1px, transparent 1px);
+      background-size: 100% 32px;
+      line-height: 32px;
       border: 3px solid var(--border);
       border-radius: 24px;
-      box-shadow: 0 20px 40px rgba(19, 33, 54, 0.12);
-      padding: 36px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      padding: 36px 44px;
+      box-shadow: 0 16px 40px rgba(19, 33, 54, 0.12);
+      font-family: "Georgia", serif;
       position: relative;
-      border-left: 12px solid var(--blue);
-      background-image: radial-gradient(#f1eee6 1px, transparent 1px);
-      background-size: 20px 20px;
+      overflow-y: auto;
+      transition: transform 0.25s ease, opacity 0.25s ease;
     }
-    .card-controls {
-      display: flex;
-      align-items: center;
-      gap: 24px;
+    .animated-paper-page.flip-next {
+      animation: flipRight 0.3s ease;
     }
-    .nav-arrow-btn {
-      width: 60px;
-      height: 60px;
+    @keyframes flipRight {
+      0% { transform: scale(0.96) translateX(40px); opacity: 0.6; }
+      100% { transform: scale(1) translateX(0); opacity: 1; }
+    }
+    .page-turn-btn {
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
       background: var(--navy);
       color: #fff;
       border: none;
-      font-size: 24px;
+      font-size: 22px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: var(--shadow-app);
+      flex-shrink: 0;
     }
-    .nav-arrow-btn:active { transform: scale(0.9); }
+    .page-turn-btn:active { transform: scale(0.9); }
 
-    /* HIZLI NOTLAR (BEYAZ TAHTA SAYFALI DEFTER) */
-    .hand-pad-stage {
+    /* KİŞİSEL EL DEFTERİ TUVALİ */
+    .personal-handbook-stage {
       flex: 1;
-      padding: 20px;
       display: flex;
       flex-direction: column;
+      padding: 20px;
       gap: 12px;
-      height: calc(100vh - 60px);
     }
-    .whiteboard-sheet {
+    .hand-sheet-container {
       flex: 1;
       background: #ffffff;
-      border: 2px solid var(--border);
-      border-radius: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      border: 2.5px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
       position: relative;
       touch-action: none;
       overflow: hidden;
     }
-    #noteSheetCanvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
+    #personalCanvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
 
-    /* GENEL FORM BUTONLARI */
+    /* GENEL FORMLAR & BUTONLAR */
     .btn {
       background: var(--navy);
       color: #fff;
@@ -425,21 +452,7 @@
   </style>
 
   <script>
-    // TARAYICI VE CİHAZIN KENDİ GERİ TUŞU İLE ÇALIŞMA SİSTEMİ
-    window.addEventListener('popstate', function(event) {
-      if (event.state && event.state.appId) {
-        showAppLayer(event.state.appId, false);
-      } else {
-        closeToLauncher(false);
-      }
-    });
-
     function launchApp(appId) {
-      history.pushState({ appId: appId }, '', '#' + appId);
-      showAppLayer(appId, true);
-    }
-
-    function showAppLayer(appId, push) {
       document.querySelectorAll('.fullscreen-app-view').forEach(function(el) {
         el.classList.remove('active');
       });
@@ -447,74 +460,63 @@
       if (target) {
         target.classList.add('active');
       }
-      if (appId === 'app-master') setTimeout(resizeMasterDrawing, 60);
-      if (appId === 'app-notes') setTimeout(resizeNoteSheet, 60);
+      if (appId === 'app-personal') setTimeout(resizePersonalCanvas, 60);
     }
 
-    function closeToLauncher(triggerBack) {
+    function returnToHome() {
       document.querySelectorAll('.fullscreen-app-view').forEach(function(el) {
         el.classList.remove('active');
       });
-      if (triggerBack && history.state && history.state.appId) {
-        history.back();
-      }
     }
   </script>
 </head>
 <body>
   <div class="os-container">
-    <!-- ÜST BİLGİ ŞERİDİ -->
+    <!-- ÜST BİLGİ ŞERİDİ (ORTADA YUVARLAK EO LOGO) -->
     <div class="os-topbar">
-      <div class="brand-group" onclick="closeToLauncher(true)">
-        <div class="eo-logo-badge">
-          <svg class="eo-svg-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <div class="topbar-left">
+        <div id="liveDate" style="font-weight:700; font-size:14px; color:#fbf7ee;">Bugün</div>
+      </div>
+
+      <!-- ORTADA YUVARLAK EO MONOGRAMI -->
+      <div class="center-logo-wrap" onclick="returnToHome()">
+        <div class="eo-circle-logo">
+          <svg class="eo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M22 24H50M22 50H44M22 76H50M22 24V76" stroke="#c59b4c" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
             <circle cx="64" cy="50" r="24" stroke="#ffffff" stroke-width="8.5" stroke-linecap="round"/>
           </svg>
         </div>
-        <div>
-          <div class="brand-title">EMIR OS</div>
-          <div class="brand-sub">Academic Workstation</div>
-        </div>
+        <span class="os-title-text">EMIR OS</span>
       </div>
 
       <div style="display:flex; align-items:center; gap:16px;">
         <div class="sync-status">
           <span>☁️</span> <span id="syncText">Bulut Hazır</span>
         </div>
-        <div style="text-align:right;">
-          <div id="liveDate" style="font-weight:700; font-size:13px; color:#fbf7ee;">Bugün</div>
-          <div id="liveClock" style="font-size:11px; opacity:0.8;">--:--</div>
-        </div>
+        <div id="liveClock" style="font-size:12px; opacity:0.8;">--:--</div>
       </div>
     </div>
 
-    <!-- 1. LAUNCHPAD: DEVASA 4 ANA UYGULAMA İKONU -->
+    <!-- 1. LAUNCHPAD: TAM EKRANI KAPLAYAN 3 DEVASA BUTON -->
     <div id="home-launcher">
-      <div class="app-grid">
-        <!-- Kütüphane -->
-        <button class="app-launcher-btn" onclick="launchApp('app-library')">
-          <div class="app-icon-squircle" style="background:#fdf8eb; color:#876719;">📚</div>
-          <div class="app-name-text">Kütüphane</div>
-        </button>
+      <div class="tri-app-grid">
+        <!-- 1. Kütüphane -->
+        <div class="giant-app-card" onclick="launchApp('app-library')">
+          <div class="giant-icon-bubble" style="background:#fdf8eb; color:#876719;">📚</div>
+          <div class="giant-label-text">Kütüphane</div>
+        </div>
 
-        <!-- Ana Defter -->
-        <button class="app-launcher-btn" onclick="launchApp('app-master')">
-          <div class="app-icon-squircle" style="background:#fff3eb; color:#b25e1a;">📖</div>
-          <div class="app-name-text">Ana Defter</div>
-        </button>
+        <!-- 2. Ana Defter (Sentezler & Kavram Haritaları) -->
+        <div class="giant-app-card" onclick="launchApp('app-master')">
+          <div class="giant-icon-bubble" style="background:#fff3eb; color:#b25e1a;">📖</div>
+          <div class="giant-label-text">Ana Defter</div>
+        </div>
 
-        <!-- Hızlı Notlar Defteri -->
-        <button class="app-launcher-btn" onclick="launchApp('app-notes')">
-          <div class="app-icon-squircle" style="background:#edf3fc; color:#1b4d89;">✍️</div>
-          <div class="app-name-text">Hızlı Notlar</div>
-        </button>
-
-        <!-- 3D Kelime Defteri -->
-        <button class="app-launcher-btn" onclick="launchApp('app-vocab')">
-          <div class="app-icon-squircle" style="background:#edf8f1; color:#1d6e3c;">🔤</div>
-          <div class="app-name-text">Kelime Defteri</div>
-        </button>
+        <!-- 3. Kişisel El Defteri -->
+        <div class="giant-app-card" onclick="launchApp('app-personal')">
+          <div class="giant-icon-bubble" style="background:#edf3fc; color:#1b4d89;">✍️</div>
+          <div class="giant-label-text">Kişisel Defter</div>
+        </div>
       </div>
     </div>
 
@@ -523,11 +525,14 @@
     <!-- A. KÜTÜPHANE UYGULAMASI -->
     <div id="app-library" class="fullscreen-app-view">
       <div class="app-topbar">
-        <div class="topbar-back-hint" onclick="closeToLauncher(true)">
-          <span>◀</span> Geri (Ana Ekran)
+        <div class="home-circle-btn" onclick="returnToHome()" title="Ana Ekrana Dön">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 24H50M22 50H44M22 76H50M22 24V76" stroke="#c59b4c" stroke-width="8.5" stroke-linecap="round"/>
+            <circle cx="64" cy="50" r="24" stroke="#ffffff" stroke-width="8.5"/>
+          </svg>
         </div>
-        <strong id="libCurrentBreadcrumb" style="color:var(--navy); font-size:16px;">Kütüphane</strong>
-        <div style="display:flex; gap:10px;">
+        <strong id="libCurrentBreadcrumb" style="font-size:17px; color:#fbf7ee;">Kütüphane</strong>
+        <div style="display:flex; gap:12px;">
           <span id="articleProgressTag" style="display:none; background:#e9f5ee; color:#207849; border:1px solid #b7e0c7; padding:6px 12px; border-radius:8px; font-size:13px; font-weight:800;">%0 Okundu</span>
           <button class="btn btn-gold" id="btnFinishReading" style="display:none;" onclick="finishReadingSession()">🎓 Okumayı Bitir & Deftere Aktar</button>
         </div>
@@ -543,11 +548,11 @@
 
           <div id="treeContentArea" style="display:flex; flex-direction:column; gap:8px;"></div>
 
-          <!-- Büyük Yükleme Alanı -->
-          <div style="margin-top:auto; padding-top:14px; border-top:2px solid var(--border); display:flex; flex-direction:column; gap:8px;">
-            <input type="text" id="uploadTitle" placeholder="Kitap veya Makale Adı..." style="font-size:14px; padding:12px; border-radius:10px; border:2px solid var(--border);">
-            <input type="file" id="uploadFile" accept="application/pdf" style="font-size:12px;">
-            <button class="btn btn-gold" style="width:100%; padding:12px;" onclick="uploadPdfToCurrentFolder()">+ PDF Dosyası Yükle</button>
+          <!-- Kesin Çalışan PDF Yükleme Formu -->
+          <div style="margin-top:auto; padding-top:16px; border-top:2px solid var(--border); display:flex; flex-direction:column; gap:10px;">
+            <input type="text" id="uploadTitle" placeholder="Yayın Adı..." style="font-size:14px; padding:12px; border-radius:12px; border:2px solid var(--border); outline:none;">
+            <input type="file" id="uploadFileInput" accept="application/pdf" style="display:none;" onchange="onPdfFileSelected(event)">
+            <button class="btn btn-gold" style="width:100%; padding:14px; font-size:15px;" onclick="triggerFilePicker()">+ PDF Dosyası Yükle</button>
           </div>
         </div>
 
@@ -555,24 +560,24 @@
         <div class="reader-split">
           <div class="reader-toolbar">
             <div style="display:flex; align-items:center; gap:10px;">
-              <button class="btn btn-light" style="padding:6px 12px;" onclick="prevPage()">◀ Geri</button>
+              <button class="btn btn-light" style="padding:6px 14px;" onclick="prevPage()">◀ Geri</button>
               <span id="pageInfo" style="font-size:13px; font-weight:700;">Sayfa: 0 / 0</span>
-              <button class="btn btn-light" style="padding:6px 12px;" onclick="nextPage()">İleri ▶</button>
+              <button class="btn btn-light" style="padding:6px 14px;" onclick="nextPage()">İleri ▶</button>
             </div>
 
             <!-- Renk Açıklamaları -->
             <div style="display:flex; align-items:center; gap:10px;">
               <div class="color-legend-badge active" id="badgeYellow" onclick="setMode('yellow')">
                 <div class="dot" style="background:var(--yellow);"></div>
-                <span>🟡 Sarı (Okuma)</span>
+                <span>🟡 Sarı: Okuma Durumu</span>
               </div>
               <div class="color-legend-badge" id="badgeBlue" onclick="setMode('blue')">
                 <div class="dot" style="background:var(--blue);"></div>
-                <span>🔵 Mavi (Kelime)</span>
+                <span>🔵 Mavi: Bilinmeyen Kelime</span>
               </div>
               <div class="color-legend-badge" id="badgeRed" onclick="setMode('red')">
                 <div class="dot" style="background:var(--red);"></div>
-                <span>🔴 Kırmızı (Konu/Terim)</span>
+                <span>🔴 Kırmızı: Konu & Terim</span>
               </div>
               <button class="btn btn-light" style="padding:6px 10px; font-size:12px;" onclick="setEraser()">Silgi</button>
               <button class="btn btn-light" style="padding:6px 10px; font-size:12px;" onclick="clearPage()">Temizle</button>
@@ -589,95 +594,65 @@
       </div>
     </div>
 
-    <!-- B. ANA DEFTER (MASTER NOTEBOOK) -->
+    <!-- B. ANA DEFTER (2 AYRI DEFTER: SENTEZLER & KİŞİSEL DEFTER) -->
     <div id="app-master" class="fullscreen-app-view">
       <div class="app-topbar">
-        <div class="topbar-back-hint" onclick="closeToLauncher(true)">
-          <span>◀</span> Geri (Ana Ekran)
+        <div class="home-circle-btn" onclick="returnToHome()" title="Ana Ekrana Dön">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 24H50M22 50H44M22 76H50M22 24V76" stroke="#c59b4c" stroke-width="8.5" stroke-linecap="round"/>
+            <circle cx="64" cy="50" r="24" stroke="#ffffff" stroke-width="8.5"/>
+          </svg>
         </div>
-        <strong style="color:var(--navy); font-size:16px;">📖 Ana Defter (Ders & Okuma Sentezi)</strong>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-light" style="padding:6px 12px;" onclick="clearMasterDrawing()">Çizimi Sil</button>
-          <button class="btn btn-gold" style="padding:6px 12px;" onclick="saveMasterText()">Metni Kaydet</button>
-        </div>
+        <strong style="font-size:17px; color:#fbf7ee;">📖 Ana Defter (Kavram Haritaları & Sentezler)</strong>
+        <div id="masterPageLabel" style="font-size:13px; color:#cbd5e1; font-weight:700;">Sayfa: 1 / 1</div>
       </div>
 
-      <div class="master-notebook-container">
-        <div class="notebook-paper-pad" id="masterNotebookPad">
-          <div style="border-bottom:2px solid var(--gold); padding-bottom:8px; display:flex; justify-content:space-between; align-items:flex-end;">
-            <div style="font-size:22px; font-weight:800; color:var(--navy);" id="masterHeading">Akademik Ders Defteri</div>
-            <div style="font-size:13px; color:var(--muted);" id="masterDate">Kayıtlı</div>
-          </div>
-
-          <!-- Senin klavyeyle aldığın notlar (Asla silinmez, üzerine kaydedilir) -->
-          <div style="font-weight:700; font-size:14px; color:var(--navy); margin-top:10px;">✍️ Kişisel Notlarım & Düşüncelerim:</div>
-          <div class="master-notes-editable" id="masterUserEditable" contenteditable="true" placeholder="Buraya kalıcı notlarını yazabilirsin, üzerine okuma sentezleri eklenir..."></div>
-
-          <hr style="border:none; border-top:1px dashed var(--border); margin:10px 0;">
-
-          <!-- Okumayı Bitir dediğinde gelen zihin haritaları ve analizler buraya eklenir -->
-          <div style="font-weight:700; font-size:14px; color:var(--red);">🔴 Okuma Sentezleri & Kavram Haritaları:</div>
-          <div id="masterSynthesizedContent" style="line-height:28px; font-size:15px; color:#222;">
-            <em>Henüz bir okuma oturumu bitirilmedi. Kütüphaneden 'Okumayı Bitir' dediğinizde zihin haritası buraya eklenecektir.</em>
-          </div>
-
-          <!-- Stylus/Kalem ile serbest el yazısı katmanı -->
-          <canvas id="masterDrawingCanvas"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- C. HIZLI NOTLAR (BEYAZ TAHTA DEFTERİ) -->
-    <div id="app-notes" class="fullscreen-app-view">
-      <div class="app-topbar">
-        <div class="topbar-back-hint" onclick="closeToLauncher(true)">
-          <span>◀</span> Geri (Ana Ekran)
-        </div>
-        <div style="display:flex; align-items:center; gap:12px;">
-          <strong style="color:var(--navy); font-size:16px;">✍️ El Yazısı Defteri</strong>
-          <span id="notePageLabel" style="font-size:13px; background:#e6dfd1; padding:4px 10px; border-radius:6px; font-weight:700;">Sayfa: 1 / 1</span>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-light" style="padding:6px 12px;" onclick="prevNotePage()">◀ Önceki</button>
-          <button class="btn btn-light" style="padding:6px 12px;" onclick="nextNotePage()">Sonraki ▶</button>
-          <button class="btn btn-gold" style="padding:6px 12px;" onclick="addNewNotePage()">+ Yeni Sayfa</button>
-          <button class="btn btn-light" style="padding:6px 10px;" onclick="clearNoteSheet()">Sayfayı Sil</button>
-        </div>
-      </div>
-
-      <div class="hand-pad-stage">
-        <div class="whiteboard-sheet" id="whiteboardWrap">
-          <canvas id="noteSheetCanvas"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- D. KELİME DEFTERİ (3D KART / SÖZLÜK) -->
-    <div id="app-vocab" class="fullscreen-app-view">
-      <div class="app-topbar">
-        <div class="topbar-back-hint" onclick="closeToLauncher(true)">
-          <span>◀</span> Geri (Ana Ekran)
-        </div>
-        <strong style="color:var(--navy); font-size:16px;">🔤 3D Kelime Defteri (PDF Taramaları)</strong>
-        <span id="vocabIndexIndicator" style="font-size:13px; font-weight:700; color:var(--muted);">0 / 0</span>
-      </div>
-
-      <div class="vocab-book-stage">
-        <div class="vocab-3d-card" id="vocabCardArea">
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--border); padding-bottom:8px;">
-              <span style="font-size:12px; color:var(--gold); font-weight:800; text-transform:uppercase;">Academic Vocabulary</span>
-              <span id="vCardSource" style="font-size:11px; color:var(--muted);">Kaynak</span>
+      <div class="master-book-layout">
+        <!-- Sayfaları Kaydırarak Gezme Alanı -->
+        <div class="notebook-flipping-stage">
+          <button class="page-turn-btn" onclick="prevMasterPage()">◀</button>
+          
+          <div class="animated-paper-page" id="masterPageCard">
+            <div id="masterPageContentArea">
+              <div style="border-bottom:2px solid var(--gold); padding-bottom:8px; display:flex; justify-content:space-between; align-items:flex-end;">
+                <div style="font-size:22px; font-weight:800; color:var(--navy);" id="masterHeading">Akademik Sentezler</div>
+                <div style="font-size:13px; color:var(--muted);" id="masterDate">Kayıtlı</div>
+              </div>
+              <div id="masterSynthContainer" style="margin-top:16px;">
+                <p style="font-style: italic; color:#777;">Henüz bir okuma oturumu bitirilmedi. Kütüphaneden bir PDF okuyup kırmızı/mavi işaretlemeleri tamamlayınca "Okumayı Bitir" dediğinde zihin haritası ve sentezler sayfalar halinde buraya işlenecektir.</p>
+              </div>
             </div>
-            <h2 id="vCardWord" style="font-size:32px; color:var(--navy); margin-top:18px;">Henüz Kelime Yok</h2>
-            <p id="vCardMeaning" style="font-size:17px; color:#334155; margin-top:14px; line-height:1.6;">PDF okurken mavi renkle işaretlediğin tüm kelimeler buraya İngilizce akademik açıklamasıyla otomatik işlenecektir.</p>
           </div>
-          <div style="font-size:12px; color:var(--muted); text-align:right;">Sayfaları çevirmek için alttaki okları kullanın.</div>
-        </div>
 
-        <div class="card-controls">
-          <button class="nav-arrow-btn" onclick="prevVocabCard()">◀</button>
-          <button class="nav-arrow-btn" onclick="nextVocabCard()">▶</button>
+          <button class="page-turn-btn" onclick="nextMasterPage()">▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- C. KİŞİSEL EL DEFTERİ (EL YAZISI VE ŞEMA DEFTERİ) -->
+    <div id="app-personal" class="fullscreen-app-view">
+      <div class="app-topbar">
+        <div class="home-circle-btn" onclick="returnToHome()" title="Ana Ekrana Dön">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 24H50M22 50H44M22 76H50M22 24V76" stroke="#c59b4c" stroke-width="8.5" stroke-linecap="round"/>
+            <circle cx="64" cy="50" r="24" stroke="#ffffff" stroke-width="8.5"/>
+          </svg>
+        </div>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <strong style="font-size:17px; color:#fbf7ee;">✍️ Kişisel El Defteri</strong>
+          <span id="personalPageLabel" style="font-size:13px; background:#213554; color:#fff; padding:4px 10px; border-radius:6px; font-weight:700;">Sayfa: 1 / 1</span>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-light" style="padding:6px 12px;" onclick="prevPersonalPage()">◀</button>
+          <button class="btn btn-light" style="padding:6px 12px;" onclick="nextPersonalPage()">▶</button>
+          <button class="btn btn-gold" style="padding:6px 12px;" onclick="addPersonalPage()">+ Yeni Sayfa</button>
+          <button class="btn btn-light" style="padding:6px 10px;" onclick="clearPersonalPage()">Sil</button>
+        </div>
+      </div>
+
+      <div class="personal-handbook-stage">
+        <div class="hand-sheet-container" id="personalWrap">
+          <canvas id="personalCanvas"></canvas>
         </div>
       </div>
     </div>
@@ -707,11 +682,8 @@
       notifyCloudSync('Yükleniyor...');
       try {
         const payload = {
-          vocabs: JSON.parse(localStorage.getItem('emir_os_vocabs') || '[]'),
-          libraryMeta: (JSON.parse(localStorage.getItem('emir_os_lib_v2') || '[]')).map(x => ({ id: x.id, title: x.title, folderId: x.folderId, isArticle: x.isArticle, progress: x.progress, lastPage: x.lastPage })),
-          masterText: localStorage.getItem('emir_os_master_user') || '',
-          masterSynth: localStorage.getItem('emir_os_master_synth') || '',
-          notePages: JSON.parse(localStorage.getItem('emir_os_hand_notes') || '[]'),
+          masterPages: JSON.parse(localStorage.getItem('emir_os_master_pages') || '[]'),
+          personalPages: JSON.parse(localStorage.getItem('emir_os_personal_sheets') || '[]'),
           updatedAt: new Date().toISOString()
         };
         const { error } = await supabase.from('emir_os_sync').upsert({ id: 'primary_workspace', data: payload, updated_at: new Date() });
@@ -727,37 +699,6 @@
       syncTimeout = setTimeout(pushToCloud, 1200);
     }
 
-    async function pullFromCloud() {
-      if (!supabase) return;
-      notifyCloudSync('Eşitleniyor...');
-      try {
-        const { data, error } = await supabase.from('emir_os_sync').select('data').eq('id', 'primary_workspace').single();
-        if (data && data.data) {
-          const d = data.data;
-          if (d.vocabs) localStorage.setItem('emir_os_vocabs', JSON.stringify(d.vocabs));
-          if (d.masterText) {
-            localStorage.setItem('emir_os_master_user', d.masterText);
-            document.getElementById('masterUserEditable').innerHTML = d.masterText;
-          }
-          if (d.masterSynth) {
-            localStorage.setItem('emir_os_master_synth', d.masterSynth);
-            document.getElementById('masterSynthesizedContent').innerHTML = d.masterSynth;
-          }
-          if (d.notePages) {
-            noteSheets = d.notePages;
-            localStorage.setItem('emir_os_hand_notes', JSON.stringify(noteSheets));
-            updateNotePageLabel();
-          }
-          renderVocabCard();
-          notifyCloudSync('Bulut: Güncel ✓');
-        } else {
-          notifyCloudSync('Bulut: Bağlandı ✓');
-        }
-      } catch (err) {
-        notifyCloudSync('Çevrimdışı Mod');
-      }
-    }
-
     function tick() {
       const n = new Date();
       document.getElementById('liveDate').textContent = n.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -766,7 +707,7 @@
     setInterval(tick, 1000); tick();
 
     // ==========================================
-    // KÜTÜPHANE & HİYERARŞİ (TIKLAMA KESİN ÇÖZÜMÜ)
+    // KÜTÜPHANE & HİYERARŞİ (HOCA & MAKALELER)
     // ==========================================
     let currentRoot = 'articles';
     let currentFolderId = 'root_articles';
@@ -857,14 +798,23 @@
       container.appendChild(listDiv);
     }
 
-    // SAĞLAM PDF YÜKLEME MOTORU
-    function uploadPdfToCurrentFolder() {
+    // KESİN ÇALIŞAN PDF DOSYA SEÇİCİ & YÜKLEME
+    function triggerFilePicker() {
       const title = document.getElementById('uploadTitle').value.trim();
-      const fileInput = document.getElementById('uploadFile');
-      const file = fileInput.files[0];
-      if (!title || !file) return alert('Lütfen yayın adı ve bir PDF dosyası seçin.');
+      if (!title) {
+        alert('Lütfen önce yayın veya kitap adını girin!');
+        document.getElementById('uploadTitle').focus();
+        return;
+      }
+      document.getElementById('uploadFileInput').click();
+    }
 
-      notifyCloudSync('PDF İşleniyor...');
+    function onPdfFileSelected(event) {
+      const file = event.target.files[0];
+      const title = document.getElementById('uploadTitle').value.trim();
+      if (!file || !title) return;
+
+      notifyCloudSync('PDF Yükleniyor...');
       const reader = new FileReader();
       reader.onload = function(e) {
         const isArticle = currentFolderId.includes('article');
@@ -884,11 +834,10 @@
         libraryData.unshift(newObj);
         localStorage.setItem('emir_os_lib_v2', JSON.stringify(libraryData));
         document.getElementById('uploadTitle').value = '';
-        fileInput.value = '';
+        event.target.value = '';
         renderTreeMenu();
         openPdfPublication(newObj.id);
-        triggerAutoSync();
-        notifyCloudSync('PDF Kaydedildi ✓');
+        notifyCloudSync('PDF Başarıyla Açıldı ✓');
       };
       reader.readAsDataURL(file);
     }
@@ -898,10 +847,9 @@
       libraryData = libraryData.filter(x => x.id !== id);
       localStorage.setItem('emir_os_lib_v2', JSON.stringify(libraryData));
       renderTreeMenu();
-      triggerAutoSync();
     }
 
-    // PDF RENDER
+    // PDF GÖRÜNTÜLEYİCİ
     let pdfDoc = null;
     let pageNum = 1;
     let scale = 1.35;
@@ -934,7 +882,7 @@
         pdfDoc = pdf;
         renderPdfPage(pageNum);
       }).catch(err => {
-        alert('PDF dosyası açılırken hata oluştu. Lütfen geçerli bir PDF seçin.');
+        alert('PDF belgesi işlenemedi. Lütfen geçerli bir PDF seçtiğinizden emin olun.');
       });
     }
 
@@ -1073,300 +1021,199 @@
     }
 
     // ==========================================
-    // OKUMAYI BİTİR: ANA DEFTER & KELİME AKTARIMI
+    // OKUMAYI BİTİR ➔ ANA DEFTERE AKTAR
     // ==========================================
+    let masterPages = JSON.parse(localStorage.getItem('emir_os_master_pages') || '[]');
+    let currentMasterPageIndex = 0;
+
     function finishReadingSession() {
       if (!currentPub) return;
 
       const bluePages = currentPub.bluePages || [];
       const redPages = currentPub.redPages || [];
 
-      // 1. Mavi sayfaları 3D Kelime Defterine aktar
-      let vocabs = JSON.parse(localStorage.getItem('emir_os_vocabs') || '[]');
-      bluePages.forEach(p => {
-        const key = `Pedagogical Expression (s.${p})`;
-        const def = `[${currentPub.title} · Sayfa ${p}] Metin içi bağlamsal öğretim terimi ve kritik akademik kelime.`;
-        if (!vocabs.some(v => v.w === key)) {
-          vocabs.unshift({ w: key, m: def, src: currentPub.title });
-        }
-      });
-      localStorage.setItem('emir_os_vocabs', JSON.stringify(vocabs));
-      renderVocabCard();
+      // Yeni sayfa sentezi oluştur
+      const pageHtml = `
+        <div style="border-bottom:2px solid var(--gold); padding-bottom:8px; display:flex; justify-content:space-between; align-items:flex-end;">
+          <div style="font-size:22px; font-weight:800; color:var(--navy);">${currentPub.title}</div>
+          <div style="font-size:12px; color:var(--muted);">${new Date().toLocaleDateString('tr-TR')} · s.${currentPub.lastPage || 1}</div>
+        </div>
 
-      // 2. Kırmızı sayfaları Ana Defter Sentezine ekle (Eski notlarının üzerine ekler)
-      let currentSynth = localStorage.getItem('emir_os_master_synth') || '';
-      let newSessionBlock = `
-        <div style="background:#fff; border:1.5px solid var(--border); border-left:5px solid var(--red); padding:14px; border-radius:12px; margin:12px 0;">
-          <strong style="color:var(--navy); font-size:15px;">📌 ${currentPub.title} (Okuma Oturumu)</strong>
-          <div style="font-size:12px; color:var(--muted);">${new Date().toLocaleDateString('tr-TR')} · Taranan Sayfa: ${currentPub.lastPage || 1}</div>
-          <div style="font-family:monospace; font-size:13px; margin-top:8px; line-height:24px; white-space:pre-wrap;">
+        <div style="margin-top:16px;">
+          <div style="font-weight:700; color:var(--red); font-size:15px; margin-bottom:8px;">🔴 Akademik Kavram Haritası & Sentez:</div>
+          <div style="background:#fff; border:1.5px solid var(--border); border-left:5px solid var(--red); padding:14px; border-radius:12px; font-family:monospace; font-size:13px; line-height:26px; white-space:pre-wrap;">
 [${currentPub.title}]
-${redPages.length > 0 ? redPages.map((p, idx) => `  ├── (s.${p}) Odak Kavram${idx+1}: Ders içi anahtar tez & akademik kavram`).join('\n') : '  └── (Kırmızı işaretli terim bulunamadı)'}
+${redPages.length > 0 ? redPages.map((p, idx) => `  ├── (s.${p}) Odak Kavram${idx+1}: Pedagojik tez & kavramsal çerçeve`).join('\n') : '  └── (Kırmızı işaretli terim bulunamadı)'}
+          </div>
+
+          <div style="font-weight:700; color:var(--blue); font-size:15px; margin-top:18px; margin-bottom:8px;">🔵 Taranan Bilinmeyen Kelimeler:</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            ${bluePages.length > 0 ? bluePages.map(p => `
+              <div style="background:#fff; border:1px solid var(--border); border-left:4px solid var(--blue); padding:10px 14px; border-radius:10px; font-size:13px;">
+                <strong>Sayfa ${p} Terimi:</strong> Academic Expression in context.
+                <div style="font-size:12px; color:#555; margin-top:2px;">Explanation: Metin bağlamında tespit edilen pedagojik kavram.</div>
+              </div>
+            `).join('') : '<span style="font-size:13px; color:#777;">Mavi işaretli kelime bulunamadı.</span>'}
           </div>
         </div>
       `;
-      currentSynth = newSessionBlock + currentSynth;
-      localStorage.setItem('emir_os_master_synth', currentSynth);
-      document.getElementById('masterSynthesizedContent').innerHTML = currentSynth;
 
+      masterPages.unshift(pageHtml);
+      localStorage.setItem('emir_os_master_pages', JSON.stringify(masterPages));
+      currentMasterPageIndex = 0;
+      renderMasterPage();
       triggerAutoSync();
-      alert(`✅ Okuma Oturumu Tamamlandı!\n• Mavi işaretli kelimeler 3D Kelime Defterine aktarıldı.\n• Kırmızı akademik kavramlar Ana Defter'e sentez olarak eklendi.`);
+
+      alert(`✅ Okuma Tamamlandı ve Ana Deftere Yeni Sayfa Olarak Eklendi!`);
       launchApp('app-master');
     }
 
-    // ==========================================
-    // ANA DEFTER: SERBEST METİN + EL YAZISI KATMANI
-    // ==========================================
-    const masterCanvas = document.getElementById('masterDrawingCanvas');
-    const masterCtx = masterCanvas.getContext('2d');
-    let isMasterDrawing = false;
+    function renderMasterPage() {
+      const card = document.getElementById('masterPageCard');
+      card.classList.remove('flip-next');
+      void card.offsetWidth; // CSS reflow tetikleyici
+      card.classList.add('flip-next');
 
-    function resizeMasterDrawing() {
-      const p = masterCanvas.parentElement;
-      masterCanvas.width = p.clientWidth;
-      masterCanvas.height = p.clientHeight;
-      const saved = localStorage.getItem('emir_os_master_canvas');
-      if (saved) {
-        const img = new Image();
-        img.onload = () => masterCtx.drawImage(img, 0, 0);
-        img.src = saved;
-      }
-    }
+      const container = document.getElementById('masterSynthContainer');
+      const label = document.getElementById('masterPageLabel');
 
-    function getMasterCoords(e) {
-      const r = masterCanvas.getBoundingClientRect();
-      const cx = e.touches ? e.touches[0].clientX : e.clientX;
-      const cy = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: cx - r.left, y: cy - r.top };
-    }
-
-    masterCanvas.addEventListener('mousedown', e => {
-      isMasterDrawing = true;
-      const p = getMasterCoords(e);
-      masterCtx.beginPath();
-      masterCtx.moveTo(p.x, p.y);
-    });
-    masterCanvas.addEventListener('mousemove', e => {
-      if(!isMasterDrawing) return;
-      e.preventDefault();
-      const p = getMasterCoords(e);
-      masterCtx.lineTo(p.x, p.y);
-      masterCtx.strokeStyle = '#132136';
-      masterCtx.lineWidth = 2.5;
-      masterCtx.lineCap = 'round';
-      masterCtx.stroke();
-    });
-    window.addEventListener('mouseup', () => {
-      if(isMasterDrawing) {
-        isMasterDrawing = false;
-        localStorage.setItem('emir_os_master_canvas', masterCanvas.toDataURL());
-      }
-    });
-
-    masterCanvas.addEventListener('touchstart', e => {
-      isMasterDrawing = true;
-      const p = getMasterCoords(e);
-      masterCtx.beginPath();
-      masterCtx.moveTo(p.x, p.y);
-    }, { passive: false });
-    masterCanvas.addEventListener('touchmove', e => {
-      if(!isMasterDrawing) return;
-      e.preventDefault();
-      const p = getMasterCoords(e);
-      masterCtx.lineTo(p.x, p.y);
-      masterCtx.strokeStyle = '#132136';
-      masterCtx.lineWidth = 2.5;
-      masterCtx.lineCap = 'round';
-      masterCtx.stroke();
-    }, { passive: false });
-    window.addEventListener('touchend', () => {
-      if(isMasterDrawing) {
-        isMasterDrawing = false;
-        localStorage.setItem('emir_os_master_canvas', masterCanvas.toDataURL());
-      }
-    });
-
-    function clearMasterDrawing() {
-      masterCtx.clearRect(0, 0, masterCanvas.width, masterCanvas.height);
-      localStorage.removeItem('emir_os_master_canvas');
-    }
-
-    function saveMasterText() {
-      const text = document.getElementById('masterUserEditable').innerHTML;
-      localStorage.setItem('emir_os_master_user', text);
-      triggerAutoSync();
-      alert('Ana defter metni kaydedildi!');
-    }
-
-    // ==========================================
-    // HIZLI NOTLAR: SAYFALI BEYAZ TAHTA DEFTERİ
-    // ==========================================
-    let noteSheets = JSON.parse(localStorage.getItem('emir_os_hand_notes') || '[""]');
-    let currentNotePageIndex = 0;
-    const noteCanvas = document.getElementById('noteSheetCanvas');
-    const noteCtx = noteCanvas.getContext('2d');
-    let isNoteDrawing = false;
-
-    function resizeNoteSheet() {
-      const p = noteCanvas.parentElement;
-      noteCanvas.width = p.clientWidth;
-      noteCanvas.height = p.clientHeight;
-      loadCurrentNotePage();
-    }
-
-    function loadCurrentNotePage() {
-      noteCtx.clearRect(0, 0, noteCanvas.width, noteCanvas.height);
-      const data = noteSheets[currentNotePageIndex];
-      if (data) {
-        const img = new Image();
-        img.onload = () => noteCtx.drawImage(img, 0, 0);
-        img.src = data;
-      }
-      updateNotePageLabel();
-    }
-
-    function saveCurrentNotePage() {
-      noteSheets[currentNotePageIndex] = noteCanvas.toDataURL();
-      localStorage.setItem('emir_os_hand_notes', JSON.stringify(noteSheets));
-      triggerAutoSync();
-    }
-
-    function updateNotePageLabel() {
-      document.getElementById('notePageLabel').textContent = `Sayfa: ${currentNotePageIndex + 1} / ${noteSheets.length}`;
-    }
-
-    function nextNotePage() {
-      saveCurrentNotePage();
-      if (currentNotePageIndex < noteSheets.length - 1) {
-        currentNotePageIndex++;
-        loadCurrentNotePage();
-      }
-    }
-
-    function prevNotePage() {
-      saveCurrentNotePage();
-      if (currentNotePageIndex > 0) {
-        currentNotePageIndex--;
-        loadCurrentNotePage();
-      }
-    }
-
-    function addNewNotePage() {
-      saveCurrentNotePage();
-      noteSheets.push("");
-      currentNotePageIndex = noteSheets.length - 1;
-      loadCurrentNotePage();
-    }
-
-    function clearNoteSheet() {
-      noteCtx.clearRect(0, 0, noteCanvas.width, noteCanvas.height);
-      saveCurrentNotePage();
-    }
-
-    function getNoteCoords(e) {
-      const r = noteCanvas.getBoundingClientRect();
-      const cx = e.touches ? e.touches[0].clientX : e.clientX;
-      const cy = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: cx - r.left, y: cy - r.top };
-    }
-
-    noteCanvas.addEventListener('mousedown', e => {
-      isNoteDrawing = true;
-      const p = getNoteCoords(e);
-      noteCtx.beginPath();
-      noteCtx.moveTo(p.x, p.y);
-    });
-    noteCanvas.addEventListener('mousemove', e => {
-      if(!isNoteDrawing) return;
-      e.preventDefault();
-      const p = getNoteCoords(e);
-      noteCtx.lineTo(p.x, p.y);
-      noteCtx.strokeStyle = '#132136';
-      noteCtx.lineWidth = 3;
-      noteCtx.lineCap = 'round';
-      noteCtx.stroke();
-    });
-    window.addEventListener('mouseup', () => {
-      if(isNoteDrawing) {
-        isNoteDrawing = false;
-        saveCurrentNotePage();
-      }
-    });
-
-    noteCanvas.addEventListener('touchstart', e => {
-      isNoteDrawing = true;
-      const p = getNoteCoords(e);
-      noteCtx.beginPath();
-      noteCtx.moveTo(p.x, p.y);
-    }, { passive: false });
-    noteCanvas.addEventListener('touchmove', e => {
-      if(!isNoteDrawing) return;
-      e.preventDefault();
-      const p = getNoteCoords(e);
-      noteCtx.lineTo(p.x, p.y);
-      noteCtx.strokeStyle = '#132136';
-      noteCtx.lineWidth = 3;
-      noteCtx.lineCap = 'round';
-      noteCtx.stroke();
-    }, { passive: false });
-    window.addEventListener('touchend', () => {
-      if(isNoteDrawing) {
-        isNoteDrawing = false;
-        saveCurrentNotePage();
-      }
-    });
-
-    // ==========================================
-    // 3D KELİME DEFTERİ (KART ÇEVİRME / CAROUSEL)
-    // ==========================================
-    let vocabIndex = 0;
-    function renderVocabCard() {
-      const vocabs = JSON.parse(localStorage.getItem('emir_os_vocabs') || '[]');
-      const ind = document.getElementById('vocabIndexIndicator');
-      if (vocabs.length === 0) {
-        ind.textContent = '0 / 0';
-        document.getElementById('vCardWord').textContent = 'Henüz Kelime Yok';
-        document.getElementById('vCardMeaning').textContent = 'PDF okurken mavi renkle altını çizdiğin veya işaretlediğin kelimeler burada sistemli olarak listelenecektir.';
-        document.getElementById('vCardSource').textContent = '—';
+      if (masterPages.length === 0) {
+        label.textContent = 'Sayfa: 0 / 0';
+        container.innerHTML = '<p style="font-style: italic; color:#777;">Henüz bir okuma oturumu bitirilmedi. Kütüphaneden "Okumayı Bitir" dediğinizde sentezler burada sayfalar halinde görünecektir.</p>';
         return;
       }
-      if (vocabIndex >= vocabs.length) vocabIndex = vocabs.length - 1;
-      if (vocabIndex < 0) vocabIndex = 0;
 
-      const item = vocabs[vocabIndex];
-      ind.textContent = `${vocabIndex + 1} / ${vocabs.length}`;
-      document.getElementById('vCardWord').textContent = item.w;
-      document.getElementById('vCardMeaning').textContent = item.m;
-      document.getElementById('vCardSource').textContent = item.src || 'Akademik Makale';
+      label.textContent = `Sayfa: ${currentMasterPageIndex + 1} / ${masterPages.length}`;
+      container.innerHTML = masterPages[currentMasterPageIndex];
     }
 
-    function nextVocabCard() {
-      const vocabs = JSON.parse(localStorage.getItem('emir_os_vocabs') || '[]');
-      if (vocabIndex < vocabs.length - 1) {
-        vocabIndex++;
-        renderVocabCard();
+    function nextMasterPage() {
+      if (currentMasterPageIndex < masterPages.length - 1) {
+        currentMasterPageIndex++;
+        renderMasterPage();
       }
     }
-
-    function prevVocabCard() {
-      if (vocabIndex > 0) {
-        vocabIndex--;
-        renderVocabCard();
+    function prevMasterPage() {
+      if (currentMasterPageIndex > 0) {
+        currentMasterPageIndex--;
+        renderMasterPage();
       }
     }
 
     // ==========================================
+    // KİŞİSEL EL DEFTERİ (EL YAZISI KATMANI)
+    // ==========================================
+    let personalPages = JSON.parse(localStorage.getItem('emir_os_personal_sheets') || '[""]');
+    let currentPersonalIdx = 0;
+    const personalCanvas = document.getElementById('personalCanvas');
+    const pCtx = personalCanvas.getContext('2d');
+    let isPersonalDrawing = false;
+
+    function resizePersonalCanvas() {
+      const p = personalCanvas.parentElement;
+      personalCanvas.width = p.clientWidth;
+      personalCanvas.height = p.clientHeight;
+      loadPersonalPage();
+    }
+
+    function loadPersonalPage() {
+      pCtx.clearRect(0, 0, personalCanvas.width, personalCanvas.height);
+      const data = personalPages[currentPersonalIdx];
+      if (data) {
+        const img = new Image();
+        img.onload = () => pCtx.drawImage(img, 0, 0);
+        img.src = data;
+      }
+      document.getElementById('personalPageLabel').textContent = `Sayfa: ${currentPersonalIdx + 1} / ${personalPages.length}`;
+    }
+
+    function savePersonalPage() {
+      personalPages[currentPersonalIdx] = personalCanvas.toDataURL();
+      localStorage.setItem('emir_os_personal_sheets', JSON.stringify(personalPages));
+      triggerAutoSync();
+    }
+
+    function nextPersonalPage() {
+      savePersonalPage();
+      if (currentPersonalIdx < personalPages.length - 1) {
+        currentPersonalIdx++;
+        loadPersonalPage();
+      }
+    }
+    function prevPersonalPage() {
+      savePersonalPage();
+      if (currentPersonalIdx > 0) {
+        currentPersonalIdx--;
+        loadPersonalPage();
+      }
+    }
+    function addPersonalPage() {
+      savePersonalPage();
+      personalPages.push("");
+      currentPersonalIdx = personalPages.length - 1;
+      loadPersonalPage();
+    }
+    function clearPersonalPage() {
+      pCtx.clearRect(0, 0, personalCanvas.width, personalCanvas.height);
+      savePersonalPage();
+    }
+
+    function getPersonalCoords(e) {
+      const r = personalCanvas.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: cx - r.left, y: cy - r.top };
+    }
+
+    personalCanvas.addEventListener('mousedown', e => {
+      isPersonalDrawing = true;
+      const p = getPersonalCoords(e);
+      pCtx.beginPath();
+      pCtx.moveTo(p.x, p.y);
+    });
+    personalCanvas.addEventListener('mousemove', e => {
+      if(!isPersonalDrawing) return;
+      e.preventDefault();
+      const p = getPersonalCoords(e);
+      pCtx.lineTo(p.x, p.y);
+      pCtx.strokeStyle = '#132136';
+      pCtx.lineWidth = 2.8;
+      pCtx.lineCap = 'round';
+      pCtx.stroke();
+    });
+    window.addEventListener('mouseup', () => {
+      if(isPersonalDrawing) {
+        isPersonalDrawing = false;
+        savePersonalPage();
+      }
+    });
+
+    personalCanvas.addEventListener('touchstart', e => {
+      isPersonalDrawing = true;
+      const p = getPersonalCoords(e);
+      pCtx.beginPath();
+      pCtx.moveTo(p.x, p.y);
+    }, { passive: false });
+    personalCanvas.addEventListener('touchmove', e => {
+      if(!isPersonalDrawing) return;
+      e.preventDefault();
+      const p = getPersonalCoords(e);
+      pCtx.lineTo(p.x, p.y);
+      pCtx.strokeStyle = '#132136';
+      pCtx.lineWidth = 2.8;
+      pCtx.lineCap = 'round';
+      pCtx.stroke();
+    }, { passive: false });
+    window.addEventListener('touchend', () => {
+      if(isPersonalDrawing) {
+        isPersonalDrawing = false;
+        savePersonalPage();
+      }
+    });
+
     // BAŞLATMA
-    // ==========================================
     renderTreeMenu();
-    renderVocabCard();
-    pullFromCloud();
-
-    // Yerel Ana Defter metinlerini yükle
-    const savedMasterUser = localStorage.getItem('emir_os_master_user');
-    if (savedMasterUser) document.getElementById('masterUserEditable').innerHTML = savedMasterUser;
-    const savedMasterSynth = localStorage.getItem('emir_os_master_synth');
-    if (savedMasterSynth) document.getElementById('masterSynthesizedContent').innerHTML = savedMasterSynth;
+    renderMasterPage();
   </script>
 </body>
 </html>
