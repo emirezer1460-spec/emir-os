@@ -8,653 +8,546 @@
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#16253d">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --bg: #f4efe6;
+      --card: #ffffff;
+      --navy: #16253d;
+      --navy-light: #243a5e;
+      --gold: #b38f4d;
+      --gold-light: #fbf7ee;
+      --border: #e3dcce;
+      --text: #1a202c;
+      --muted: #718096;
+      --shadow: 0 4px 16px rgba(22, 37, 61, 0.08);
+      --radius: 16px;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #f5f2eb;
-      color: #1c212a;
-      padding: 16px;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
     }
-    .wrapper {
+    .app-viewport {
       width: 100%;
-      max-width: 1200px;
+      max-width: 1000px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: calc(100vh - 32px);
+    }
+
+    /* ÜST BAR (STATUS / TOP BAR) */
+    .top-bar {
+      background: var(--navy);
+      color: #fff;
+      padding: 14px 22px;
+      border-radius: var(--radius);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+    }
+    .logo-badge {
+      width: 44px;
+      height: 44px;
+      background: #0d1726;
+      border: 1.5px solid var(--gold);
+      color: var(--gold);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+    }
+    .brand-text h1 { font-size: 19px; font-weight: 700; letter-spacing: 0.5px; }
+    .brand-text p { font-size: 12px; color: #cbd5e1; }
+    .clock-display { text-align: right; }
+    .clock-display .date { font-weight: 600; font-size: 13px; color: #fbf7ee; }
+    .clock-display .time { font-size: 12px; opacity: 0.8; }
+
+    /* ANA EKRAN DOCK / GRID */
+    .home-view {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 10px;
+    }
+    .app-tile {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .app-tile:active { transform: scale(0.98); border-color: var(--navy); }
+    .tile-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    .tile-title { font-size: 18px; font-weight: 700; color: var(--navy); }
+    .tile-desc { font-size: 13px; color: var(--muted); line-height: 1.4; }
+
+    /* MODÜL EKRANLARI */
+    .module-view {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .module-view.active { display: flex; }
+    .module-header {
+      background: #faf8f3;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .back-btn {
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .module-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
-    header {
-      background: #16253d;
-      color: #ffffff;
-      padding: 14px 20px;
-      border-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .logo-badge {
-      width: 40px;
-      height: 40px;
-      background: #0f1a2b;
-      color: #b38f4d;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 20px;
-      border: 1px solid #b38f4d;
-    }
-    .nav-tabs {
-      display: flex;
-      gap: 6px;
-      background: #0f1a2b;
-      padding: 4px;
-      border-radius: 8px;
-    }
-    .nav-tab-btn {
-      background: transparent;
-      border: none;
-      color: #cbd5e1;
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .nav-tab-btn.active {
-      background: #b38f4d;
-      color: #0f1a2b;
-    }
-    .section-view { display: none; }
-    .section-view.active { display: block; }
 
-    /* DASHBOARD GRID */
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1.3fr;
-      gap: 16px;
-    }
-    @media (max-width: 850px) {
-      .grid { grid-template-columns: 1fr; }
-    }
-    .card {
-      background: #ffffff;
-      border: 1px solid #e2ddd3;
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-    .card-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: #16253d;
-      margin-bottom: 12px;
-      border-bottom: 1px solid #f0eae1;
-      padding-bottom: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    /* GENEL BUTONLAR & FORMLAR */
     input[type="text"], input[type="number"], textarea, select {
       width: 100%;
-      border: 1px solid #e2ddd3;
-      border-radius: 6px;
-      padding: 8px 10px;
-      font-size: 14px;
-      background: #faf8f5;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 15px;
+      background: #fbfaf7;
       outline: none;
       font-family: inherit;
     }
-    textarea { resize: vertical; margin-top: 6px; }
+    input:focus, textarea:focus { border-color: var(--navy); background: #fff; }
     .btn {
-      background: #16253d;
+      background: var(--navy);
       color: #fff;
       border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      font-size: 13px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
     }
-    .btn:hover { background: #243b5a; }
-    .btn-light {
-      background: #eee8dc;
-      color: #16253d;
-      border: 1px solid #ded6c5;
+    .btn-secondary {
+      background: #ece6d8;
+      color: var(--navy);
+      border: 1px solid var(--border);
     }
-    .todo-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px;
-      background: #faf8f5;
-      border-radius: 6px;
-      margin-top: 6px;
-    }
-    .todo-item.done span { text-decoration: line-through; color: #888; }
-    .vocab-chip {
-      background: #f7f1e5;
-      border: 1px solid #e8deb8;
-      color: #7a5a1f;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 13px;
-      display: inline-flex;
-      gap: 6px;
-      margin: 4px;
-    }
-    .wb-box {
-      border: 1px solid #e2ddd3;
-      border-radius: 8px;
+
+    /* WHITEBOARD */
+    .canvas-container {
+      flex: 1;
+      min-height: 460px;
       background: #ffffff;
-      height: 320px;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
       position: relative;
       touch-action: none;
     }
-    canvas { width: 100%; height: 100%; display: block; }
-
-    /* KÜTÜPHANE SAYFASI */
-    .library-layout {
-      display: grid;
-      grid-template-columns: 340px 1fr;
-      gap: 16px;
-    }
-    @media (max-width: 900px) {
-      .library-layout { grid-template-columns: 1fr; }
-    }
-    .book-item {
-      background: #faf8f5;
-      border: 1px solid #e2ddd3;
-      border-radius: 8px;
-      padding: 12px;
-      margin-top: 8px;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-    .book-item:hover, .book-item.selected {
-      border-color: #16253d;
-      background: #ffffff;
-    }
-    .book-progress-bar {
-      height: 5px;
-      background: #e2ddd3;
-      border-radius: 4px;
-      margin-top: 8px;
-      overflow: hidden;
-    }
-    .book-progress-fill {
-      height: 100%;
-      background: #b38f4d;
-    }
-    .reader-container {
-      background: #ffffff;
-      border: 1px solid #e2ddd3;
-      border-radius: 10px;
+    canvas { width: 100%; height: 100%; display: block; border-radius: 10px; cursor: crosshair; }
+    .tool-bar {
       display: flex;
-      flex-direction: column;
-      height: 750px;
-      overflow: hidden;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      background: #faf8f3;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
     }
-    .reader-header {
-      padding: 10px 16px;
-      background: #f1ece2;
-      border-bottom: 1px solid #e2ddd3;
+    .color-pill {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .color-pill.active { border-color: var(--navy); transform: scale(1.15); }
+
+    /* LİSTELER */
+    .item-card {
+      background: #faf8f5;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-top: 8px;
     }
-    .reader-body {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 1.5fr 1fr;
-    }
-    @media (max-width: 800px) {
-      .reader-body { grid-template-columns: 1fr; }
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: #525659;
-    }
-    .reader-notes {
-      padding: 14px;
-      border-left: 1px solid #e2ddd3;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: #faf8f5;
+    .tag {
+      background: var(--gold-light);
+      border: 1px solid #ebd9b3;
+      color: #8c6827;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px;
     }
   </style>
 </head>
 <body>
-  <div class="wrapper">
-    <header>
-      <div class="brand">
+  <div class="app-viewport">
+    <!-- ÜST BİLGİ ŞERİDİ -->
+    <div class="top-bar">
+      <div class="brand-section" onclick="openModule('home')">
         <div class="logo-badge">E</div>
-        <div>
-          <h1 style="font-size:18px;">EMIR OS</h1>
-          <p style="font-size:11px; color:#cbd5e1;">Kişisel Bilgi & Akademik Çalışma Alanı</p>
+        <div class="brand-text">
+          <h1>EMIR OS</h1>
+          <p>Kişisel Çalışma & Yaşam Alanı</p>
         </div>
       </div>
-      
-      <!-- NAVİGASYON -->
-      <div class="nav-tabs">
-        <button class="nav-tab-btn active" onclick="switchMainTab('dashboard')">Dashboard</button>
-        <button class="nav-tab-btn" onclick="switchMainTab('library')">PDF Kütüphanesi</button>
+      <div class="clock-display">
+        <div class="date" id="liveDate">Bugün</div>
+        <div class="time" id="liveClock">--:--</div>
       </div>
+    </div>
 
-      <div style="text-align:right;">
-        <div id="liveDate" style="font-weight:600; color:#f7f1e5; font-size:13px;"></div>
-        <div id="liveClock" style="font-size:11px; opacity:0.8;"></div>
-      </div>
-    </header>
-
-    <!-- DASHBOARD GÖRÜNÜMÜ -->
-    <div id="view-dashboard" class="section-view active">
-      <div class="grid">
-        <!-- SOL SÜTUN -->
+    <!-- 1. ANA EKRAN (BÜYÜK UYGULAMA İKONLARI) -->
+    <div id="mod-home" class="home-view">
+      <div class="app-tile" onclick="openModule('notes')">
+        <div class="tile-icon" style="background:#e8effa; color:#1b4d89;">📝</div>
         <div>
-          <div class="card">
-            <div class="card-title"><span>Bugünün Hedefleri</span></div>
-            <div style="display:flex; gap:6px;">
-              <input type="text" id="newTodoInput" placeholder="Görev ekle...">
-              <button class="btn" onclick="addTodo()">Ekle</button>
-            </div>
-            <div id="todoList" style="margin-top:8px;"></div>
-          </div>
-
-          <div class="card">
-            <div class="card-title"><span>Kelime Defteri (EN / ES)</span></div>
-            <div style="display:flex; gap:6px;">
-              <input type="text" id="vocabWord" placeholder="Kelime...">
-              <input type="text" id="vocabMeaning" placeholder="Anlamı...">
-              <button class="btn" onclick="addVocab()">Ekle</button>
-            </div>
-            <div id="vocabContainer" style="margin-top:8px;"></div>
-          </div>
+          <div class="tile-title">Hızlı Notlar</div>
+          <div class="tile-desc">Otomatik kaydedilen temiz metin notları ve arşiv.</div>
         </div>
+      </div>
 
-        <!-- SAĞ SÜTUN -->
+      <div class="app-tile" onclick="openModule('draw')">
+        <div class="tile-icon" style="background:#faefe8; color:#9c4819;">🎨</div>
         <div>
-          <div class="card">
-            <div class="card-title">
-              <span>Hızlı Not</span>
-              <span id="saveStatus" style="font-size:12px; font-weight:normal; color:#888;">Otomatik kaydeder</span>
-            </div>
-            <input type="text" id="noteTitle" placeholder="Başlık...">
-            <textarea id="noteContent" rows="4" placeholder="Notunu yaz..."></textarea>
-            <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:8px;">
-              <button class="btn btn-light" onclick="newNote()">Temizle</button>
-              <button class="btn" onclick="saveCurrentNote()">Kaydet</button>
-            </div>
-            <div id="notesList" style="margin-top:10px;"></div>
-          </div>
+          <div class="tile-title">Beyaz Tahta</div>
+          <div class="tile-desc">Stylus ve kalemle serbest çizim, zihin haritası.</div>
+        </div>
+      </div>
 
-          <div class="card">
-            <div class="card-title">
-              <span>Çizim Tahtası (Stylus / Kalem)</span>
-              <div>
-                <button class="btn btn-light" style="padding:2px 8px; font-size:11px;" onclick="clearCanvas()">Temizle</button>
-                <button class="btn" style="padding:2px 8px; font-size:11px;" onclick="downloadDrawing()">İndir</button>
-              </div>
-            </div>
-            <div class="wb-box">
-              <canvas id="mainCanvas"></canvas>
-            </div>
-          </div>
+      <div class="app-tile" onclick="openModule('library')">
+        <div class="tile-icon" style="background:#f9f5e6; color:#876719;">📚</div>
+        <div>
+          <div class="tile-title">PDF Kütüphanesi</div>
+          <div class="tile-desc">Makale ve kitap okuyucu, kaynak notları ve ilerleme.</div>
+        </div>
+      </div>
+
+      <div class="app-tile" onclick="openModule('vocab')">
+        <div class="tile-icon" style="background:#e8f7ee; color:#1d6e3c;">🔤</div>
+        <div>
+          <div class="tile-title">Kelime Defteri</div>
+          <div class="tile-desc">İngilizce ve İspanyolca akademik kelime havuzu.</div>
+        </div>
+      </div>
+
+      <div class="app-tile" onclick="openModule('tasks')">
+        <div class="tile-icon" style="background:#f4ebf9; color:#68278f;">🎯</div>
+        <div>
+          <div class="tile-title">Hedefler & Görevler</div>
+          <div class="tile-desc">Günlük odaklanma listesi ve to-do takibi.</div>
         </div>
       </div>
     </div>
 
-    <!-- PDF KÜTÜPHANESİ GÖRÜNÜMÜ -->
-    <div id="view-library" class="section-view">
-      <div class="library-layout">
-        <!-- SOL: KİTAP LİSTESİ & YÜKLEME -->
-        <div>
-          <div class="card">
-            <div class="card-title"><span>Kitap / Makale Ekle</span></div>
-            <div style="display:flex; flex-direction:column; gap:8px;">
-              <input type="text" id="bookTitle" placeholder="Eser Adı...">
-              <input type="text" id="bookAuthor" placeholder="Yazar / Yıl...">
-              <select id="bookCategory">
-                <option value="ELT / Dil Eğitimi">ELT / Dil Eğitimi</option>
-                <option value="Araştırma / Makale">Araştırma / Makale</option>
-                <option value="Kitap">Kitap</option>
-                <option value="Kişisel">Kişisel Gelişim</option>
-              </select>
-              <input type="file" id="pdfFileInput" accept="application/pdf" style="font-size:12px;">
-              <button class="btn" onclick="addNewBook()">Kütüphaneye Ekle</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-title"><span>Kayıtlı Kaynaklar</span></div>
-            <div id="booksList"></div>
-          </div>
+    <!-- 2. HIZLI NOTLAR MODÜLÜ -->
+    <div id="mod-notes" class="module-view">
+      <div class="module-header">
+        <button class="back-btn" onclick="openModule('home')">← Ana Menü</button>
+        <span id="noteSaveStatus" style="font-size:13px; color:var(--muted);">Otomatik kaydeder</span>
+      </div>
+      <div class="module-content">
+        <input type="text" id="noteTitle" placeholder="Not Başlığı...">
+        <textarea id="noteContent" rows="8" placeholder="Düşüncelerini buraya yaz..."></textarea>
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+          <button class="btn btn-secondary" onclick="newNote()">Temizle</button>
+          <button class="btn" onclick="saveCurrentNote()">Kaydet</button>
         </div>
+        <h3 style="font-size:16px; margin-top:10px; color:var(--navy);">Kayıtlı Notlar</h3>
+        <div id="notesList"></div>
+      </div>
+    </div>
 
-        <!-- SAĞ: PDF OKUYUCU VE KAYNAK NOTLARI -->
-        <div class="reader-container">
-          <div class="reader-header">
-            <div>
-              <strong id="activeBookTitle" style="color:#16253d; font-size:14px;">Henüz bir eser seçilmedi</strong>
-              <div id="activeBookMeta" style="font-size:11px; color:#666;">Soldan bir esere tıklayın veya PDF yükleyin</div>
-            </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span style="font-size:12px;">İlerleme: %</span>
-              <input type="number" id="readingProgressInput" min="0" max="100" style="width:60px; padding:4px;" onchange="updateProgress(this.value)">
-            </div>
-          </div>
-
-          <div class="reader-body">
-            <iframe id="pdfViewerFrame" src="about:blank"></iframe>
-            
-            <div class="reader-notes">
-              <strong style="font-size:13px; color:#16253d;">Bu Kaynağa Ait Notlar</strong>
-              <p style="font-size:11px; color:#666;">Okurken karşılaştığın fikirleri ve alıntıları buraya kaydet.</p>
-              <textarea id="bookSpecificNotes" style="flex:1;" placeholder="Kaynak notları..." oninput="saveBookNote()"></textarea>
-            </div>
-          </div>
+    <!-- 3. BEYAZ TAHTA MODÜLÜ -->
+    <div id="mod-draw" class="module-view">
+      <div class="module-header">
+        <button class="back-btn" onclick="openModule('home')">← Ana Menü</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary" style="padding:8px 14px;" onclick="clearCanvas()">Temizle</button>
+          <button class="btn" style="padding:8px 14px;" onclick="downloadDrawing()">PNG İndir</button>
         </div>
+      </div>
+      <div class="module-content">
+        <div class="tool-bar">
+          <span style="font-size:13px; font-weight:600;">Kalem Rengi:</span>
+          <div class="color-pill active" style="background:#16253d;" onclick="setColor('#16253d', this)"></div>
+          <div class="color-pill" style="background:#b38f4d;" onclick="setColor('#b38f4d', this)"></div>
+          <div class="color-pill" style="background:#c93b2b;" onclick="setColor('#c93b2b', this)"></div>
+          <div class="color-pill" style="background:#207849;" onclick="setColor('#207849', this)"></div>
+          <button class="btn btn-secondary" style="padding:6px 12px; margin-left:auto;" onclick="setEraser()">Silgi</button>
+        </div>
+        <div class="canvas-container" id="canvasWrap">
+          <canvas id="mainCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. PDF KÜTÜPHANESİ MODÜLÜ -->
+    <div id="mod-library" class="module-view">
+      <div class="module-header">
+        <button class="back-btn" onclick="openModule('home')">← Ana Menü</button>
+        <strong id="activeBookHeader" style="color:var(--navy); font-size:14px;">Eser Seçilmedi</strong>
+      </div>
+      <div class="module-content">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
+          <input type="text" id="bookTitle" placeholder="Eser Adı...">
+          <input type="text" id="bookAuthor" placeholder="Yazar / Yıl...">
+          <select id="bookCat">
+            <option value="ELT / Dil">ELT / Dil Eğitimi</option>
+            <option value="Makale">Araştırma / Makale</option>
+            <option value="Kitap">Kitap</option>
+          </select>
+          <input type="file" id="pdfFileInput" accept="application/pdf">
+          <button class="btn" onclick="addBook()">Kütüphaneye Ekle</button>
+        </div>
+        <div id="booksGrid" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <div style="height:480px; border:1px solid var(--border); border-radius:10px; overflow:hidden;">
+          <iframe id="pdfFrame" src="about:blank" style="width:100%; height:100%; border:none;"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. KELİME DEFTERİ MODÜLÜ -->
+    <div id="mod-vocab" class="module-view">
+      <div class="module-header">
+        <button class="back-btn" onclick="openModule('home')">← Ana Menü</button>
+      </div>
+      <div class="module-content">
+        <div style="display:flex; gap:10px;">
+          <input type="text" id="vWord" placeholder="Kelime / Phrase...">
+          <input type="text" id="vMean" placeholder="Anlamı...">
+          <button class="btn" onclick="addVocab()">Kaydet</button>
+        </div>
+        <div id="vocabContainer" style="margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <!-- 6. HEDEFLER & TO-DO MODÜLÜ -->
+    <div id="mod-tasks" class="module-view">
+      <div class="module-header">
+        <button class="back-btn" onclick="openModule('home')">← Ana Menü</button>
+      </div>
+      <div class="module-content">
+        <div style="display:flex; gap:10px;">
+          <input type="text" id="todoInp" placeholder="Yeni hedef veya görev...">
+          <button class="btn" onclick="addTodo()">Ekle</button>
+        </div>
+        <div id="todoList"></div>
       </div>
     </div>
   </div>
 
   <script>
-    // SEKME GEÇİŞİ
-    function switchMainTab(tab) {
-      document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.section-view').forEach(v => v.classList.remove('active'));
-      if(tab === 'dashboard') {
-        document.querySelectorAll('.nav-tab-btn')[0].classList.add('active');
-        document.getElementById('view-dashboard').classList.add('active');
-        resizeCanvas();
-      } else {
-        document.querySelectorAll('.nav-tab-btn')[1].classList.add('active');
-        document.getElementById('view-library').classList.add('active');
+    // MODÜL NAVİGASYONU
+    function openModule(id) {
+      document.getElementById('mod-home').style.display = id === 'home' ? 'grid' : 'none';
+      document.querySelectorAll('.module-view').forEach(m => m.classList.remove('active'));
+      if (id !== 'home') {
+        const target = document.getElementById('mod-' + id);
+        if (target) target.classList.add('active');
+        if (id === 'draw') setTimeout(resizeCanvas, 80);
       }
     }
 
-    // SAAT
-    function updateClock() {
-      const now = new Date();
-      document.getElementById('liveDate').textContent = now.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
-      document.getElementById('liveClock').textContent = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    // SAAT & TARİH
+    function tick() {
+      const n = new Date();
+      document.getElementById('liveDate').textContent = n.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
+      document.getElementById('liveClock').textContent = n.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
     }
-    setInterval(updateClock, 1000);
-    updateClock();
+    setInterval(tick, 1000); tick();
 
-    // TO-DO
-    let todos = JSON.parse(localStorage.getItem('emir_os_todos') || '[]');
-    function renderTodos() {
-      const el = document.getElementById('todoList');
-      el.innerHTML = '';
-      todos.forEach((t, i) => {
-        const item = document.createElement('div');
-        item.className = 'todo-item' + (t.done ? ' done' : '');
-        item.innerHTML = `
-          <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTodo(${i})">
-          <span style="flex:1;">${t.text}</span>
-          <button style="border:none; background:none; color:#c2413a; cursor:pointer;" onclick="deleteTodo(${i})">✕</button>
-        `;
-        el.appendChild(item);
+    // NOTLAR
+    let notes = JSON.parse(localStorage.getItem('emir_os_notes') || '[]');
+    let activeNoteId = null;
+    const nTitle = document.getElementById('noteTitle'), nCont = document.getElementById('noteContent'), nStat = document.getElementById('noteSaveStatus');
+
+    function renderNotes() {
+      const el = document.getElementById('notesList');
+      el.innerHTML = notes.length ? '' : '<div style="color:var(--muted); font-size:14px;">Henüz kayıt yok.</div>';
+      notes.forEach(n => {
+        const d = document.createElement('div');
+        d.className = 'item-card';
+        d.innerHTML = `<div onclick="loadNote('${n.id}')" style="cursor:pointer; flex:1;"><strong>${n.title || 'Başlıksız'}</strong><div style="font-size:12px; color:var(--muted);">${new Date(n.updatedAt).toLocaleDateString('tr-TR')}</div></div><button style="border:none; background:none; color:#c93b2b; cursor:pointer;" onclick="deleteNote('${n.id}')">✕</button>`;
+        el.appendChild(d);
       });
-      localStorage.setItem('emir_os_todos', JSON.stringify(todos));
     }
-    function addTodo() {
-      const inp = document.getElementById('newTodoInput');
-      if (!inp.value.trim()) return;
-      todos.push({ text: inp.value.trim(), done: false });
-      inp.value = '';
-      renderTodos();
+    function saveCurrentNote() {
+      const t = nTitle.value.trim(), c = nCont.value.trim();
+      if (!t && !c) return;
+      if (!activeNoteId) {
+        activeNoteId = Date.now().toString();
+        notes.unshift({ id: activeNoteId, title: t, content: c, updatedAt: Date.now() });
+      } else {
+        const item = notes.find(x => x.id === activeNoteId);
+        if (item) { item.title = t; item.content = c; item.updatedAt = Date.now(); }
+      }
+      localStorage.setItem('emir_os_notes', JSON.stringify(notes));
+      nStat.textContent = 'Kaydedildi';
+      renderNotes();
     }
-    function toggleTodo(i) { todos[i].done = !todos[i].done; renderTodos(); }
-    function deleteTodo(i) { todos.splice(i, 1); renderTodos(); }
+    [nTitle, nCont].forEach(x => x.addEventListener('input', () => { nStat.textContent = 'Kaydediliyor...'; clearTimeout(window.nt); window.nt = setTimeout(saveCurrentNote, 700); }));
+    function newNote() { activeNoteId = null; nTitle.value = ''; nCont.value = ''; nStat.textContent = 'Yeni not'; }
+    function loadNote(id) { const n = notes.find(x => x.id === id); if(!n) return; activeNoteId = n.id; nTitle.value = n.title; nCont.value = n.content; nStat.textContent = 'Yüklendi'; }
+    function deleteNote(id) { notes = notes.filter(x => x.id !== id); localStorage.setItem('emir_os_notes', JSON.stringify(notes)); if(activeNoteId === id) newNote(); renderNotes(); }
+
+    // ÇİZİM TAHTASI (CANVAS)
+    const cv = document.getElementById('mainCanvas'), ctx = cv.getContext('2d');
+    let isDrawing = false, penColor = '#16253d', penSize = 3;
+
+    function resizeCanvas() {
+      const p = cv.parentElement;
+      if (cv.width !== p.clientWidth || cv.height !== p.clientHeight) {
+        const img = ctx.getImageData(0, 0, cv.width, cv.height);
+        cv.width = p.clientWidth; cv.height = p.clientHeight;
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cv.width, cv.height);
+        try { ctx.putImageData(img, 0, 0); } catch(e){}
+      }
+    }
+    function getPos(e) {
+      const r = cv.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX, cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: cx - r.left, y: cy - r.top };
+    }
+    function startD(e) { isDrawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+    function moveD(e) {
+      if (!isDrawing) return; e.preventDefault();
+      const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle = penColor; ctx.lineWidth = penSize; ctx.lineCap = 'round'; ctx.stroke();
+    }
+    function stopD() { isDrawing = false; }
+    cv.addEventListener('mousedown', startD); cv.addEventListener('mousemove', moveD); window.addEventListener('mouseup', stopD);
+    cv.addEventListener('touchstart', startD, { passive: false }); cv.addEventListener('touchmove', moveD, { passive: false }); window.addEventListener('touchend', stopD);
+    function setColor(c, el) { penColor = c; penSize = 3; document.querySelectorAll('.color-pill').forEach(x => x.classList.remove('active')); if(el) el.classList.add('active'); }
+    function setEraser() { penColor = '#ffffff'; penSize = 24; }
+    function clearCanvas() { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cv.width, cv.height); }
+    function downloadDrawing() { const a = document.createElement('a'); a.download = 'cizim.png'; a.href = cv.toDataURL(); a.click(); }
 
     // VOCAB
     let vocabs = JSON.parse(localStorage.getItem('emir_os_vocabs') || '[]');
-    function renderVocabs() {
-      const el = document.getElementById('vocabContainer');
-      el.innerHTML = '';
+    function renderVocab() {
+      const el = document.getElementById('vocabContainer'); el.innerHTML = '';
       vocabs.forEach((v, i) => {
-        const chip = document.createElement('div');
-        chip.className = 'vocab-chip';
-        chip.innerHTML = `<strong>${v.word}</strong>: <span>${v.meaning}</span> <span style="cursor:pointer;" onclick="deleteVocab(${i})">✕</span>`;
-        el.appendChild(chip);
+        const c = document.createElement('div'); c.className = 'tag';
+        c.innerHTML = `<strong>${v.w}</strong>: ${v.m} <span style="cursor:pointer;" onclick="delVocab(${i})">✕</span>`;
+        el.appendChild(c);
       });
       localStorage.setItem('emir_os_vocabs', JSON.stringify(vocabs));
     }
     function addVocab() {
-      const w = document.getElementById('vocabWord');
-      const m = document.getElementById('vocabMeaning');
+      const w = document.getElementById('vWord'), m = document.getElementById('vMean');
       if (!w.value.trim()) return;
-      vocabs.unshift({ word: w.value.trim(), meaning: m.value.trim() });
-      w.value = ''; m.value = '';
-      renderVocabs();
+      vocabs.unshift({ w: w.value.trim(), m: m.value.trim() });
+      w.value = ''; m.value = ''; renderVocab();
     }
-    function deleteVocab(i) { vocabs.splice(i, 1); renderVocabs(); }
+    function delVocab(i) { vocabs.splice(i, 1); renderVocab(); }
 
-    // NOTLAR
-    let notes = JSON.parse(localStorage.getItem('emir_os_notes') || '[]');
-    let currentNoteId = null;
-    const titleEl = document.getElementById('noteTitle');
-    const contentEl = document.getElementById('noteContent');
-    const statusEl = document.getElementById('saveStatus');
-
-    function renderNotes() {
-      const listEl = document.getElementById('notesList');
-      listEl.innerHTML = '';
-      notes.slice(0, 5).forEach(n => {
-        const div = document.createElement('div');
-        div.style = 'padding:6px; background:#faf8f5; border-radius:6px; margin-top:4px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;';
-        div.innerHTML = `<span onclick="loadNote('${n.id}')" style="font-size:13px; font-weight:600; color:#16253d;">${n.title || 'Başlıksız'}</span><button onclick="deleteNote('${n.id}')" style="border:none; background:none; color:#c2413a; cursor:pointer;">✕</button>`;
-        listEl.appendChild(div);
+    // GÖREVLER
+    let todos = JSON.parse(localStorage.getItem('emir_os_todos') || '[]');
+    function renderTodos() {
+      const el = document.getElementById('todoList'); el.innerHTML = '';
+      todos.forEach((t, i) => {
+        const d = document.createElement('div'); d.className = 'item-card';
+        d.innerHTML = `<label style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer;"><input type="checkbox" ${t.d?'checked':''} onchange="toggleT(${i})"><span style="${t.d?'text-decoration:line-through;color:var(--muted)':''}">${t.t}</span></label><button style="border:none; background:none; color:#c93b2b; cursor:pointer;" onclick="delT(${i})">✕</button>`;
+        el.appendChild(d);
       });
+      localStorage.setItem('emir_os_todos', JSON.stringify(todos));
     }
-    function saveCurrentNote() {
-      const t = titleEl.value.trim();
-      const c = contentEl.value.trim();
-      if (!t && !c) return;
-      if (!currentNoteId) {
-        currentNoteId = Date.now().toString();
-        notes.unshift({ id: currentNoteId, title: t, content: c, updatedAt: Date.now() });
-      } else {
-        const n = notes.find(x => x.id === currentNoteId);
-        if (n) { n.title = t; n.content = c; n.updatedAt = Date.now(); }
-      }
-      localStorage.setItem('emir_os_notes', JSON.stringify(notes));
-      statusEl.textContent = 'Kaydedildi';
-      renderNotes();
+    function addTodo() {
+      const inp = document.getElementById('todoInp');
+      if (!inp.value.trim()) return;
+      todos.push({ t: inp.value.trim(), d: false });
+      inp.value = ''; renderTodos();
     }
-    function newNote() {
-      currentNoteId = null;
-      titleEl.value = ''; contentEl.value = '';
-      statusEl.textContent = 'Yeni not';
-    }
-    function loadNote(id) {
-      const n = notes.find(x => x.id === id);
-      if (!n) return;
-      currentNoteId = n.id;
-      titleEl.value = n.title; contentEl.value = n.content;
-      statusEl.textContent = 'Yüklendi';
-    }
-    function deleteNote(id) {
-      notes = notes.filter(x => x.id !== id);
-      localStorage.setItem('emir_os_notes', JSON.stringify(notes));
-      if (currentNoteId === id) newNote();
-      renderNotes();
-    }
+    function toggleT(i) { todos[i].d = !todos[i].d; renderTodos(); }
+    function delT(i) { todos.splice(i, 1); renderTodos(); }
 
-    // CANVAS (WHITEBOARD)
-    const canvas = document.getElementById('mainCanvas');
-    const ctx = canvas.getContext('2d');
-    let isDrawing = false;
-
-    function resizeCanvas() {
-      canvas.width = canvas.parentElement.clientWidth;
-      canvas.height = canvas.parentElement.clientHeight;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-    window.addEventListener('load', resizeCanvas);
-    window.addEventListener('resize', resizeCanvas);
-
-    function getPos(e) {
-      const r = canvas.getBoundingClientRect();
-      const cx = e.touches ? e.touches[0].clientX : e.clientX;
-      const cy = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: cx - r.left, y: cy - r.top };
-    }
-    function start(e) { isDrawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
-    function move(e) {
-      if (!isDrawing) return;
-      e.preventDefault();
-      const p = getPos(e);
-      ctx.lineTo(p.x, p.y);
-      ctx.strokeStyle = '#16253d';
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
-      ctx.stroke();
-    }
-    function end() { isDrawing = false; }
-
-    canvas.addEventListener('mousedown', start);
-    canvas.addEventListener('mousemove', move);
-    window.addEventListener('mouseup', end);
-    canvas.addEventListener('touchstart', start, { passive: false });
-    canvas.addEventListener('touchmove', move, { passive: false });
-    window.addEventListener('touchend', end);
-
-    function clearCanvas() {
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-    function downloadDrawing() {
-      const a = document.createElement('a');
-      a.download = 'cizim.png';
-      a.href = canvas.toDataURL();
-      a.click();
-    }
-
-    // PDF KÜTÜPHANESİ MANTIĞI
+    // PDF KÜTÜPHANESİ
     let books = JSON.parse(localStorage.getItem('emir_os_books') || '[]');
-    let currentBookId = null;
-
     function renderBooks() {
-      const el = document.getElementById('booksList');
-      el.innerHTML = '';
-      if(books.length === 0) {
-        el.innerHTML = '<div style="font-size:12px; color:#888;">Henüz kayıtlı kaynak yok.</div>';
-        return;
-      }
+      const el = document.getElementById('booksGrid'); el.innerHTML = '';
       books.forEach(b => {
-        const item = document.createElement('div');
-        item.className = 'book-item' + (b.id === currentBookId ? ' selected' : '');
-        item.innerHTML = `
-          <div onclick="selectBook('${b.id}')">
-            <strong style="color:#16253d; font-size:13px;">${b.title}</strong>
-            <div style="font-size:11px; color:#666;">${b.author || ''} · <span style="color:#b38f4d;">${b.category}</span></div>
-            <div class="book-progress-bar">
-              <div class="book-progress-fill" style="width: ${b.progress || 0}%;"></div>
-            </div>
-            <div style="font-size:10px; color:#888; text-align:right; margin-top:2px;">%${b.progress || 0} okundu</div>
-          </div>
-          <button style="border:none; background:none; color:#c2413a; cursor:pointer; font-size:11px; margin-top:4px;" onclick="deleteBook('${b.id}')">Sil</button>
-        `;
-        el.appendChild(item);
+        const d = document.createElement('div'); d.className = 'item-card';
+        d.innerHTML = `<div onclick="selectB('${b.id}')" style="cursor:pointer; flex:1;"><strong>${b.t}</strong> <span style="font-size:12px; color:var(--muted);">(${b.c})</span></div><button style="border:none; background:none; color:#c93b2b; cursor:pointer;" onclick="delB('${b.id}')">✕</button>`;
+        el.appendChild(d);
       });
+      localStorage.setItem('emir_os_books', JSON.stringify(books));
     }
-
-    function addNewBook() {
+    function addBook() {
       const t = document.getElementById('bookTitle').value.trim();
       const a = document.getElementById('bookAuthor').value.trim();
-      const c = document.getElementById('bookCategory').value;
-      const file = document.getElementById('pdfFileInput').files[0];
-
-      if (!t) return alert('Lütfen eser adını girin');
-
+      const c = document.getElementById('bookCat').value;
+      const f = document.getElementById('pdfFileInput').files[0];
+      if (!t) return alert('Eser adı girin');
       const id = Date.now().toString();
-      let pdfUrl = '';
-      if (file) {
-        pdfUrl = URL.createObjectURL(file);
-      }
-
-      const newB = { id, title: t, author: a, category: c, progress: 0, notes: '', pdfUrl };
-      books.unshift(newB);
-      localStorage.setItem('emir_os_books', JSON.stringify(books));
-      
-      document.getElementById('bookTitle').value = '';
-      document.getElementById('bookAuthor').value = '';
-      document.getElementById('pdfFileInput').value = '';
-      renderBooks();
-      selectBook(id);
+      const url = f ? URL.createObjectURL(f) : '';
+      books.unshift({ id, t, a, c, url });
+      document.getElementById('bookTitle').value = ''; document.getElementById('pdfFileInput').value = '';
+      renderBooks(); selectB(id);
     }
-
-    function selectBook(id) {
-      currentBookId = id;
-      const b = books.find(x => x.id === id);
-      if (!b) return;
-
-      document.getElementById('activeBookTitle').textContent = b.title;
-      document.getElementById('activeBookMeta').textContent = `${b.author || ''} (${b.category})`;
-      document.getElementById('readingProgressInput').value = b.progress || 0;
-      document.getElementById('bookSpecificNotes').value = b.notes || '';
-
-      const frame = document.getElementById('pdfViewerFrame');
-      if (b.pdfUrl) {
-        frame.src = b.pdfUrl;
-      } else {
-        frame.src = 'about:blank';
-      }
-      renderBooks();
+    function selectB(id) {
+      const b = books.find(x => x.id === id); if(!b) return;
+      document.getElementById('activeBookHeader').textContent = b.t;
+      if (b.url) document.getElementById('pdfFrame').src = b.url;
     }
+    function delB(id) { books = books.filter(x => x.id !== id); renderBooks(); }
 
-    function updateProgress(val) {
-      if (!currentBookId) return;
-      const b = books.find(x => x.id === currentBookId);
-      if (b) {
-        b.progress = Math.min(100, Math.max(0, parseInt(val) || 0));
-        localStorage.setItem('emir_os_books', JSON.stringify(books));
-        renderBooks();
-      }
-    }
-
-    function saveBookNote() {
-      if (!currentBookId) return;
-      const b = books.find(x => x.id === currentBookId);
-      if (b) {
-        b.notes = document.getElementById('bookSpecificNotes').value;
-        localStorage.setItem('emir_os_books', JSON.stringify(books));
-      }
-    }
-
-    function deleteBook(id) {
-      books = books.filter(x => x.id !== id);
-      localStorage.setItem('emir_os_books', JSON.stringify(books));
-      if (currentBookId === id) {
-        currentBookId = null;
-        document.getElementById('activeBookTitle').textContent = 'Henüz bir eser seçilmedi';
-        document.getElementById('pdfViewerFrame').src = 'about:blank';
-        document.getElementById('bookSpecificNotes').value = '';
-      }
-      renderBooks();
-    }
-
-    // BAŞLATMA
-    renderTodos();
-    renderVocabs();
-    renderNotes();
-    renderBooks();
+    // BAŞLAT
+    renderNotes(); renderVocab(); renderTodos(); renderBooks();
   </script>
 </body>
 </html>
