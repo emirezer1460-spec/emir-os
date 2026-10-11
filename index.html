@@ -7,22 +7,19 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#16253d">
-  <!-- Supabase & PDF.js SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     :root {
-      --bg: #f4efe6;
+      --bg: #f5f1e8;
       --card: #ffffff;
-      --navy: #16253d;
-      --navy-light: #243a5e;
-      --gold: #b38f4d;
-      --gold-light: #fbf7ee;
-      --border: #e2dcd0;
+      --navy: #132136;
+      --navy-light: #213554;
+      --gold: #c59b4c;
+      --border: #e2dbcd;
       --text: #1a202c;
-      --muted: #718096;
-      --shadow-lg: 0 10px 30px rgba(22, 37, 61, 0.08);
+      --muted: #64748b;
+      --shadow-soft: 0 14px 34px rgba(19, 33, 54, 0.12);
       --yellow: #f59e0b;
       --blue: #2563eb;
       --red: #dc2626;
@@ -36,130 +33,153 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    /* ANA ÇERÇEVE */
     .os-shell {
       width: 100vw;
       height: 100vh;
       display: flex;
       flex-direction: column;
-      padding: 18px 24px;
+      padding: 16px 22px;
       gap: 16px;
       position: relative;
     }
 
-    /* STATUS / TOPBAR */
+    /* ESTETİK ÜST BAR & EO LOGOSU */
     .os-topbar {
-      height: 56px;
+      height: 60px;
       background: var(--navy);
       color: #fff;
-      border-radius: 16px;
-      padding: 0 20px;
+      border-radius: 18px;
+      padding: 0 22px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow-soft);
       flex-shrink: 0;
       z-index: 50;
     }
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       cursor: pointer;
     }
-    .os-logo {
-      width: 36px;
-      height: 36px;
-      background: #0d1726;
+    
+    /* Özel EO Monogram Logo Rozeti */
+    .eo-logo-badge {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #0b1421 0%, #1a2d47 100%);
       border: 1.5px solid var(--gold);
-      color: var(--gold);
-      border-radius: 10px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
-      font-size: 18px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
     }
-    .brand-title { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
+    .eo-svg-logo {
+      width: 28px;
+      height: 28px;
+    }
+    .brand-title-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-title {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      color: #fbf7ee;
+    }
+    .brand-sub {
+      font-size: 11px;
+      letter-spacing: 0.8px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
 
     .sync-status {
       display: flex;
       align-items: center;
       gap: 6px;
       font-size: 12px;
-      background: rgba(255,255,255,0.12);
-      padding: 4px 10px;
-      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      padding: 5px 12px;
+      border-radius: 10px;
       color: #cbd5e1;
     }
 
-    /* 1. ANA EKRAN: TÜM EKRANI KAPLAYAN DEV UYGULAMA İKONLARI */
+    /* ANA EKRAN LAUNCHPAD (DEV İKONLAR) */
     #home-launcher {
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 30px;
-      padding: 20px 0;
+      width: 100%;
     }
     .app-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      max-width: 900px;
-      width: 100%;
-      gap: 30px 24px;
-      justify-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       align-items: center;
+      gap: 40px 32px;
+      max-width: 960px;
+      width: 100%;
+      padding: 20px;
     }
     .app-launcher-btn {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       cursor: pointer;
       user-select: none;
-      transition: transform 0.15s ease;
+      -webkit-user-select: none;
       background: none;
       border: none;
       outline: none;
+      touch-action: manipulation;
+      transition: transform 0.12s ease;
     }
     .app-launcher-btn:active {
       transform: scale(0.90);
     }
     .app-icon-squircle {
-      width: 96px;
-      height: 96px;
-      border-radius: 28px;
+      width: 112px;
+      height: 112px;
+      border-radius: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 44px;
-      box-shadow: 0 10px 25px rgba(22, 37, 61, 0.12);
-      border: 2px solid rgba(255, 255, 255, 0.8);
+      font-size: 52px;
+      box-shadow: 0 14px 28px rgba(19, 33, 54, 0.14);
+      border: 2.5px solid rgba(255, 255, 255, 0.9);
+      pointer-events: none; /* Tıklamayı ana butona iletir */
     }
     .app-name-text {
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 700;
       color: var(--navy);
       text-align: center;
+      pointer-events: none;
     }
 
-    /* 2. TAM EKRAN AÇILAN UYGULAMALAR (MODÜLLER) */
+    /* TAM EKRAN AÇILAN UYGULAMA KATMANLARI */
     .fullscreen-app-view {
       position: absolute;
-      top: 18px; left: 24px; right: 24px; bottom: 18px;
+      top: 16px; left: 22px; right: 22px; bottom: 16px;
       background: var(--card);
       border: 1.5px solid var(--border);
       border-radius: 24px;
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow-soft);
       display: none;
       flex-direction: column;
       overflow: hidden;
       z-index: 100;
     }
     .fullscreen-app-view.active {
-      display: flex;
+      display: flex !important;
     }
     .app-topbar {
       height: 60px;
@@ -193,7 +213,7 @@
       gap: 14px;
     }
 
-    /* GENEL FORMLAR & BUTONLAR */
+    /* FORMLAR & BUTONLAR */
     input, textarea, select {
       width: 100%;
       border: 2px solid var(--border);
@@ -228,7 +248,7 @@
       margin-top: 6px;
     }
 
-    /* KÜTÜPHANE VE DERS DİZİNİ */
+    /* KÜTÜPHANE */
     .lib-tree-pane {
       background: #f9f7f2;
       border-right: 1.5px solid var(--border);
@@ -272,7 +292,7 @@
       gap: 8px;
       cursor: pointer;
     }
-    .folder-item.active { border-color: var(--gold); background: var(--gold-light); }
+    .folder-item.active { border-color: var(--gold); background: #fbf7ee; }
     .subfolder-item {
       margin-left: 18px;
       padding: 8px 10px;
@@ -289,7 +309,7 @@
     }
     .subfolder-item.active { border-color: var(--gold); background: #fff; }
 
-    /* PDF OKUYUCU */
+    /* PDF OKUMA */
     .reader-split {
       display: flex;
       flex-direction: column;
@@ -406,14 +426,48 @@
       touch-action: none; cursor: crosshair;
     }
   </style>
+
+  <!-- KRİTİK NAVİGASYON BETİĞİ (EN BAŞTA ÇALIŞIR, ASLA KİLİTLENMEZ) -->
+  <script>
+    function launchApp(appId) {
+      var all = document.querySelectorAll('.fullscreen-app-view');
+      for (var i = 0; i < all.length; i++) {
+        all[i].classList.remove('active');
+      }
+      var target = document.getElementById(appId);
+      if (target) {
+        target.classList.add('active');
+      }
+      if (appId === 'app-master' && typeof resizeMasterCanvas === 'function') setTimeout(resizeMasterCanvas, 60);
+      if (appId === 'app-notes' && typeof resizeHandCanvas === 'function') setTimeout(resizeHandCanvas, 60);
+    }
+
+    function closeAllApps() {
+      var all = document.querySelectorAll('.fullscreen-app-view');
+      for (var i = 0; i < all.length; i++) {
+        all[i].classList.remove('active');
+      }
+    }
+  </script>
 </head>
 <body>
   <div class="os-shell">
     <!-- TOPBAR -->
     <div class="os-topbar">
       <div class="brand-group" onclick="closeAllApps()">
-        <div class="os-logo">E</div>
-        <div class="brand-title">EMIR OS</div>
+        <!-- Estetik EO Monogram Logo -->
+        <div class="eo-logo-badge">
+          <svg class="eo-svg-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- E Harfi -->
+            <path d="M22 24H50M22 50H44M22 76H50M22 24V76" stroke="#c59b4c" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- O Harfi (E ile kesişen modern form) -->
+            <circle cx="64" cy="50" r="24" stroke="#ffffff" stroke-width="8.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-title-wrap">
+          <span class="brand-title">EMIR OS</span>
+          <span class="brand-sub">Academic Workstation</span>
+        </div>
       </div>
 
       <div style="display:flex; align-items:center; gap:16px;">
@@ -427,44 +481,44 @@
       </div>
     </div>
 
-    <!-- 1. TÜM EKRANI KAPLAYAN ANA LAUNCHER (SADECE BÜYÜK YUVARLAK İKONLAR) -->
+    <!-- 1. ANA EKRAN: DEV YUVARLAK İKONLAR -->
     <div id="home-launcher">
       <div class="app-grid">
         <!-- Kütüphane -->
         <button class="app-launcher-btn" onclick="launchApp('app-library')">
-          <div class="app-icon-squircle" style="background:#f9f5e6; color:#876719;">📚</div>
+          <div class="app-icon-squircle" style="background:#fdf8eb; color:#876719;">📚</div>
           <div class="app-name-text">Kütüphane</div>
         </button>
 
         <!-- Ana Defter -->
         <button class="app-launcher-btn" onclick="launchApp('app-master')">
-          <div class="app-icon-squircle" style="background:#fdf2e9; color:#b25e1a;">📖</div>
+          <div class="app-icon-squircle" style="background:#fff3eb; color:#b25e1a;">📖</div>
           <div class="app-name-text">Ana Defter</div>
         </button>
 
         <!-- Hızlı Notlar -->
         <button class="app-launcher-btn" onclick="launchApp('app-notes')">
-          <div class="app-icon-squircle" style="background:#e8effa; color:#1b4d89;">✍️</div>
+          <div class="app-icon-squircle" style="background:#edf3fc; color:#1b4d89;">✍️</div>
           <div class="app-name-text">Hızlı Notlar</div>
         </button>
 
         <!-- Kelimeler -->
         <button class="app-launcher-btn" onclick="launchApp('app-vocab')">
-          <div class="app-icon-squircle" style="background:#e8f7ee; color:#1d6e3c;">🔤</div>
+          <div class="app-icon-squircle" style="background:#edf8f1; color:#1d6e3c;">🔤</div>
           <div class="app-name-text">Kelimeler</div>
         </button>
 
         <!-- Hedefler -->
         <button class="app-launcher-btn" onclick="launchApp('app-todos')">
-          <div class="app-icon-squircle" style="background:#f4ebf9; color:#68278f;">🎯</div>
+          <div class="app-icon-squircle" style="background:#f8effd; color:#68278f;">🎯</div>
           <div class="app-name-text">Hedefler</div>
         </button>
       </div>
     </div>
 
-    <!-- 2. TAM EKRAN AÇILAN MODÜLLER (BİRİ AÇILINCA DİĞERLERİ KAPANIR) -->
+    <!-- 2. TAM EKRAN MODÜLLER -->
 
-    <!-- A. KÜTÜPHANE UYGULAMASI -->
+    <!-- A. KÜTÜPHANE -->
     <div id="app-library" class="fullscreen-app-view">
       <div class="app-topbar">
         <button class="back-home-btn" onclick="closeAllApps()">← Ana Ekran</button>
@@ -476,7 +530,6 @@
       </div>
 
       <div style="flex:1; display:flex; overflow:hidden;">
-        <!-- Sol Klasör Menüsü -->
         <div class="lib-tree-pane" id="libTreePane">
           <div class="tree-tab-group">
             <button class="tree-tab-btn active" id="tabBtnArticles" onclick="selectRootSection('articles')">📄 Makaleler</button>
@@ -492,7 +545,6 @@
           </div>
         </div>
 
-        <!-- Orta PDF & Kalem Alanı -->
         <div class="reader-split" style="flex:1;">
           <div class="reader-toolbar">
             <div style="display:flex; align-items:center; gap:8px;">
@@ -529,7 +581,7 @@
       </div>
     </div>
 
-    <!-- B. ANA DEFTER UYGULAMASI -->
+    <!-- B. ANA DEFTER -->
     <div id="app-master" class="fullscreen-app-view">
       <div class="app-topbar">
         <button class="back-home-btn" onclick="closeAllApps()">← Ana Ekran</button>
@@ -544,7 +596,7 @@
           </div>
           
           <div id="masterNotebookBody">
-            <p style="font-style: italic; color:#777;">Henüz okuma bitirilmedi. Kütüphaneden bir PDF okuyup işaretlemeleri tamamlayınca "Okumayı Bitir" dediğinde ders sentezi ve zihin haritaları buraya otomatik işlenecektir.</p>
+            <p style="font-style: italic; color:#777;">Henüz okuma bitirilmedi. Kütüphaneden bir PDF okuyup kırmızı/mavi işaretlemeleri tamamlayınca "Okumayı Bitir" dediğinde ders sentezi ve zihin haritaları buraya otomatik işlenecektir.</p>
           </div>
 
           <canvas id="masterCanvasOverlay"></canvas>
@@ -552,7 +604,7 @@
       </div>
     </div>
 
-    <!-- C. HIZLI NOTLAR UYGULAMASI -->
+    <!-- C. HIZLI NOTLAR -->
     <div id="app-notes" class="fullscreen-app-view">
       <div class="app-topbar">
         <button class="back-home-btn" onclick="closeAllApps()">← Ana Ekran</button>
@@ -577,7 +629,7 @@
       </div>
     </div>
 
-    <!-- D. KELİMELER UYGULAMASI -->
+    <!-- D. KELİMELER -->
     <div id="app-vocab" class="fullscreen-app-view">
       <div class="app-topbar">
         <button class="back-home-btn" onclick="closeAllApps()">← Ana Ekran</button>
@@ -594,7 +646,7 @@
       </div>
     </div>
 
-    <!-- E. HEDEFLER UYGULAMASI -->
+    <!-- E. HEDEFLER -->
     <div id="app-todos" class="fullscreen-app-view">
       <div class="app-topbar">
         <button class="back-home-btn" onclick="closeAllApps()">← Ana Ekran</button>
@@ -611,13 +663,22 @@
     </div>
   </div>
 
-  <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  <!-- HARİCİ KÜTÜPHANELER SAYFANIN EN SONUNDA YÜKLENİR -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-    // SUPABASE BULUT
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
+    // SUPABASE BULUT SENKRONİZASYONU
     const SUPABASE_URL = 'https://rexoyhcaureiknzwqmbs.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_p6Qu12fVRmD49G-dPBPSjw_L1g3uXtM';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let supabase = null;
+    if (window.supabase) {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
 
     let syncTimeout = null;
     function notifyCloudSync(statusText) {
@@ -626,6 +687,7 @@
     }
 
     async function pushToCloud() {
+      if (!supabase) return;
       notifyCloudSync('Yükleniyor...');
       try {
         const payload = {
@@ -650,6 +712,7 @@
     }
 
     async function pullFromCloud() {
+      if (!supabase) return;
       notifyCloudSync('Eşitleniyor...');
       try {
         const { data, error } = await supabase.from('emir_os_sync').select('data').eq('id', 'primary_workspace').single();
@@ -678,21 +741,6 @@
       }
     }
 
-    // UYGULAMA AÇMA & KAPATMA (TAM EKRAN NAVİGASYON)
-    function launchApp(appId) {
-      document.querySelectorAll('.fullscreen-app-view').forEach(app => app.classList.remove('active'));
-      const target = document.getElementById(appId);
-      if (target) {
-        target.classList.add('active');
-      }
-      if (appId === 'app-master') setTimeout(resizeMasterCanvas, 50);
-      if (appId === 'app-notes' && noteMode === 'draw') setTimeout(resizeHandCanvas, 50);
-    }
-
-    function closeAllApps() {
-      document.querySelectorAll('.fullscreen-app-view').forEach(app => app.classList.remove('active'));
-    }
-
     function tick() {
       const n = new Date();
       document.getElementById('liveDate').textContent = n.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -700,7 +748,7 @@
     }
     setInterval(tick, 1000); tick();
 
-    // KÜTÜPHANE
+    // KÜTÜPHANE YÖNETİMİ
     let currentRoot = 'articles';
     let currentFolderId = 'root_articles';
     const teachers = ['Serkan Hoca', 'Doğan Hoca', 'Banu Hoca', 'Mehmet Hoca'];
@@ -1334,7 +1382,7 @@
       triggerAutoSync();
     }
 
-    // BAŞLATMA
+    // İLK BAŞLATMA
     renderTreeMenu();
     renderNotesList();
     renderVocabList();
