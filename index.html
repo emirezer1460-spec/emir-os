@@ -20,9 +20,9 @@
       --text: #1a202c;
       --muted: #64748b;
       --shadow-app: 0 16px 36px rgba(19, 33, 54, 0.16);
-      --yellow-hl: rgba(255, 225, 53, 0.55);
-      --blue-hl: rgba(56, 148, 255, 0.45);
-      --red-hl: rgba(255, 71, 87, 0.45);
+      --yellow-hl: rgba(255, 225, 53, 0.45);
+      --blue-hl: rgba(56, 148, 255, 0.40);
+      --red-hl: rgba(255, 71, 87, 0.40);
     }
     html, body {
       width: 100vw;
@@ -232,12 +232,12 @@
     .big-folder-icon { font-size: 52px; pointer-events: none; }
     .big-folder-name { font-size: 15px; font-weight: 800; color: var(--navy); text-align: center; pointer-events: none; }
 
-    /* OKUNMA BARI */
+    /* DİNAMİK RENKLİ OKUNMA BARI */
     .reading-progress-wrap {
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
       margin-top: 6px;
       pointer-events: none;
     }
@@ -250,15 +250,14 @@
     }
     .reading-progress-bar-fill {
       height: 100%;
-      background: #207849;
       border-radius: 6px;
-      transition: width 0.3s ease;
+      transition: width 0.3s ease, background-color 0.3s ease;
     }
     .reading-progress-text {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
-      color: #207849;
       text-align: right;
+      transition: color 0.3s ease;
     }
 
     .fab-add-btn {
@@ -374,7 +373,6 @@
       transition: transform 0.12s ease;
     }
     .palette-circle.active { border-color: var(--navy); transform: scale(1.2); }
-    
     .size-slider-box {
       display: flex;
       align-items: center;
@@ -395,7 +393,6 @@
       display: inline-block;
       transition: all 0.1s ease;
     }
-
     .personal-sheet-pad {
       flex: 1;
       background: #ffffff;
@@ -416,7 +413,7 @@
       cursor: crosshair;
     }
 
-    /* PDF OKUMA EKRANI & GERÇEK FOSFORLU MOTOR */
+    /* PDF OKUMA EKRANI & EDGE/ADOBE TARZI AKILLI HIGHLIGHT MOTORU */
     .pdf-reader-fullscreen {
       position: absolute;
       top: 0; left: 0; width: 100vw; height: 100vh;
@@ -456,9 +453,8 @@
     #pdfDrawCanvas {
       position: absolute;
       top: 0; left: 0;
-      /* Multiply modu: Yazıyı asla kapatmaz, yazının altına ışık gibi işler */
       mix-blend-mode: multiply;
-      pointer-events: none; /* Toggle kapalıyken tıklamaları yutmaz */
+      pointer-events: none;
     }
     #pdfDrawCanvas.drawing-enabled {
       pointer-events: auto !important;
@@ -466,7 +462,6 @@
       cursor: crosshair;
     }
 
-    /* SCROLL / SAYFA ATLAYICI BAR */
     .page-scrubber-box {
       display: flex;
       align-items: center;
@@ -481,7 +476,6 @@
       cursor: pointer;
     }
 
-    /* TOGGLE BUTONU */
     .toggle-hl-btn {
       background: #2d3748;
       color: #cbd5e1;
@@ -545,6 +539,9 @@
       }
       if (appId === 'app-library') {
         renderBrowserView();
+      }
+      if (appId === 'app-notes') {
+        renderNotesPage();
       }
     }
 
@@ -630,7 +627,7 @@
     </div>
     <input type="file" id="hiddenPdfPicker" accept="application/pdf" style="display:none;" onchange="handlePdfSelected(event)">
 
-    <!-- PDF OKUYUCU (GERÇEK HIGHLIGHTER & HIZLI SCRUBBER SÜRÜCÜSÜ) -->
+    <!-- PDF OKUYUCU (ADOBE/EDGE TARZI SNAP HIGHLIGHTER) -->
     <div class="pdf-reader-fullscreen" id="pdfReaderModal">
       <div class="reader-topbar">
         <div class="home-circle-btn" onclick="closePdfReader()" title="Kütüphaneye Dön">
@@ -640,12 +637,10 @@
           </svg>
         </div>
 
-        <!-- HIGHLIGHTER TOGGLE (Açıkken çizer, kapalıyken sayfayı kaydırıp çevirirsin) -->
         <button class="toggle-hl-btn active" id="hlToggleBtn" onclick="toggleHighlighterMode()">
           <span>🖍️ Vurgulayıcı: AÇIK</span>
         </button>
 
-        <!-- RENK PALETİ -->
         <div style="display:flex; align-items:center; gap:6px;">
           <div class="color-legend-badge active" id="badgeYellow" onclick="setPdfColor('yellow')">
             <div style="width:14px; height:14px; border-radius:50%; background:#f59e0b;"></div>
@@ -662,15 +657,12 @@
           <button class="btn btn-light" style="padding:6px 10px; font-size:12px;" onclick="setPdfEraser()">Silgi</button>
         </div>
 
-        <!-- HIZLI SAYFA KAYDIRMA ÇUBUĞU (SCRUBBER) -->
         <div class="page-scrubber-box">
           <button class="btn btn-light" style="padding:4px 8px; font-size:12px;" onclick="pdfPrevPage()">◀</button>
           <input type="range" id="pageScrubberSlider" min="1" max="1" value="1" oninput="onScrubberSlide(this.value)">
           <span id="pdfPageInfo" style="font-size:12px; font-weight:800; min-width:65px; text-align:center;">1 / 1</span>
           <button class="btn btn-light" style="padding:4px 8px; font-size:12px;" onclick="pdfNextPage()">▶</button>
         </div>
-
-        <button class="btn btn-gold" onclick="finishPdfSession()">🎓 Okumayı Bitir</button>
       </div>
 
       <div class="reader-stage-wrap" id="readerTouchStage">
@@ -690,20 +682,13 @@
             <circle cx="64" cy="50" r="24" stroke="#ffffff" stroke-width="8.5"/>
           </svg>
         </div>
-        <strong style="font-size:18px; color:#fbf7ee;">📖 Notlar (Ders & Okuma Sentezleri)</strong>
+        <strong style="font-size:18px; color:#fbf7ee;">📖 Notlar (Otomatik Ders & Okuma Sentezleri)</strong>
         <span id="notesPageIndex" style="font-size:13px; color:#cbd5e1; font-weight:700;">Sayfa: 0 / 0</span>
       </div>
       <div class="notes-book-stage">
         <button class="page-arrow-btn" onclick="prevNotesPage()">◀</button>
         <div class="notebook-paper-page">
-          <div id="notesPageContent">
-            <div style="border-bottom:2px solid var(--gold); padding-bottom:8px; display:flex; justify-content:space-between; align-items:flex-end;">
-              <div style="font-size:22px; font-weight:800; color:var(--navy);">Akademik Kayıtlar</div>
-            </div>
-            <div style="margin-top:20px; font-style:italic; color:#777;">
-              Henüz bir okuma oturumu tamamlanmadı. Kütüphaneden bir makale okuyup "Okumayı Bitir" dediğinizde sentezler buraya sayfa sayfa eklenecektir.
-            </div>
-          </div>
+          <div id="notesPageContent"></div>
         </div>
         <button class="page-arrow-btn" onclick="nextNotesPage()">▶</button>
       </div>
@@ -800,6 +785,13 @@
       return f ? (f.isArticleFolder || f.name.toLowerCase().includes('makale')) : false;
     }
 
+    // Dinamik Renk Fonksiyonu: 0% yeşil -> 50% turuncu/sarı -> 100% koyu kırmızı
+    function getProgressColor(percent) {
+      if (percent < 35) return '#207849'; // Yeşil
+      if (percent < 70) return '#d97706'; // Turuncu / Amber
+      return '#dc2626'; // Kırmızı
+    }
+
     function renderBrowserView() {
       const grid = document.getElementById('folderGridContainer');
       const breadcrumb = document.getElementById('libBreadcrumbNav');
@@ -847,13 +839,14 @@
         const card = document.createElement('div');
         card.className = 'big-folder-card';
         const progress = file.progress || 0;
+        const color = getProgressColor(progress);
 
         const progressBarHtml = `
           <div class="reading-progress-wrap">
             <div class="reading-progress-bar-bg">
-              <div class="reading-progress-bar-fill" style="width: ${progress}%;"></div>
+              <div class="reading-progress-bar-fill" style="width: ${progress}%; background-color: ${color};"></div>
             </div>
-            <div class="reading-progress-text">%${progress} Okundu (Sarı Sayfa)</div>
+            <div class="reading-progress-text" style="color: ${color};">%${progress} okundu</div>
           </div>
         `;
 
@@ -890,7 +883,9 @@
           lastPage: 1,
           progress: 0,
           yellowPages: [],
-          drawings: {}
+          blueItems: [],
+          redItems: [],
+          highlights: {} // sayfa bazlı highlight verileri
         };
         storedFiles.unshift(newDoc);
         localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
@@ -924,7 +919,7 @@
     }
 
     // ==========================================
-    // GERÇEK HIGHLIGHTER & HIZLI SCRUBBER SÜRÜCÜSÜ
+    // ADOBE / EDGE TARZI AKILLI HIGHLIGHT MOTORU
     // ==========================================
     let currentActivePdf = null;
     let pdfDoc = null;
@@ -935,17 +930,21 @@
     const dCanvas = document.getElementById('pdfDrawCanvas');
     const dCtx = dCanvas.getContext('2d');
 
-    let isHighlighterActive = true; // Toggle modu
-    let isPdfDrawing = false;
+    let isHighlighterActive = true;
+    let isHighlightSelecting = false;
     let pdfToolMode = 'yellow'; // 'yellow' | 'blue' | 'red' | 'eraser'
-    let pdfPenColor = 'rgba(255, 225, 53, 0.65)';
-    let pdfPenWidth = 24;
+    let pageTextItems = []; // Kelime koordinat kutuları
+
+    let dragStartPos = null;
+    let currentDragPos = null;
 
     function openPdfReader(fileId) {
       currentActivePdf = storedFiles.find(x => x.id === fileId);
       if (!currentActivePdf) return;
-      if (!currentActivePdf.drawings) currentActivePdf.drawings = {};
+      if (!currentActivePdf.highlights) currentActivePdf.highlights = {};
       if (!currentActivePdf.yellowPages) currentActivePdf.yellowPages = [];
+      if (!currentActivePdf.blueItems) currentActivePdf.blueItems = [];
+      if (!currentActivePdf.redItems) currentActivePdf.redItems = [];
 
       document.getElementById('pdfReaderModal').classList.add('active');
       currentPdfPage = currentActivePdf.lastPage || 1;
@@ -962,7 +961,6 @@
     }
 
     function closePdfReader() {
-      saveCurrentPdfPageDrawing();
       document.getElementById('pdfReaderModal').classList.remove('active');
       renderBrowserView();
     }
@@ -972,43 +970,58 @@
         const viewport = page.getViewport({ scale: 1.35 });
         rCanvas.height = viewport.height;
         rCanvas.width = viewport.width;
-        
         dCanvas.height = viewport.height;
         dCanvas.width = viewport.width;
 
         page.render({ canvasContext: rCtx, viewport: viewport }).promise.then(() => {
-          restorePdfPageDrawing(num);
+          // Sayfadaki metinlerin koordinatlarını PDF motorundan çek
+          page.getTextContent().then(textContent => {
+            extractPageTextCoordinates(textContent, viewport);
+            redrawSavedHighlights(num);
+          });
         });
       });
       document.getElementById('pdfPageInfo').textContent = `${num} / ${pdfDoc.numPages}`;
       document.getElementById('pageScrubberSlider').value = num;
     }
 
+    // Kelimelerin Bounding Box (Kutu) haritasını çıkar
+    function extractPageTextCoordinates(textContent, viewport) {
+      pageTextItems = [];
+      textContent.items.forEach(item => {
+        const tx = pdfjsLib.Util.transform(viewport.transform, item.transform);
+        const fontHeight = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
+        const width = item.width * (viewport.scale || 1.35);
+        const x = tx[4];
+        const y = tx[5] - fontHeight;
+
+        // Kelimeleri bölerek kaydet
+        const words = item.str.split(/\s+/);
+        let currX = x;
+        const avgCharWidth = width / (item.str.length || 1);
+
+        words.forEach(w => {
+          if (!w) return;
+          const wWidth = w.length * avgCharWidth;
+          pageTextItems.push({
+            text: w,
+            rect: { x: currX, y: y, w: wWidth, h: fontHeight }
+          });
+          currX += wWidth + avgCharWidth;
+        });
+      });
+    }
+
     function onScrubberSlide(val) {
       const pageIndex = parseInt(val, 10);
       if (pageIndex !== currentPdfPage && pageIndex >= 1 && pageIndex <= pdfDoc.numPages) {
-        saveCurrentPdfPageDrawing();
         currentPdfPage = pageIndex;
         renderReaderPage(currentPdfPage);
       }
     }
+    function pdfPrevPage() { if (currentPdfPage > 1) { currentPdfPage--; renderReaderPage(currentPdfPage); } }
+    function pdfNextPage() { if (currentPdfPage < pdfDoc.numPages) { currentPdfPage++; renderReaderPage(currentPdfPage); } }
 
-    function pdfPrevPage() {
-      if (currentPdfPage > 1) {
-        saveCurrentPdfPageDrawing();
-        currentPdfPage--;
-        renderReaderPage(currentPdfPage);
-      }
-    }
-    function pdfNextPage() {
-      if (currentPdfPage < pdfDoc.numPages) {
-        saveCurrentPdfPageDrawing();
-        currentPdfPage++;
-        renderReaderPage(currentPdfPage);
-      }
-    }
-
-    // VURGULAYICI TOGGLE (Açıkken çizer, kapalıyken sayfayı kaydırırsın)
     function toggleHighlighterMode() {
       isHighlighterActive = !isHighlighterActive;
       const btn = document.getElementById('hlToggleBtn');
@@ -1018,181 +1031,241 @@
         dCanvas.classList.add('drawing-enabled');
       } else {
         btn.classList.remove('active');
-        btn.innerHTML = '<span>🖐️ Okuma Modu (Sayfa Çevir)</span>';
+        btn.innerHTML = '<span>🖐️ Okuma Modu</span>';
         dCanvas.classList.remove('drawing-enabled');
       }
     }
 
-    // PARMAKLA SAYFA ÇEVİRME / SWIPE ALGILAYICI (Toggle kapalıyken çalışır)
-    let touchStartX = 0, touchEndX = 0;
-    const touchStage = document.getElementById('readerTouchStage');
-    touchStage.addEventListener('touchstart', e => {
-      touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-    touchStage.addEventListener('touchend', e => {
-      if (isHighlighterActive) return; // Çizim modundayken sayfa atlatma
-      touchEndX = e.changedTouches[0].screenX;
-      if (touchStartX - touchEndX > 75) {
-        pdfNextPage(); // Sola kaydırma ➔ İleri sayfa
-      } else if (touchEndX - touchStartX > 75) {
-        pdfPrevPage(); // Sağa kaydırma ➔ Geri sayfa
-      }
-    }, { passive: true });
-
     function setPdfColor(mode) {
       pdfToolMode = mode;
-      dCtx.globalCompositeOperation = 'source-over';
       document.querySelectorAll('.color-legend-badge').forEach(b => b.classList.remove('active'));
-      pdfPenWidth = 24;
-
-      if (mode === 'yellow') {
-        pdfPenColor = 'rgba(255, 225, 53, 0.65)';
-        document.getElementById('badgeYellow').classList.add('active');
-      } else if (mode === 'blue') {
-        pdfPenColor = 'rgba(56, 148, 255, 0.55)';
-        document.getElementById('badgeBlue').classList.add('active');
-      } else if (mode === 'red') {
-        pdfPenColor = 'rgba(255, 71, 87, 0.55)';
-        document.getElementById('badgeRed').classList.add('active');
-      }
+      if (mode === 'yellow') document.getElementById('badgeYellow').classList.add('active');
+      else if (mode === 'blue') document.getElementById('badgeBlue').classList.add('active');
+      else if (mode === 'red') document.getElementById('badgeRed').classList.add('active');
     }
-
     function setPdfEraser() {
       pdfToolMode = 'eraser';
-      dCtx.globalCompositeOperation = 'destination-out';
-      pdfPenWidth = 34;
       document.querySelectorAll('.color-legend-badge').forEach(b => b.classList.remove('active'));
     }
 
-    function clearPdfDrawing() {
-      dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
-      if (currentActivePdf && currentActivePdf.drawings) {
-        delete currentActivePdf.drawings[currentPdfPage];
-        // Sayfadan sarı kaldırıldıysa güncelle
-        currentActivePdf.yellowPages = currentActivePdf.yellowPages.filter(p => p !== currentPdfPage);
-        recalcAutoProgress();
-        localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
-      }
-    }
-
-    function saveCurrentPdfPageDrawing() {
-      if (!currentActivePdf) return;
-      if (!currentActivePdf.drawings) currentActivePdf.drawings = {};
-      currentActivePdf.drawings[currentPdfPage] = dCanvas.toDataURL();
-      localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
-    }
-
-    function restorePdfPageDrawing(num) {
-      dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
-      dCtx.globalCompositeOperation = 'source-over';
-      if (currentActivePdf && currentActivePdf.drawings && currentActivePdf.drawings[num]) {
-        const img = new Image();
-        img.onload = () => dCtx.drawImage(img, 0, 0);
-        img.src = currentActivePdf.drawings[num];
-      }
-    }
-
-    // SARI SAYFA SAYISINA GÖRE ANINDA OKUNMA ORANI HESABI
-    function recalcAutoProgress() {
-      if (!currentActivePdf || !pdfDoc) return;
-      const yellowCount = (currentActivePdf.yellowPages || []).length;
-      const totalPages = pdfDoc.numPages || 1;
-      const pct = Math.min(100, Math.round((yellowCount / totalPages) * 100));
-      currentActivePdf.progress = pct;
-      localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
-    }
-
-    function getPdfDrawCoords(e) {
+    function getCoords(e) {
       const r = dCanvas.getBoundingClientRect();
       const cx = e.touches ? e.touches[0].clientX : e.clientX;
       const cy = e.touches ? e.touches[0].clientY : e.clientY;
       return { x: cx - r.left, y: cy - r.top };
     }
 
+    // POINTER İLE ÇEKİLEN YERE KADAR AKILLI SNAP SEÇİMİ
     dCanvas.addEventListener('pointerdown', e => {
       if (!isHighlighterActive) return;
-      isPdfDrawing = true;
-      const p = getPdfDrawCoords(e);
-      dCtx.beginPath();
-      dCtx.moveTo(p.x, p.y);
+      isHighlightSelecting = true;
+      dragStartPos = getCoords(e);
+      currentDragPos = dragStartPos;
     });
 
     dCanvas.addEventListener('pointermove', e => {
-      if (!isPdfDrawing || !isHighlighterActive) return;
+      if (!isHighlightSelecting || !isHighlighterActive) return;
       e.preventDefault();
-      const p = getPdfDrawCoords(e);
-      dCtx.lineTo(p.x, p.y);
-      dCtx.strokeStyle = pdfToolMode === 'eraser' ? 'rgba(0,0,0,1)' : pdfPenColor;
-      dCtx.lineWidth = pdfPenWidth;
-      dCtx.lineCap = 'round';
-      dCtx.lineJoin = 'round';
-      dCtx.stroke();
+      currentDragPos = getCoords(e);
+      renderSelectionPreview();
     });
 
     window.addEventListener('pointerup', () => {
-      if (isPdfDrawing) {
-        isPdfDrawing = false;
-        saveCurrentPdfPageDrawing();
-
-        // SARI İŞARETLENDİĞİ AN ANLIK OLARAK ORANI GÜNCELLE
-        if (currentActivePdf && pdfToolMode === 'yellow') {
-          if (!currentActivePdf.yellowPages.includes(currentPdfPage)) {
-            currentActivePdf.yellowPages.push(currentPdfPage);
-            recalcAutoProgress();
-          }
-        }
+      if (isHighlightSelecting) {
+        isHighlightSelecting = false;
+        finalizeHighlightSelection();
       }
     });
 
-    function finishPdfSession() {
-      if (!currentActivePdf) return;
-      saveCurrentPdfPageDrawing();
-      let notes = JSON.parse(localStorage.getItem('emir_os_notes_pages') || '[]');
-      const yellowCount = (currentActivePdf.yellowPages || []).length;
+    function getSelectionBoundingBox() {
+      if (!dragStartPos || !currentDragPos) return null;
+      const minX = Math.min(dragStartPos.x, currentDragPos.x);
+      const maxX = Math.max(dragStartPos.x, currentDragPos.x);
+      const minY = Math.min(dragStartPos.y, currentDragPos.y);
+      const maxY = Math.max(dragStartPos.y, currentDragPos.y);
+      return { x: minX, y: minY, w: maxX - minX, h: Math.max(22, maxY - minY) };
+    }
 
-      const block = `
-        <div style="border-bottom:2px solid var(--gold); padding-bottom:8px; display:flex; justify-content:space-between; align-items:flex-end;">
-          <div style="font-size:22px; font-weight:800; color:var(--navy);">${currentActivePdf.title}</div>
-          <div style="font-size:12px; color:var(--muted);">${new Date().toLocaleDateString('tr-TR')} · Toplam Sarı Sayfa: ${yellowCount}</div>
-        </div>
-        <div style="margin-top:16px;">
-          <div style="font-weight:700; color:var(--red); font-size:15px; margin-bottom:8px;">🔴 Akademik Kavram Haritası & Sentez:</div>
-          <div style="background:#fff; border:1.5px solid var(--border); border-left:5px solid var(--red); padding:14px; border-radius:12px; font-family:monospace; font-size:13px; line-height:24px;">
+    // Seçim esnasında hafif kılavuz göster
+    function renderSelectionPreview() {
+      redrawSavedHighlights(currentPdfPage);
+      const sel = getSelectionBoundingBox();
+      if (!sel) return;
+      dCtx.fillStyle = 'rgba(197, 155, 76, 0.2)';
+      dCtx.fillRect(sel.x, sel.y, sel.w, sel.h);
+    }
+
+    // Kalem bırakılınca kelimelere tam oturan highlight kutularını çiz ve kaydet
+    function finalizeHighlightSelection() {
+      const sel = getSelectionBoundingBox();
+      if (!sel || (sel.w < 5 && sel.h < 5)) {
+        redrawSavedHighlights(currentPdfPage);
+        return;
+      }
+
+      if (pdfToolMode === 'eraser') {
+        // Silgi: Seçilen kutudaki highlight'ları kaldır
+        if (currentActivePdf && currentActivePdf.highlights[currentPdfPage]) {
+          currentActivePdf.highlights[currentPdfPage] = currentActivePdf.highlights[currentPdfPage].filter(h => {
+            return !(h.rect.x < sel.x + sel.w && h.rect.x + h.rect.w > sel.x &&
+                     h.rect.y < sel.y + sel.h && h.rect.y + h.rect.h > sel.y);
+          });
+          recalcReadingProgress();
+          redrawSavedHighlights(currentPdfPage);
+        }
+        return;
+      }
+
+      // Kalemin çektiği alanla kesişen tüm kelimeleri yakala
+      const matched = pageTextItems.filter(item => {
+        const r = item.rect;
+        return (r.x < sel.x + sel.w && r.x + r.w > sel.x &&
+                r.y < sel.y + sel.h && r.y + r.h > sel.y);
+      });
+
+      if (matched.length === 0) {
+        // Eğer OCR metin kutusu yoksa bile kullanıcının çektiği koordinatı doğrudan snap bloğu yap
+        matched.push({ text: 'Metin Bloğu', rect: sel });
+      }
+
+      if (!currentActivePdf.highlights[currentPdfPage]) {
+        currentActivePdf.highlights[currentPdfPage] = [];
+      }
+
+      const colorMap = {
+        yellow: 'rgba(255, 225, 53, 0.50)',
+        blue: 'rgba(56, 148, 255, 0.45)',
+        red: 'rgba(255, 71, 87, 0.45)'
+      };
+
+      const selectedWords = matched.map(m => m.text).join(' ');
+
+      matched.forEach(m => {
+        currentActivePdf.highlights[currentPdfPage].push({
+          rect: m.rect,
+          color: colorMap[pdfToolMode] || colorMap.yellow,
+          mode: pdfToolMode
+        });
+      });
+
+      // SARI İSE OKUNMA DURUMUNU GÜNCELLE
+      if (pdfToolMode === 'yellow') {
+        if (!currentActivePdf.yellowPages.includes(currentPdfPage)) {
+          currentActivePdf.yellowPages.push(currentPdfPage);
+        }
+        recalcReadingProgress();
+      }
+
+      // MAVİ İSE KELİME HAVUZUNA EKLE
+      if (pdfToolMode === 'blue') {
+        currentActivePdf.blueItems.push({ page: currentPdfPage, text: selectedWords });
+      }
+
+      // KIRMIZI İSE KAVRAM/ÖZET HAVUZUNA EKLE
+      if (pdfToolMode === 'red') {
+        currentActivePdf.redItems.push({ page: currentPdfPage, text: selectedWords });
+      }
+
+      // ÇİZER ÇİZMEZ ANINDA OTOMATİK SENTEZİ NOTLAR'A GÖNDER!
+      autoSynthesizeAndPushNotes();
+
+      localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
+      redrawSavedHighlights(currentPdfPage);
+    }
+
+    // Kayıtlı highlight'ları tam kelime sınırlarıyla ekrana bas
+    function redrawSavedHighlights(pageNum) {
+      dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+      if (!currentActivePdf || !currentActivePdf.highlights || !currentActivePdf.highlights[pageNum]) return;
+
+      currentActivePdf.highlights[pageNum].forEach(hl => {
+        dCtx.fillStyle = hl.color;
+        // Metnin üzerine tam oturan yuvarlatılmış fosforlu dikdörtgen
+        dCtx.beginPath();
+        const r = hl.rect;
+        dCtx.roundRect ? dCtx.roundRect(r.x, r.y - 1, r.w, r.h + 2, 4) : dCtx.rect(r.x, r.y - 1, r.w, r.h + 2);
+        dCtx.fill();
+      });
+    }
+
+    function recalcReadingProgress() {
+      if (!currentActivePdf || !pdfDoc) return;
+      const yellowCount = (currentActivePdf.yellowPages || []).length;
+      const total = pdfDoc.numPages || 1;
+      const pct = Math.min(100, Math.round((yellowCount / total) * 100));
+      currentActivePdf.progress = pct;
+      localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
+    }
+
+    // ÇİZER ÇİZMEZ ANINDA ÇALIŞAN OTOMATİK SENTEZ MOTORU
+    function autoSynthesizeAndPushNotes() {
+      if (!currentActivePdf) return;
+      let notes = JSON.parse(localStorage.getItem('emir_os_notes_pages') || '[]');
+      
+      const blueList = currentActivePdf.blueItems || [];
+      const redList = currentActivePdf.redItems || [];
+      const progress = currentActivePdf.progress || 0;
+
+      // Bu makaleye ait mevcut notu bul veya başa ekle
+      const noteTitle = currentActivePdf.title;
+      notes = notes.filter(n => !n.includes(`data-doc-id="${currentActivePdf.id}"`));
+
+      const newBlock = `
+        <div data-doc-id="${currentActivePdf.id}">
+          <div style="border-bottom:2px solid var(--gold); padding-bottom:8px; display:flex; justify-content:space-between; align-items:flex-end;">
+            <div style="font-size:22px; font-weight:800; color:var(--navy);">${currentActivePdf.title}</div>
+            <div style="font-size:12px; color:var(--muted); font-weight:700;">%${progress} okundu · s.${currentPdfPage}</div>
+          </div>
+          <div style="margin-top:16px;">
+            <div style="font-weight:700; color:var(--red); font-size:15px; margin-bottom:8px;">🔴 Taranan Akademik Kavramlar & Tezler:</div>
+            <div style="background:#fff; border:1.5px solid var(--border); border-left:5px solid var(--red); padding:14px; border-radius:12px; font-family:monospace; font-size:13px; line-height:24px;">
 [${currentActivePdf.title}]
-  ├── Okunma Durumu: Toplam ${yellowCount} sayfa sarı renkle analiz edildi.
-  └── Akademik Özet: Makale pedagojik çerçevede arşivlendi.
+${redList.length > 0 ? redList.map(r => `  ├── (s.${r.page}) "${r.text}"`).join('\n') : '  └── Henüz kırmızı kavram işaretlenmedi.'}
+            </div>
+
+            <div style="font-weight:700; color:var(--blue); font-size:15px; margin-top:18px; margin-bottom:8px;">🔵 Taranan Bilinmeyen Kelimeler (Sözlük):</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              ${blueList.length > 0 ? blueList.map(b => `
+                <div style="background:#fff; border:1px solid var(--border); border-left:4px solid var(--blue); padding:10px 14px; border-radius:10px; font-size:13px;">
+                  <strong>(s.${b.page}) "${b.text}":</strong> Academic expression in context.
+                </div>
+              `).join('') : '<span style="font-size:13px; color:#777;">Henüz mavi kelime işaretlenmedi.</span>'}
+            </div>
           </div>
         </div>
       `;
-      notes.unshift(block);
+
+      notes.unshift(newBlock);
       localStorage.setItem('emir_os_notes_pages', JSON.stringify(notes));
-      currentNotesIdx = 0;
-      renderNotesPage();
-      closePdfReader();
-      alert('Okuma oturumu tamamlandı ve Notlar defterine eklendi!');
-      launchApp('app-notes');
     }
 
     // ==========================================
     // NOTLAR DEFTERİ
     // ==========================================
-    let notesPages = JSON.parse(localStorage.getItem('emir_os_notes_pages') || '[]');
     let currentNotesIdx = 0;
 
     function renderNotesPage() {
       const container = document.getElementById('notesPageContent');
       const label = document.getElementById('notesPageIndex');
-      notesPages = JSON.parse(localStorage.getItem('emir_os_notes_pages') || '[]');
+      const notesPages = JSON.parse(localStorage.getItem('emir_os_notes_pages') || '[]');
+
       if (notesPages.length === 0) {
         label.textContent = 'Sayfa: 0 / 0';
-        container.innerHTML = '<p style="font-style:italic; color:#777; margin-top:20px;">Henüz okuma oturumu yok. Kütüphaneden "Okumayı Bitir" dediğinizde kavram haritaları buraya eklenecektir.</p>';
+        container.innerHTML = '<p style="font-style:italic; color:#777; margin-top:20px;">Henüz okuma yapılmadı. Kütüphanede bir PDF okurken kırmızı veya maviyle işaretlediğiniz an sentezler otomatik buraya eklenecektir.</p>';
         return;
       }
+
+      if (currentNotesIdx >= notesPages.length) currentNotesIdx = notesPages.length - 1;
       label.textContent = `Sayfa: ${currentNotesIdx + 1} / ${notesPages.length}`;
       container.innerHTML = notesPages[currentNotesIdx];
     }
-    function nextNotesPage() { if (currentNotesIdx < notesPages.length - 1) { currentNotesIdx++; renderNotesPage(); } }
-    function prevNotesPage() { if (currentNotesIdx > 0) { currentNotesIdx--; renderNotesPage(); } }
+    function nextNotesPage() {
+      const notesPages = JSON.parse(localStorage.getItem('emir_os_notes_pages') || '[]');
+      if (currentNotesIdx < notesPages.length - 1) { currentNotesIdx++; renderNotesPage(); }
+    }
+    function prevNotesPage() {
+      if (currentNotesIdx > 0) { currentNotesIdx--; renderNotesPage(); }
+    }
 
     // ==========================================
     // KİŞİSEL DEFTER
@@ -1273,14 +1346,14 @@
       return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
-    function startPersonalDraw(e) {
+    pCanvas.addEventListener('pointerdown', e => {
       isDrawingPersonal = true;
       const pos = getPersonalCoords(e);
       pCtx.beginPath();
       pCtx.moveTo(pos.x, pos.y);
-    }
+    });
 
-    function personalDrawMove(e) {
+    pCanvas.addEventListener('pointermove', e => {
       if (!isDrawingPersonal) return;
       e.preventDefault();
       const pos = getPersonalCoords(e);
@@ -1290,18 +1363,14 @@
       pCtx.lineCap = 'round';
       pCtx.lineJoin = 'round';
       pCtx.stroke();
-    }
+    });
 
-    function stopPersonalDraw() {
+    window.addEventListener('pointerup', () => {
       if (isDrawingPersonal) {
         isDrawingPersonal = false;
         saveCurrentSheet();
       }
-    }
-
-    pCanvas.addEventListener('pointerdown', startPersonalDraw);
-    pCanvas.addEventListener('pointermove', personalDrawMove);
-    window.addEventListener('pointerup', stopPersonalDraw);
+    });
 
     function nextPersonalSheet() {
       saveCurrentSheet();
@@ -1321,9 +1390,6 @@
       pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
       saveCurrentSheet();
     }
-
-    // BAŞLATMA
-    renderNotesPage();
   </script>
 </body>
 </html>
