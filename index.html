@@ -2,11 +2,14 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>EMIR OS</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#16253d">
+  <!-- Supabase & PDF.js SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     :root {
@@ -16,149 +19,171 @@
       --navy-light: #243a5e;
       --gold: #b38f4d;
       --gold-light: #fbf7ee;
-      --border: #e3dcce;
+      --border: #e2dcd0;
       --text: #1a202c;
       --muted: #718096;
-      --shadow: 0 4px 16px rgba(22, 37, 61, 0.08);
-      --radius: 16px;
+      --shadow-lg: 0 10px 30px rgba(22, 37, 61, 0.08);
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --yellow: #f59e0b;
+      --blue: #2563eb;
+      --red: #dc2626;
     }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
       background-color: var(--bg);
       color: var(--text);
-      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .os-container {
+      width: 100vw;
+      height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding: 16px;
+      padding: 16px 20px;
+      gap: 14px;
     }
-    .app-viewport {
-      width: 100%;
-      max-width: 1000px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      height: calc(100vh - 32px);
-    }
-
-    /* ÜST BAR (STATUS / TOP BAR) */
-    .top-bar {
+    .os-topbar {
+      height: 60px;
       background: var(--navy);
       color: #fff;
-      padding: 14px 22px;
-      border-radius: var(--radius);
+      border-radius: var(--radius-md);
+      padding: 0 20px;
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-lg);
+      flex-shrink: 0;
     }
-    .brand-section {
+    .brand-group {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       cursor: pointer;
     }
-    .logo-badge {
-      width: 44px;
-      height: 44px;
+    .os-logo {
+      width: 40px;
+      height: 40px;
       background: #0d1726;
       border: 1.5px solid var(--gold);
       color: var(--gold);
-      border-radius: 12px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
       font-weight: 800;
+      font-size: 20px;
     }
-    .brand-text h1 { font-size: 19px; font-weight: 700; letter-spacing: 0.5px; }
-    .brand-text p { font-size: 12px; color: #cbd5e1; }
-    .clock-display { text-align: right; }
-    .clock-display .date { font-weight: 600; font-size: 13px; color: #fbf7ee; }
-    .clock-display .time { font-size: 12px; opacity: 0.8; }
+    .brand-title { font-size: 19px; font-weight: 800; letter-spacing: 0.5px; }
 
-    /* ANA EKRAN DOCK / GRID */
-    .home-view {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-      margin-top: 10px;
+    .sync-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      background: rgba(255,255,255,0.12);
+      padding: 4px 10px;
+      border-radius: 8px;
+      color: #cbd5e1;
     }
-    .app-tile {
+
+    /* DOCK CAROUSEL */
+    .dock-carousel {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding: 4px 2px 14px 2px;
+      flex-shrink: 0;
+      scrollbar-width: none;
+    }
+    .dock-carousel::-webkit-scrollbar { display: none; }
+    .carousel-card {
+      flex: 0 0 270px;
+      height: 170px;
       background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
+      justify-content: space-between;
       cursor: pointer;
-      box-shadow: var(--shadow);
-      transition: transform 0.15s, border-color 0.15s;
+      scroll-snap-align: start;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.2s, border-color 0.2s;
     }
-    .app-tile:active { transform: scale(0.98); border-color: var(--navy); }
-    .tile-icon {
-      width: 58px;
-      height: 58px;
+    .carousel-card:hover { transform: translateY(-3px); border-color: var(--navy); }
+    .carousel-card:active { transform: scale(0.97); }
+    .card-icon-badge {
+      width: 48px;
+      height: 48px;
       border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
+      font-size: 24px;
     }
-    .tile-title { font-size: 18px; font-weight: 700; color: var(--navy); }
-    .tile-desc { font-size: 13px; color: var(--muted); line-height: 1.4; }
+    .card-title { font-size: 19px; font-weight: 800; color: var(--navy); }
+    .card-desc { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
 
-    /* MODÜL EKRANLARI */
-    .module-view {
-      display: none;
-      flex-direction: column;
+    /* WORKSPACE */
+    .workspace-area {
       flex: 1;
       background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
+      position: relative;
     }
-    .module-view.active { display: flex; }
-    .module-header {
+    .view-layer {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--card);
+      display: none;
+      flex-direction: column;
+    }
+    .view-layer.active { display: flex; }
+    .view-header {
+      height: 58px;
+      padding: 0 20px;
       background: #faf8f3;
-      padding: 14px 20px;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1.5px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-shrink: 0;
     }
-    .back-btn {
+    .close-btn {
       background: var(--navy);
       color: #fff;
       border: none;
-      padding: 10px 18px;
+      padding: 8px 16px;
       border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 13px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
-    .module-content {
+    .view-body {
       flex: 1;
       padding: 20px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
     }
 
-    /* GENEL BUTONLAR & FORMLAR */
-    input[type="text"], input[type="number"], textarea, select {
+    input, textarea, select {
       width: 100%;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-size: 15px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 14px;
       background: #fbfaf7;
       outline: none;
       font-family: inherit;
@@ -168,243 +193,539 @@
       background: var(--navy);
       color: #fff;
       border: none;
-      padding: 12px 20px;
+      padding: 10px 18px;
       border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 13px;
+      font-weight: 700;
       cursor: pointer;
     }
-    .btn-secondary {
-      background: #ece6d8;
-      color: var(--navy);
-      border: 1px solid var(--border);
+    .btn-gold { background: var(--gold); color: #fff; }
+    .btn-light { background: #ece6d8; color: var(--navy); }
+    .list-item-card {
+      background: #faf8f5;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
     }
 
-    /* WHITEBOARD */
-    .canvas-container {
+    /* KÜTÜPHANE */
+    .lib-tree-pane {
+      background: #f9f7f2;
+      border-right: 1.5px solid var(--border);
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 280px;
+    }
+    .tree-tab-group {
+      display: flex;
+      gap: 6px;
+      background: #e9e4d9;
+      padding: 4px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .tree-tab-btn {
       flex: 1;
-      min-height: 460px;
+      border: none;
+      background: transparent;
+      padding: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .tree-tab-btn.active {
+      background: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    }
+    .folder-item {
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .folder-item.active { border-color: var(--gold); background: var(--gold-light); }
+    .subfolder-item {
+      margin-left: 18px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #fdfdfc;
+      border: 1px dashed var(--border);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy-light);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .subfolder-item.active { border-color: var(--gold); background: #fff; }
+
+    /* PDF OKUMA */
+    .reader-split {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: #525659;
+      overflow: hidden;
+      position: relative;
+    }
+    .reader-toolbar {
+      height: 54px;
+      background: #1e2430;
+      color: #fff;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      gap: 12px;
+      overflow-x: auto;
+    }
+    .color-legend-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.1);
+      cursor: pointer;
+      user-select: none;
+    }
+    .color-legend-badge.active { outline: 2px solid #fff; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .pdf-viewport {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 16px;
+      position: relative;
+    }
+    .page-stage {
+      position: relative;
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+    #pdfCanvas { display: block; }
+    #drawingCanvas {
+      position: absolute;
+      top: 0; left: 0;
+      touch-action: none;
+      cursor: crosshair;
+    }
+
+    /* NOT DEFTERİ */
+    .note-draw-container {
+      width: 100%;
+      height: 380px;
       background: #ffffff;
       border: 2px dashed var(--border);
       border-radius: 12px;
       position: relative;
       touch-action: none;
     }
-    canvas { width: 100%; height: 100%; display: block; border-radius: 10px; cursor: crosshair; }
-    .tool-bar {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-      background: #faf8f3;
-      padding: 10px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
-    .color-pill {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid transparent;
-    }
-    .color-pill.active { border-color: var(--navy); transform: scale(1.15); }
+    #noteHandCanvas { width: 100%; height: 100%; display: block; border-radius: 10px; cursor: crosshair; }
 
-    /* LİSTELER */
-    .item-card {
-      background: #faf8f5;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
+    /* MASTER NOTEBOOK */
+    .notebook-paper {
+      background: #fbf9f4;
+      background-image: linear-gradient(#e9e4d8 1px, transparent 1px);
+      background-size: 100% 28px;
+      line-height: 28px;
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 30px;
+      font-family: "Georgia", serif;
+      color: #242b35;
+      min-height: 400px;
+      position: relative;
+    }
+    .notebook-header {
+      border-bottom: 2px solid var(--gold);
+      padding-bottom: 8px;
+      margin-bottom: 16px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-top: 8px;
+      align-items: flex-end;
     }
-    .tag {
-      background: var(--gold-light);
-      border: 1px solid #ebd9b3;
-      color: #8c6827;
-      padding: 6px 12px;
-      border-radius: 8px;
+    .notebook-title { font-size: 22px; font-weight: 700; color: var(--navy); }
+    .mindmap-box {
+      background: rgba(255,255,255,0.7);
+      border: 1.5px solid #deb887;
+      border-left: 5px solid var(--red);
+      padding: 14px 18px;
+      border-radius: 10px;
+      margin: 14px 0;
+      font-family: monospace;
       font-size: 13px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin: 4px;
+      white-space: pre-wrap;
+    }
+    .vocab-card {
+      background: rgba(255,255,255,0.7);
+      border: 1.5px solid #a8c0e6;
+      border-left: 5px solid var(--blue);
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    #masterCanvasOverlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      touch-action: none; cursor: crosshair;
     }
   </style>
 </head>
 <body>
-  <div class="app-viewport">
-    <!-- ÜST BİLGİ ŞERİDİ -->
-    <div class="top-bar">
-      <div class="brand-section" onclick="openModule('home')">
-        <div class="logo-badge">E</div>
-        <div class="brand-text">
-          <h1>EMIR OS</h1>
-          <p>Kişisel Çalışma & Yaşam Alanı</p>
-        </div>
-      </div>
-      <div class="clock-display">
-        <div class="date" id="liveDate">Bugün</div>
-        <div class="time" id="liveClock">--:--</div>
-      </div>
-    </div>
-
-    <!-- 1. ANA EKRAN (BÜYÜK UYGULAMA İKONLARI) -->
-    <div id="mod-home" class="home-view">
-      <div class="app-tile" onclick="openModule('notes')">
-        <div class="tile-icon" style="background:#e8effa; color:#1b4d89;">📝</div>
+  <div class="os-container">
+    <!-- TOPBAR -->
+    <div class="os-topbar">
+      <div class="brand-group" onclick="showHome()">
+        <div class="os-logo">E</div>
         <div>
-          <div class="tile-title">Hızlı Notlar</div>
-          <div class="tile-desc">Otomatik kaydedilen temiz metin notları ve arşiv.</div>
+          <div class="brand-title">EMIR OS</div>
+          <div style="font-size:11px; color:#cbd5e1;">Akademik Araştırma & Bulut Entegre İstasyon</div>
         </div>
       </div>
 
-      <div class="app-tile" onclick="openModule('draw')">
-        <div class="tile-icon" style="background:#faefe8; color:#9c4819;">🎨</div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div class="sync-status" id="cloudSyncIndicator">
+          <span>☁️</span> <span id="syncText">Bulut Hazır</span>
+        </div>
+        <div style="text-align:right;">
+          <div id="liveDate" style="font-weight:600; font-size:13px; color:#fbf7ee;">Bugün</div>
+          <div id="liveClock" style="font-size:11px; opacity:0.8;">--:--</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAROUSEL -->
+    <div class="dock-carousel">
+      <div class="carousel-card" onclick="openLayer('library')">
+        <div class="card-icon-badge" style="background:#f9f5e6; color:#876719;">📚</div>
         <div>
-          <div class="tile-title">Beyaz Tahta</div>
-          <div class="tile-desc">Stylus ve kalemle serbest çizim, zihin haritası.</div>
+          <div class="card-title">Kütüphane & Okuma</div>
+          <div class="card-desc">Makaleler, Hoca klasörleri ve el yazısıyla anında işaretleme.</div>
         </div>
       </div>
 
-      <div class="app-tile" onclick="openModule('library')">
-        <div class="tile-icon" style="background:#f9f5e6; color:#876719;">📚</div>
+      <div class="carousel-card" onclick="openLayer('master-notebook')">
+        <div class="card-icon-badge" style="background:#fdf2e9; color:#b25e1a;">📖</div>
         <div>
-          <div class="tile-title">PDF Kütüphanesi</div>
-          <div class="tile-desc">Makale ve kitap okuyucu, kaynak notları ve ilerleme.</div>
+          <div class="card-title">Ana Defter</div>
+          <div class="card-desc">Günün sonunda derlenen zihin haritaları, kavramlar ve el yazısı tuvali.</div>
         </div>
       </div>
 
-      <div class="app-tile" onclick="openModule('vocab')">
-        <div class="tile-icon" style="background:#e8f7ee; color:#1d6e3c;">🔤</div>
+      <div class="carousel-card" onclick="openLayer('notes')">
+        <div class="card-icon-badge" style="background:#e8effa; color:#1b4d89;">✍️</div>
         <div>
-          <div class="tile-title">Kelime Defteri</div>
-          <div class="tile-desc">İngilizce ve İspanyolca akademik kelime havuzu.</div>
+          <div class="card-title">Hızlı Notlar (Kalem)</div>
+          <div class="card-desc">Stylus el yazısı çizimi ve klavye notlarının bir arada olduğu alan.</div>
         </div>
       </div>
 
-      <div class="app-tile" onclick="openModule('tasks')">
-        <div class="tile-icon" style="background:#f4ebf9; color:#68278f;">🎯</div>
+      <div class="carousel-card" onclick="openLayer('vocab')">
+        <div class="card-icon-badge" style="background:#e8f7ee; color:#1d6e3c;">🔤</div>
         <div>
-          <div class="tile-title">Hedefler & Görevler</div>
-          <div class="tile-desc">Günlük odaklanma listesi ve to-do takibi.</div>
+          <div class="card-title">Kelime Defteri</div>
+          <div class="card-desc">Maviyle taranan akademik terimler ve İngilizce açıklamaları.</div>
+        </div>
+      </div>
+
+      <div class="carousel-card" onclick="openLayer('todos')">
+        <div class="card-icon-badge" style="background:#f4ebf9; color:#68278f;">🎯</div>
+        <div>
+          <div class="card-title">Hedefler</div>
+          <div class="card-desc">Günün öncelikleri ve akademik çalışma planı.</div>
         </div>
       </div>
     </div>
 
-    <!-- 2. HIZLI NOTLAR MODÜLÜ -->
-    <div id="mod-notes" class="module-view">
-      <div class="module-header">
-        <button class="back-btn" onclick="openModule('home')">← Ana Menü</button>
-        <span id="noteSaveStatus" style="font-size:13px; color:var(--muted);">Otomatik kaydeder</span>
-      </div>
-      <div class="module-content">
-        <input type="text" id="noteTitle" placeholder="Not Başlığı...">
-        <textarea id="noteContent" rows="8" placeholder="Düşüncelerini buraya yaz..."></textarea>
-        <div style="display:flex; justify-content:flex-end; gap:8px;">
-          <button class="btn btn-secondary" onclick="newNote()">Temizle</button>
-          <button class="btn" onclick="saveCurrentNote()">Kaydet</button>
+    <!-- WORKSPACE -->
+    <div class="workspace-area">
+      <!-- VARSAYILAN HOME EKRANI -->
+      <div id="layer-home" class="view-layer active" style="padding:20px; overflow-y:auto;">
+        <h2 style="font-size:20px; color:var(--navy); margin-bottom:12px;">Akademik Genel Bakış</h2>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:14px;">
+          <div style="background:#faf8f5; border:1.5px solid var(--border); border-radius:16px; padding:18px;">
+            <h3 style="font-size:15px; color:var(--navy); margin-bottom:8px;">📖 Aktif Okunan Eser</h3>
+            <div id="homeBookStatus" style="font-size:13px; color:var(--muted);">Henüz bir yayın seçilmedi.</div>
+            <button class="btn btn-light" style="margin-top:10px; width:100%;" onclick="openLayer('library')">Kütüphaneye Git</button>
+          </div>
+          <div style="background:#faf8f5; border:1.5px solid var(--border); border-radius:16px; padding:18px;">
+            <h3 style="font-size:15px; color:var(--navy); margin-bottom:8px;">🎯 Bekleyen Görevler</h3>
+            <div id="homeTodos" style="font-size:13px; color:var(--muted);"></div>
+          </div>
         </div>
-        <h3 style="font-size:16px; margin-top:10px; color:var(--navy);">Kayıtlı Notlar</h3>
-        <div id="notesList"></div>
       </div>
-    </div>
 
-    <!-- 3. BEYAZ TAHTA MODÜLÜ -->
-    <div id="mod-draw" class="module-view">
-      <div class="module-header">
-        <button class="back-btn" onclick="openModule('home')">← Ana Menü</button>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-secondary" style="padding:8px 14px;" onclick="clearCanvas()">Temizle</button>
-          <button class="btn" style="padding:8px 14px;" onclick="downloadDrawing()">PNG İndir</button>
+      <!-- KÜTÜPHANE VE PDF İSTASYONU -->
+      <div id="layer-library" class="view-layer">
+        <div class="view-header">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <strong id="libCurrentBreadcrumb" style="color:var(--navy); font-size:15px;">Kütüphane</strong>
+            <span id="articleProgressTag" style="display:none; background:#e9f5ee; color:#207849; border:1px solid #b7e0c7; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;">%0 Okundu</span>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-gold" id="btnFinishReading" style="display:none;" onclick="finishReadingSession()">🎓 Okumayı Bitir (Ana Deftere Aktar)</button>
+            <button class="close-btn" onclick="showHome()">← Kapat</button>
+          </div>
         </div>
-      </div>
-      <div class="module-content">
-        <div class="tool-bar">
-          <span style="font-size:13px; font-weight:600;">Kalem Rengi:</span>
-          <div class="color-pill active" style="background:#16253d;" onclick="setColor('#16253d', this)"></div>
-          <div class="color-pill" style="background:#b38f4d;" onclick="setColor('#b38f4d', this)"></div>
-          <div class="color-pill" style="background:#c93b2b;" onclick="setColor('#c93b2b', this)"></div>
-          <div class="color-pill" style="background:#207849;" onclick="setColor('#207849', this)"></div>
-          <button class="btn btn-secondary" style="padding:6px 12px; margin-left:auto;" onclick="setEraser()">Silgi</button>
-        </div>
-        <div class="canvas-container" id="canvasWrap">
-          <canvas id="mainCanvas"></canvas>
-        </div>
-      </div>
-    </div>
 
-    <!-- 4. PDF KÜTÜPHANESİ MODÜLÜ -->
-    <div id="mod-library" class="module-view">
-      <div class="module-header">
-        <button class="back-btn" onclick="openModule('home')">← Ana Menü</button>
-        <strong id="activeBookHeader" style="color:var(--navy); font-size:14px;">Eser Seçilmedi</strong>
-      </div>
-      <div class="module-content">
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
-          <input type="text" id="bookTitle" placeholder="Eser Adı...">
-          <input type="text" id="bookAuthor" placeholder="Yazar / Yıl...">
-          <select id="bookCat">
-            <option value="ELT / Dil">ELT / Dil Eğitimi</option>
-            <option value="Makale">Araştırma / Makale</option>
-            <option value="Kitap">Kitap</option>
-          </select>
-          <input type="file" id="pdfFileInput" accept="application/pdf">
-          <button class="btn" onclick="addBook()">Kütüphaneye Ekle</button>
-        </div>
-        <div id="booksGrid" style="display:flex; flex-direction:column; gap:8px;"></div>
-        <div style="height:480px; border:1px solid var(--border); border-radius:10px; overflow:hidden;">
-          <iframe id="pdfFrame" src="about:blank" style="width:100%; height:100%; border:none;"></iframe>
-        </div>
-      </div>
-    </div>
+        <div style="flex:1; display:flex; overflow:hidden;">
+          <!-- SOL: KLASÖR VE HİYERARŞİ BROWSER -->
+          <div class="lib-tree-pane" id="libTreePane">
+            <div class="tree-tab-group">
+              <button class="tree-tab-btn active" id="tabBtnArticles" onclick="selectRootSection('articles')">📄 Makaleler</button>
+              <button class="tree-tab-btn" id="tabBtnBooks" onclick="selectRootSection('books')">📚 Kitaplar</button>
+            </div>
 
-    <!-- 5. KELİME DEFTERİ MODÜLÜ -->
-    <div id="mod-vocab" class="module-view">
-      <div class="module-header">
-        <button class="back-btn" onclick="openModule('home')">← Ana Menü</button>
-      </div>
-      <div class="module-content">
-        <div style="display:flex; gap:10px;">
-          <input type="text" id="vWord" placeholder="Kelime / Phrase...">
-          <input type="text" id="vMean" placeholder="Anlamı...">
-          <button class="btn" onclick="addVocab()">Kaydet</button>
-        </div>
-        <div id="vocabContainer" style="margin-top:10px;"></div>
-      </div>
-    </div>
+            <div id="treeContentArea" style="display:flex; flex-direction:column; gap:6px;"></div>
 
-    <!-- 6. HEDEFLER & TO-DO MODÜLÜ -->
-    <div id="mod-tasks" class="module-view">
-      <div class="module-header">
-        <button class="back-btn" onclick="openModule('home')">← Ana Menü</button>
-      </div>
-      <div class="module-content">
-        <div style="display:flex; gap:10px;">
-          <input type="text" id="todoInp" placeholder="Yeni hedef veya görev...">
-          <button class="btn" onclick="addTodo()">Ekle</button>
+            <!-- PDF YÜKLEME ALANI -->
+            <div style="margin-top:auto; padding-top:10px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:6px;">
+              <input type="text" id="uploadTitle" placeholder="Yayın Adı..." style="font-size:12px; padding:8px;">
+              <input type="file" id="uploadFile" accept="application/pdf" style="font-size:11px;">
+              <button class="btn" style="padding:8px; font-size:12px;" onclick="uploadPdfToCurrentFolder()">+ Bu Klasöre Yükle</button>
+            </div>
+          </div>
+
+          <!-- ORTA: PDF GÖRÜNTÜLEYİCİ VE ÇİZİM -->
+          <div class="reader-split" style="flex:1;">
+            <div class="reader-toolbar">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <button class="btn btn-light" style="padding:4px 8px; font-size:11px;" onclick="prevPage()">◀</button>
+                <span id="pageInfo" style="font-size:12px;">Sayfa: 0 / 0</span>
+                <button class="btn btn-light" style="padding:4px 8px; font-size:11px;" onclick="nextPage()">▶</button>
+              </div>
+
+              <!-- İŞARETLEME MODLARI -->
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="color-legend-badge active" id="badgeYellow" onclick="setMode('yellow')">
+                  <div class="dot" style="background:var(--yellow);"></div>
+                  <span>🟡 Sarı: Okuma Durumu</span>
+                </div>
+                <div class="color-legend-badge" id="badgeBlue" onclick="setMode('blue')">
+                  <div class="dot" style="background:var(--blue);"></div>
+                  <span>🔵 Mavi: Bilinmeyen Kelime</span>
+                </div>
+                <div class="color-legend-badge" id="badgeRed" onclick="setMode('red')">
+                  <div class="dot" style="background:var(--red);"></div>
+                  <span>🔴 Kırmızı: Konu & Terim</span>
+                </div>
+                <button class="btn btn-light" style="padding:4px 8px; font-size:11px;" onclick="setEraser()">Silgi</button>
+                <button class="btn btn-light" style="padding:4px 8px; font-size:11px;" onclick="clearPage()">Temizle</button>
+              </div>
+            </div>
+
+            <!-- PDF SAHNESİ -->
+            <div class="pdf-viewport">
+              <div class="page-stage" id="stageContainer">
+                <canvas id="pdfCanvas"></canvas>
+                <canvas id="drawingCanvas"></canvas>
+              </div>
+            </div>
+          </div>
         </div>
-        <div id="todoList"></div>
+      </div>
+
+      <!-- ANA DEFTER (MASTER NOTEBOOK) -->
+      <div id="layer-master-notebook" class="view-layer">
+        <div class="view-header">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <strong style="color:var(--navy); font-size:15px;">📖 Ana Defter (Ders & Okuma Sentezi)</strong>
+            <button class="btn btn-light" style="padding:4px 10px; font-size:12px;" onclick="clearMasterDrawings()">Çizimi Temizle</button>
+          </div>
+          <button class="close-btn" onclick="showHome()">← Kapat</button>
+        </div>
+        <div class="view-body" style="padding:16px;">
+          <div class="notebook-paper" id="notebookPaperArea">
+            <div class="notebook-header">
+              <div class="notebook-title" id="masterNotebookHeading">Günün Akademik Kayıtları</div>
+              <div style="font-size:12px; color:var(--muted);" id="masterNotebookDate">Bugün</div>
+            </div>
+            
+            <div id="masterNotebookBody">
+              <p style="font-style: italic; color:#777;">Henüz okuma bitirilmedi. Kütüphaneden bir PDF okuyup kırmızı/mavi işaretlemeleri yaptıktan sonra "Okumayı Bitir" butonuna bastığınızda ders sentezi ve zihin haritaları buraya otomatik işlenecektir.</p>
+            </div>
+
+            <canvas id="masterCanvasOverlay"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- HIZLI NOTLAR -->
+      <div id="layer-notes" class="view-layer">
+        <div class="view-header">
+          <strong style="color:var(--navy); font-size:15px;">Hızlı Notlar (Kalem & Klavye)</strong>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-light" id="btnToggleNoteMode" style="padding:6px 12px; font-size:12px;" onclick="toggleNoteMode()">✍️ Kalemle Yaz Modu</button>
+            <button class="close-btn" onclick="showHome()">← Kapat</button>
+          </div>
+        </div>
+        <div class="view-body">
+          <input type="text" id="nTitle" placeholder="Not Başlığı...">
+          <textarea id="nCont" rows="6" placeholder="Klavye ile notunu yaz..."></textarea>
+          
+          <div id="noteDrawWrap" class="note-draw-container" style="display:none;">
+            <canvas id="noteHandCanvas"></canvas>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:8px;">
+            <button class="btn btn-light" onclick="clearHandCanvas()">Çizimi Sil</button>
+            <button class="btn btn-light" onclick="newNote()">Temizle</button>
+            <button class="btn" onclick="saveNote()">Kaydet</button>
+          </div>
+          <h4 style="color:var(--navy); margin-top:8px;">Kayıtlı Notlar</h4>
+          <div id="notesList"></div>
+        </div>
+      </div>
+
+      <!-- KELİME DEFTERİ -->
+      <div id="layer-vocab" class="view-layer">
+        <div class="view-header">
+          <strong style="color:var(--navy); font-size:15px;">Kelime Defteri (Akademik Sözlük)</strong>
+          <button class="close-btn" onclick="showHome()">← Kapat</button>
+        </div>
+        <div class="view-body">
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="vwWord" placeholder="English Term / Word...">
+            <input type="text" id="vwMeaning" placeholder="Definition / Explanation in English...">
+            <button class="btn" onclick="addVocabDirect()">Kaydet</button>
+          </div>
+          <div id="vocabDeck" style="display:flex; flex-direction:column; gap:6px;"></div>
+        </div>
+      </div>
+
+      <!-- HEDEFLER -->
+      <div id="layer-todos" class="view-layer">
+        <div class="view-header">
+          <strong style="color:var(--navy); font-size:15px;">Hedefler</strong>
+          <button class="close-btn" onclick="showHome()">← Kapat</button>
+        </div>
+        <div class="view-body">
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="tInp" placeholder="Yeni hedef...">
+            <button class="btn" onclick="addTodo()">Ekle</button>
+          </div>
+          <div id="todoList"></div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    // MODÜL NAVİGASYONU
-    function openModule(id) {
-      document.getElementById('mod-home').style.display = id === 'home' ? 'grid' : 'none';
-      document.querySelectorAll('.module-view').forEach(m => m.classList.remove('active'));
-      if (id !== 'home') {
-        const target = document.getElementById('mod-' + id);
-        if (target) target.classList.add('active');
-        if (id === 'draw') setTimeout(resizeCanvas, 80);
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // ==========================================
+    // SUPABASE CANLI BULUT SENKRONİZASYONU
+    // ==========================================
+    const SUPABASE_URL = 'https://rexoyhcaureiknzwqmbs.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6Qu12fVRmD49G-dPBPSjw_L1g3uXtM';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let syncTimeout = null;
+    function notifyCloudSync(statusText) {
+      const el = document.getElementById('syncText');
+      if (el) el.textContent = statusText;
+    }
+
+    async function pushToCloud() {
+      notifyCloudSync('Buluta Yükleniyor...');
+      try {
+        const payload = {
+          notes: JSON.parse(localStorage.getItem('emir_os_notes') || '[]'),
+          vocabs: JSON.parse(localStorage.getItem('emir_os_vocabs') || '[]'),
+          todos: JSON.parse(localStorage.getItem('emir_os_todos') || '[]'),
+          library: JSON.parse(localStorage.getItem('emir_os_lib_v2') || '[]'),
+          masterHtml: document.getElementById('masterNotebookBody')?.innerHTML || '',
+          updatedAt: new Date().toISOString()
+        };
+
+        const { error } = await supabase
+          .from('emir_os_sync')
+          .upsert({ id: 'primary_workspace', data: payload, updated_at: new Date() });
+
+        if (error) throw error;
+        notifyCloudSync('Bulut: Senkronize ✓');
+      } catch (err) {
+        notifyCloudSync('Yerel Kaydedildi (Bulut Beklemede)');
       }
     }
 
-    // SAAT & TARİH
+    function triggerAutoSync() {
+      clearTimeout(syncTimeout);
+      syncTimeout = setTimeout(pushToCloud, 1000);
+    }
+
+    async function pullFromCloud() {
+      notifyCloudSync('Buluttan Çekiliyor...');
+      try {
+        const { data, error } = await supabase
+          .from('emir_os_sync')
+          .select('data, updated_at')
+          .eq('id', 'primary_workspace')
+          .single();
+
+        if (data && data.data) {
+          const d = data.data;
+          if (d.notes) localStorage.setItem('emir_os_notes', JSON.stringify(d.notes));
+          if (d.vocabs) localStorage.setItem('emir_os_vocabs', JSON.stringify(d.vocabs));
+          if (d.todos) localStorage.setItem('emir_os_todos', JSON.stringify(d.todos));
+          if (d.library) {
+            libraryData = d.library;
+            localStorage.setItem('emir_os_lib_v2', JSON.stringify(d.library));
+          }
+          if (d.masterHtml && document.getElementById('masterNotebookBody')) {
+            document.getElementById('masterNotebookBody').innerHTML = d.masterHtml;
+          }
+
+          renderTreeMenu();
+          renderNotesList();
+          renderVocabList();
+          renderTodos();
+          notifyCloudSync('Bulut: Güncel ✓');
+        } else {
+          notifyCloudSync('Bulut: Bağlandı ✓');
+        }
+      } catch (err) {
+        notifyCloudSync('Çevrimdışı Mod');
+      }
+    }
+
+    // ==========================================
+    // GENEL GÖRÜNÜM
+    // ==========================================
+    function openLayer(id) {
+      document.querySelectorAll('.view-layer').forEach(l => l.classList.remove('active'));
+      const target = document.getElementById('layer-' + id);
+      if (target) target.classList.add('active');
+      if (id === 'master-notebook') resizeMasterCanvas();
+      if (id === 'notes' && noteMode === 'draw') resizeHandCanvas();
+    }
+    function showHome() {
+      openLayer('home');
+      renderHomeSummary();
+    }
     function tick() {
       const n = new Date();
       document.getElementById('liveDate').textContent = n.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -412,142 +733,671 @@
     }
     setInterval(tick, 1000); tick();
 
-    // NOTLAR
-    let notes = JSON.parse(localStorage.getItem('emir_os_notes') || '[]');
-    let activeNoteId = null;
-    const nTitle = document.getElementById('noteTitle'), nCont = document.getElementById('noteContent'), nStat = document.getElementById('noteSaveStatus');
+    // ==========================================
+    // KLASÖR & KÜTÜPHANE
+    // ==========================================
+    let currentRoot = 'articles';
+    let currentFolderId = 'root_articles';
+    const teachers = ['Serkan Hoca', 'Doğan Hoca', 'Banu Hoca', 'Mehmet Hoca'];
+    let libraryData = JSON.parse(localStorage.getItem('emir_os_lib_v2') || '[]');
+    let currentPub = null;
 
-    function renderNotes() {
-      const el = document.getElementById('notesList');
-      el.innerHTML = notes.length ? '' : '<div style="color:var(--muted); font-size:14px;">Henüz kayıt yok.</div>';
-      notes.forEach(n => {
+    function selectRootSection(root) {
+      currentRoot = root;
+      document.getElementById('tabBtnArticles').classList.toggle('active', root === 'articles');
+      document.getElementById('tabBtnBooks').classList.toggle('active', root === 'books');
+      renderTreeMenu();
+    }
+
+    function renderTreeMenu() {
+      const area = document.getElementById('treeContentArea');
+      area.innerHTML = '';
+
+      if (currentRoot === 'articles') {
+        currentFolderId = 'root_articles';
         const d = document.createElement('div');
-        d.className = 'item-card';
-        d.innerHTML = `<div onclick="loadNote('${n.id}')" style="cursor:pointer; flex:1;"><strong>${n.title || 'Başlıksız'}</strong><div style="font-size:12px; color:var(--muted);">${new Date(n.updatedAt).toLocaleDateString('tr-TR')}</div></div><button style="border:none; background:none; color:#c93b2b; cursor:pointer;" onclick="deleteNote('${n.id}')">✕</button>`;
-        el.appendChild(d);
+        d.className = 'folder-item active';
+        d.innerHTML = `📁 Genel Makaleler`;
+        area.appendChild(d);
+        renderFolderFileList(area, 'root_articles', true);
+      } else {
+        const dkHeader = document.createElement('div');
+        dkHeader.className = 'folder-item';
+        dkHeader.innerHTML = `📂 Ders Kitapları`;
+        area.appendChild(dkHeader);
+
+        teachers.forEach(tName => {
+          const tFolder = document.createElement('div');
+          const tId = 'teacher_' + tName.replace(/\s+/g, '_');
+          tFolder.className = 'folder-item ' + (currentFolderId === tId ? 'active' : '');
+          tFolder.style.marginLeft = '10px';
+          tFolder.innerHTML = `👨‍🏫 ${tName}`;
+          tFolder.onclick = () => { currentFolderId = tId; renderTreeMenu(); };
+          area.appendChild(tFolder);
+
+          const tArtId = tId + '_articles';
+          const tArtFolder = document.createElement('div');
+          tArtFolder.className = 'subfolder-item ' + (currentFolderId === tArtId ? 'active' : '');
+          tArtFolder.innerHTML = `📄 Makaleler`;
+          tArtFolder.onclick = (e) => { e.stopPropagation(); currentFolderId = tArtId; renderTreeMenu(); };
+          area.appendChild(tArtFolder);
+
+          if (currentFolderId === tId) {
+            renderFolderFileList(area, tId, false);
+          } else if (currentFolderId === tArtId) {
+            renderFolderFileList(area, tArtId, true);
+          }
+        });
+      }
+    }
+
+    function renderFolderFileList(container, fId, isArticleFolder) {
+      const files = libraryData.filter(x => x.folderId === fId);
+      const listDiv = document.createElement('div');
+      listDiv.style = 'margin:6px 0 10px 14px; display:flex; flex-direction:column; gap:4px;';
+
+      if (files.length === 0) {
+        listDiv.innerHTML = '<span style="font-size:11px; color:#888;">Bu klasörde henüz PDF yok.</span>';
+      }
+
+      files.forEach(f => {
+        const item = document.createElement('div');
+        item.style = 'background:#fff; border:1px solid var(--border); padding:8px 10px; border-radius:8px; cursor:pointer; font-size:12px; display:flex; justify-content:space-between; align-items:center;';
+        
+        let progressBadge = '';
+        if (isArticleFolder) {
+          progressBadge = `<span style="font-size:10px; color:#207849; font-weight:700; background:#e9f5ee; padding:2px 6px; border-radius:4px;">%${f.progress || 0}</span>`;
+        }
+
+        item.innerHTML = `
+          <div onclick="openPdfPublication('${f.id}')" style="flex:1;">
+            <strong>${f.title}</strong>
+            ${progressBadge ? '<div style="margin-top:2px;">' + progressBadge + '</div>' : ''}
+          </div>
+          <button onclick="deletePdf('${f.id}')" style="border:none; background:none; color:#dc2626; cursor:pointer;">✕</button>
+        `;
+        listDiv.appendChild(item);
+      });
+      container.appendChild(listDiv);
+    }
+
+    function uploadPdfToCurrentFolder() {
+      const title = document.getElementById('uploadTitle').value.trim();
+      const file = document.getElementById('uploadFile').files[0];
+      if (!title || !file) return alert('Lütfen yayın adı ve PDF dosyası seçin.');
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const isArticle = currentFolderId.includes('article');
+        const newObj = {
+          id: Date.now().toString(),
+          title: title,
+          data: e.target.result,
+          folderId: currentFolderId,
+          isArticle: isArticle,
+          progress: 0,
+          lastPage: 1,
+          yellowPages: [],
+          bluePages: [],
+          redPages: [],
+          drawings: {}
+        };
+        libraryData.unshift(newObj);
+        saveLibrary();
+        document.getElementById('uploadTitle').value = '';
+        document.getElementById('uploadFile').value = '';
+        renderTreeMenu();
+        openPdfPublication(newObj.id);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function deletePdf(id) {
+      if(!confirm('Bu eseri silmek istiyor musunuz?')) return;
+      libraryData = libraryData.filter(x => x.id !== id);
+      saveLibrary();
+      renderTreeMenu();
+    }
+
+    function saveLibrary() {
+      localStorage.setItem('emir_os_lib_v2', JSON.stringify(libraryData));
+      triggerAutoSync();
+    }
+
+    // ==========================================
+    // PDF OKUYUCU
+    // ==========================================
+    let pdfDoc = null;
+    let pageNum = 1;
+    let scale = 1.35;
+    let activeColorMode = 'yellow';
+
+    const pdfCanvas = document.getElementById('pdfCanvas');
+    const pdfCtx = pdfCanvas.getContext('2d');
+    const drawCanvas = document.getElementById('drawingCanvas');
+    const drawCtx = drawCanvas.getContext('2d');
+    let isDrawing = false;
+
+    function openPdfPublication(id) {
+      currentPub = libraryData.find(x => x.id === id);
+      if (!currentPub) return;
+
+      document.getElementById('libCurrentBreadcrumb').textContent = currentPub.title;
+      document.getElementById('btnFinishReading').style.display = 'block';
+
+      const progTag = document.getElementById('articleProgressTag');
+      if (currentPub.isArticle) {
+        progTag.style.display = 'inline-block';
+        progTag.textContent = `%${currentPub.progress || 0} Okundu`;
+      } else {
+        progTag.style.display = 'none';
+      }
+
+      pageNum = currentPub.lastPage || 1;
+
+      pdfjsLib.getDocument(currentPub.data).promise.then(pdf => {
+        pdfDoc = pdf;
+        renderPdfPage(pageNum);
       });
     }
-    function saveCurrentNote() {
-      const t = nTitle.value.trim(), c = nCont.value.trim();
-      if (!t && !c) return;
-      if (!activeNoteId) {
-        activeNoteId = Date.now().toString();
-        notes.unshift({ id: activeNoteId, title: t, content: c, updatedAt: Date.now() });
-      } else {
-        const item = notes.find(x => x.id === activeNoteId);
-        if (item) { item.title = t; item.content = c; item.updatedAt = Date.now(); }
-      }
-      localStorage.setItem('emir_os_notes', JSON.stringify(notes));
-      nStat.textContent = 'Kaydedildi';
-      renderNotes();
-    }
-    [nTitle, nCont].forEach(x => x.addEventListener('input', () => { nStat.textContent = 'Kaydediliyor...'; clearTimeout(window.nt); window.nt = setTimeout(saveCurrentNote, 700); }));
-    function newNote() { activeNoteId = null; nTitle.value = ''; nCont.value = ''; nStat.textContent = 'Yeni not'; }
-    function loadNote(id) { const n = notes.find(x => x.id === id); if(!n) return; activeNoteId = n.id; nTitle.value = n.title; nCont.value = n.content; nStat.textContent = 'Yüklendi'; }
-    function deleteNote(id) { notes = notes.filter(x => x.id !== id); localStorage.setItem('emir_os_notes', JSON.stringify(notes)); if(activeNoteId === id) newNote(); renderNotes(); }
 
-    // ÇİZİM TAHTASI (CANVAS)
-    const cv = document.getElementById('mainCanvas'), ctx = cv.getContext('2d');
-    let isDrawing = false, penColor = '#16253d', penSize = 3;
+    function renderPdfPage(num) {
+      pdfDoc.getPage(num).then(page => {
+        const viewport = page.getViewport({ scale: scale });
+        pdfCanvas.height = viewport.height;
+        pdfCanvas.width = viewport.width;
+        drawCanvas.height = viewport.height;
+        drawCanvas.width = viewport.width;
 
-    function resizeCanvas() {
-      const p = cv.parentElement;
-      if (cv.width !== p.clientWidth || cv.height !== p.clientHeight) {
-        const img = ctx.getImageData(0, 0, cv.width, cv.height);
-        cv.width = p.clientWidth; cv.height = p.clientHeight;
-        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cv.width, cv.height);
-        try { ctx.putImageData(img, 0, 0); } catch(e){}
+        page.render({ canvasContext: pdfCtx, viewport: viewport }).promise.then(() => {
+          restorePageDrawing(num);
+          updateProgressMetrics(num);
+        });
+      });
+      document.getElementById('pageInfo').textContent = `Sayfa: ${num} / ${pdfDoc.numPages}`;
+    }
+
+    function prevPage() {
+      if (pageNum <= 1) return;
+      saveCurrentPageDrawing();
+      pageNum--;
+      renderPdfPage(pageNum);
+    }
+    function nextPage() {
+      if (pageNum >= pdfDoc.numPages) return;
+      saveCurrentPageDrawing();
+      pageNum++;
+      renderPdfPage(pageNum);
+    }
+
+    function setMode(mode) {
+      activeColorMode = mode;
+      document.getElementById('badgeYellow').classList.toggle('active', mode === 'yellow');
+      document.getElementById('badgeBlue').classList.toggle('active', mode === 'blue');
+      document.getElementById('badgeRed').classList.toggle('active', mode === 'red');
+    }
+    function setEraser() { activeColorMode = 'eraser'; }
+    function clearPage() {
+      drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+      if (currentPub && currentPub.drawings) {
+        delete currentPub.drawings[pageNum];
+        saveLibrary();
       }
     }
-    function getPos(e) {
-      const r = cv.getBoundingClientRect();
-      const cx = e.touches ? e.touches[0].clientX : e.clientX, cy = e.touches ? e.touches[0].clientY : e.clientY;
+
+    function getCanvasCoords(e) {
+      const r = drawCanvas.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
       return { x: cx - r.left, y: cy - r.top };
     }
-    function startD(e) { isDrawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
-    function moveD(e) {
-      if (!isDrawing) return; e.preventDefault();
-      const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle = penColor; ctx.lineWidth = penSize; ctx.lineCap = 'round'; ctx.stroke();
-    }
-    function stopD() { isDrawing = false; }
-    cv.addEventListener('mousedown', startD); cv.addEventListener('mousemove', moveD); window.addEventListener('mouseup', stopD);
-    cv.addEventListener('touchstart', startD, { passive: false }); cv.addEventListener('touchmove', moveD, { passive: false }); window.addEventListener('touchend', stopD);
-    function setColor(c, el) { penColor = c; penSize = 3; document.querySelectorAll('.color-pill').forEach(x => x.classList.remove('active')); if(el) el.classList.add('active'); }
-    function setEraser() { penColor = '#ffffff'; penSize = 24; }
-    function clearCanvas() { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cv.width, cv.height); }
-    function downloadDrawing() { const a = document.createElement('a'); a.download = 'cizim.png'; a.href = cv.toDataURL(); a.click(); }
 
-    // VOCAB
-    let vocabs = JSON.parse(localStorage.getItem('emir_os_vocabs') || '[]');
-    function renderVocab() {
-      const el = document.getElementById('vocabContainer'); el.innerHTML = '';
-      vocabs.forEach((v, i) => {
-        const c = document.createElement('div'); c.className = 'tag';
-        c.innerHTML = `<strong>${v.w}</strong>: ${v.m} <span style="cursor:pointer;" onclick="delVocab(${i})">✕</span>`;
-        el.appendChild(c);
+    drawCanvas.addEventListener('mousedown', startStroke);
+    drawCanvas.addEventListener('mousemove', moveStroke);
+    window.addEventListener('mouseup', endStroke);
+    drawCanvas.addEventListener('touchstart', startStroke, { passive: false });
+    drawCanvas.addEventListener('touchmove', moveStroke, { passive: false });
+    window.addEventListener('touchend', endStroke);
+
+    function startStroke(e) {
+      isDrawing = true;
+      const p = getCanvasCoords(e);
+      drawCtx.beginPath();
+      drawCtx.moveTo(p.x, p.y);
+    }
+    function moveStroke(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      const p = getCanvasCoords(e);
+      drawCtx.lineTo(p.x, p.y);
+
+      if (activeColorMode === 'yellow') {
+        drawCtx.strokeStyle = 'rgba(245, 158, 11, 0.45)';
+        drawCtx.lineWidth = 18;
+      } else if (activeColorMode === 'blue') {
+        drawCtx.strokeStyle = 'rgba(37, 99, 235, 0.9)';
+        drawCtx.lineWidth = 2.5;
+      } else if (activeColorMode === 'red') {
+        drawCtx.strokeStyle = 'rgba(220, 38, 38, 0.9)';
+        drawCtx.lineWidth = 2.5;
+      } else if (activeColorMode === 'eraser') {
+        drawCtx.strokeStyle = '#ffffff';
+        drawCtx.lineWidth = 26;
+      }
+      drawCtx.lineCap = 'round';
+      drawCtx.stroke();
+    }
+    function endStroke() {
+      if (isDrawing) {
+        isDrawing = false;
+        saveCurrentPageDrawing();
+        
+        if (currentPub) {
+          if (!currentPub.yellowPages) currentPub.yellowPages = [];
+          if (!currentPub.bluePages) currentPub.bluePages = [];
+          if (!currentPub.redPages) currentPub.redPages = [];
+
+          if (activeColorMode === 'yellow' && !currentPub.yellowPages.includes(pageNum)) {
+            currentPub.yellowPages.push(pageNum);
+            updateProgressMetrics(pageNum);
+          } else if (activeColorMode === 'blue' && !currentPub.bluePages.includes(pageNum)) {
+            currentPub.bluePages.push(pageNum);
+          } else if (activeColorMode === 'red' && !currentPub.redPages.includes(pageNum)) {
+            currentPub.redPages.push(pageNum);
+          }
+          saveLibrary();
+        }
+      }
+    }
+
+    function saveCurrentPageDrawing() {
+      if (!currentPub) return;
+      if (!currentPub.drawings) currentPub.drawings = {};
+      currentPub.drawings[pageNum] = drawCanvas.toDataURL();
+      saveLibrary();
+    }
+    function restorePageDrawing(num) {
+      drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+      if (currentPub && currentPub.drawings && currentPub.drawings[num]) {
+        const img = new Image();
+        img.onload = () => drawCtx.drawImage(img, 0, 0);
+        img.src = currentPub.drawings[num];
+      }
+    }
+
+    function updateProgressMetrics(curPage) {
+      if (!currentPub || !pdfDoc) return;
+      currentPub.lastPage = Math.max(currentPub.lastPage || 1, curPage);
+      if (currentPub.isArticle) {
+        const pct = Math.min(100, Math.round((currentPub.lastPage / pdfDoc.numPages) * 100));
+        currentPub.progress = pct;
+        document.getElementById('articleProgressTag').textContent = `%${pct} Okundu`;
+      }
+      saveLibrary();
+    }
+
+    // ==========================================
+    // OKUMAYI BİTİR & ANA DEFTER
+    // ==========================================
+    function finishReadingSession() {
+      if (!currentPub) return;
+
+      const yellowCount = (currentPub.yellowPages || []).length;
+      const bluePages = currentPub.bluePages || [];
+      const redPages = currentPub.redPages || [];
+
+      let vocabs = JSON.parse(localStorage.getItem('emir_os_vocabs') || '[]');
+      bluePages.forEach(p => {
+        const wordKey = `Academic Term (p.${p})`;
+        const def = `[From: ${currentPub.title} · Page ${p}] Key linguistic or instructional vocabulary highlighted in blue.`;
+        if (!vocabs.some(v => v.w === wordKey)) {
+          vocabs.unshift({ w: wordKey, m: def });
+        }
       });
       localStorage.setItem('emir_os_vocabs', JSON.stringify(vocabs));
-    }
-    function addVocab() {
-      const w = document.getElementById('vWord'), m = document.getElementById('vMean');
-      if (!w.value.trim()) return;
-      vocabs.unshift({ w: w.value.trim(), m: m.value.trim() });
-      w.value = ''; m.value = ''; renderVocab();
-    }
-    function delVocab(i) { vocabs.splice(i, 1); renderVocab(); }
+      renderVocabList();
 
-    // GÖREVLER
-    let todos = JSON.parse(localStorage.getItem('emir_os_todos') || '[]');
-    function renderTodos() {
-      const el = document.getElementById('todoList'); el.innerHTML = '';
-      todos.forEach((t, i) => {
-        const d = document.createElement('div'); d.className = 'item-card';
-        d.innerHTML = `<label style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer;"><input type="checkbox" ${t.d?'checked':''} onchange="toggleT(${i})"><span style="${t.d?'text-decoration:line-through;color:var(--muted)':''}">${t.t}</span></label><button style="border:none; background:none; color:#c93b2b; cursor:pointer;" onclick="delT(${i})">✕</button>`;
-        el.appendChild(d);
+      document.getElementById('masterNotebookHeading').textContent = `Ders & Okuma Sentezi: ${currentPub.title}`;
+      document.getElementById('masterNotebookDate').textContent = new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+      let bookHtml = `
+        <div style="margin-bottom:14px;">
+          <strong>Kaynak Eser:</strong> ${currentPub.title} <br>
+          <strong>Okunma Özeti:</strong> Toplam ${currentPub.lastPage || 1} sayfa tarandı. Sarı ile işaretlenen ${yellowCount} sayfa aktif analiz edildi.
+        </div>
+      `;
+
+      bookHtml += `<h3 style="color:var(--red); font-size:16px; margin-top:12px;">🔴 Akademik Konu Anlatımı & Zihin Haritası:</h3>`;
+      if (redPages.length > 0) {
+        let mindmapTree = `[${currentPub.title}]\n`;
+        redPages.forEach((p, idx) => {
+          mindmapTree += `  ├── [Sayfa ${p}] Odak Kavram ${idx+1}: Ders içi anahtar tez & kuramsal çerçeve\n`;
+          mindmapTree += `  │     └── Çözümleme: Metin bağlamında vurgulanan temel metodoloji.\n`;
+        });
+        bookHtml += `<div class="mindmap-box">${mindmapTree}</div>`;
+      } else {
+        bookHtml += `<p style="font-size:13px; color:#666;">Bu oturumda kırmızı ile işaretlenmiş sayfa bulunmuyor.</p>`;
+      }
+
+      bookHtml += `<h3 style="color:var(--blue); font-size:16px; margin-top:16px;">🔵 Yeni Kelimeler & Açıklamaları (Vocabulary):</h3>`;
+      if (bluePages.length > 0) {
+        bluePages.forEach(p => {
+          bookHtml += `
+            <div class="vocab-card">
+              <strong>Sayfa ${p} Terimi:</strong> Academic Expression in context.
+              <div style="font-size:12px; color:#555; margin-top:2px;">Explanation: Specialized instruction/language pedagogy term identified during reading.</div>
+            </div>
+          `;
+        });
+      } else {
+        bookHtml += `<p style="font-size:13px; color:#666;">Bu oturumda mavi ile işaretlenmiş kelime sayfası bulunmuyor.</p>`;
+      }
+
+      document.getElementById('masterNotebookBody').innerHTML = bookHtml;
+      triggerAutoSync();
+
+      alert(`✅ Okuma Tamamlandı ve Buluta Aktarıldı!\n• ${bluePages.length} sayfalık kelime Kelime Defterine kaydedildi.\n• Kırmızı işaretli ${redPages.length} sayfa üzerinden Zihin Haritası Ana Defter'e işlendi.`);
+      openLayer('master-notebook');
+    }
+
+    // ==========================================
+    // ANA DEFTER OVERLAY
+    // ==========================================
+    const masterCanvas = document.getElementById('masterCanvasOverlay');
+    const masterCtx = masterCanvas.getContext('2d');
+    let isMasterDrawing = false;
+
+    function resizeMasterCanvas() {
+      const p = masterCanvas.parentElement;
+      if (masterCanvas.width !== p.clientWidth || masterCanvas.height !== p.clientHeight) {
+        masterCanvas.width = p.clientWidth;
+        masterCanvas.height = p.clientHeight;
+      }
+    }
+
+    function getMasterCoords(e) {
+      const r = masterCanvas.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: cx - r.left, y: cy - r.top };
+    }
+
+    masterCanvas.addEventListener('mousedown', e => {
+      isMasterDrawing = true;
+      const p = getMasterCoords(e);
+      masterCtx.beginPath();
+      masterCtx.moveTo(p.x, p.y);
+    });
+    masterCanvas.addEventListener('mousemove', e => {
+      if(!isMasterDrawing) return;
+      e.preventDefault();
+      const p = getMasterCoords(e);
+      masterCtx.lineTo(p.x, p.y);
+      masterCtx.strokeStyle = '#16253d';
+      masterCtx.lineWidth = 2.5;
+      masterCtx.lineCap = 'round';
+      masterCtx.stroke();
+    });
+    window.addEventListener('mouseup', () => isMasterDrawing = false);
+
+    masterCanvas.addEventListener('touchstart', e => {
+      isMasterDrawing = true;
+      const p = getMasterCoords(e);
+      masterCtx.beginPath();
+      masterCtx.moveTo(p.x, p.y);
+    }, { passive: false });
+    masterCanvas.addEventListener('touchmove', e => {
+      if(!isMasterDrawing) return;
+      e.preventDefault();
+      const p = getMasterCoords(e);
+      masterCtx.lineTo(p.x, p.y);
+      masterCtx.strokeStyle = '#16253d';
+      masterCtx.lineWidth = 2.5;
+      masterCtx.lineCap = 'round';
+      masterCtx.stroke();
+    }, { passive: false });
+    window.addEventListener('touchend', () => isMasterDrawing = false);
+
+    function clearMasterDrawings() {
+      masterCtx.clearRect(0, 0, masterCanvas.width, masterCanvas.height);
+    }
+
+    // ==========================================
+    // HIZLI NOTLAR
+    // ==========================================
+    let noteMode = 'keyboard';
+    const handCanvas = document.getElementById('noteHandCanvas');
+    const handCtx = handCanvas.getContext('2d');
+    let isHandDrawing = false;
+
+    function toggleNoteMode() {
+      const btn = document.getElementById('btnToggleNoteMode');
+      const textEl = document.getElementById('nCont');
+      const drawWrap = document.getElementById('noteDrawWrap');
+
+      if (noteMode === 'keyboard') {
+        noteMode = 'draw';
+        btn.textContent = '⌨️ Klavye Modu';
+        textEl.style.display = 'none';
+        drawWrap.style.display = 'block';
+        resizeHandCanvas();
+      } else {
+        noteMode = 'keyboard';
+        btn.textContent = '✍️ Kalemle Yaz Modu';
+        textEl.style.display = 'block';
+        drawWrap.style.display = 'none';
+      }
+    }
+
+    function resizeHandCanvas() {
+      handCanvas.width = handCanvas.parentElement.clientWidth;
+      handCanvas.height = handCanvas.parentElement.clientHeight;
+      handCtx.fillStyle = '#ffffff';
+      handCtx.fillRect(0, 0, handCanvas.width, handCanvas.height);
+    }
+
+    function getHandCoords(e) {
+      const r = handCanvas.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: cx - r.left, y: cy - r.top };
+    }
+
+    handCanvas.addEventListener('mousedown', e => {
+      isHandDrawing = true;
+      const p = getHandCoords(e);
+      handCtx.beginPath();
+      handCtx.moveTo(p.x, p.y);
+    });
+    handCanvas.addEventListener('mousemove', e => {
+      if(!isHandDrawing) return;
+      e.preventDefault();
+      const p = getHandCoords(e);
+      handCtx.lineTo(p.x, p.y);
+      handCtx.strokeStyle = '#16253d';
+      handCtx.lineWidth = 2.5;
+      handCtx.lineCap = 'round';
+      handCtx.stroke();
+    });
+    window.addEventListener('mouseup', () => isHandDrawing = false);
+
+    handCanvas.addEventListener('touchstart', e => {
+      isHandDrawing = true;
+      const p = getHandCoords(e);
+      handCtx.beginPath();
+      handCtx.moveTo(p.x, p.y);
+    }, { passive: false });
+    handCanvas.addEventListener('touchmove', e => {
+      if(!isHandDrawing) return;
+      e.preventDefault();
+      const p = getHandCoords(e);
+      handCtx.lineTo(p.x, p.y);
+      handCtx.strokeStyle = '#16253d';
+      handCtx.lineWidth = 2.5;
+      handCtx.lineCap = 'round';
+      handCtx.stroke();
+    }, { passive: false });
+    window.addEventListener('touchend', () => isHandDrawing = false);
+
+    function clearHandCanvas() {
+      handCtx.fillStyle = '#ffffff';
+      handCtx.fillRect(0, 0, handCanvas.width, handCanvas.height);
+    }
+
+    function saveNote() {
+      const t = document.getElementById('nTitle').value.trim();
+      const c = document.getElementById('nCont').value.trim();
+      let handData = null;
+      if (noteMode === 'draw') {
+        handData = handCanvas.toDataURL();
+      }
+      if (!t && !c && !handData) return;
+
+      let notes = JSON.parse(localStorage.getItem('emir_os_notes') || '[]');
+      notes.unshift({
+        id: Date.now().toString(),
+        title: t || 'El Yazısı Notu',
+        content: c,
+        handData: handData,
+        updatedAt: Date.now()
       });
-      localStorage.setItem('emir_os_todos', JSON.stringify(todos));
+      localStorage.setItem('emir_os_notes', JSON.stringify(notes));
+      renderNotesList();
+      newNote();
+      triggerAutoSync();
+    }
+
+    function renderNotesList() {
+      const notes = JSON.parse(localStorage.getItem('emir_os_notes') || '[]');
+      const el = document.getElementById('notesList');
+      el.innerHTML = notes.map(n => `
+        <div class="list-item-card">
+          <div onclick="loadNote('${n.id}')" style="cursor:pointer; flex:1;">
+            <strong>${n.title}</strong>
+            <div style="font-size:12px; color:var(--muted);">${new Date(n.updatedAt).toLocaleDateString('tr-TR')} · ${n.handData ? '✍️ El Yazılı' : '⌨️ Metin'}</div>
+          </div>
+          <button style="border:none; background:none; color:#dc2626; cursor:pointer;" onclick="deleteNote('${n.id}')">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function newNote() {
+      document.getElementById('nTitle').value = '';
+      document.getElementById('nCont').value = '';
+      clearHandCanvas();
+    }
+    function loadNote(id) {
+      const notes = JSON.parse(localStorage.getItem('emir_os_notes') || '[]');
+      const n = notes.find(x => x.id === id);
+      if (!n) return;
+      document.getElementById('nTitle').value = n.title;
+      document.getElementById('nCont').value = n.content || '';
+      if (n.handData) {
+        if (noteMode !== 'draw') toggleNoteMode();
+        const img = new Image();
+        img.onload = () => handCtx.drawImage(img, 0, 0);
+        img.src = n.handData;
+      }
+    }
+    function deleteNote(id) {
+      let notes = JSON.parse(localStorage.getItem('emir_os_notes') || '[]');
+      notes = notes.filter(x => x.id !== id);
+      localStorage.setItem('emir_os_notes', JSON.stringify(notes));
+      renderNotesList();
+      triggerAutoSync();
+    }
+
+    // ==========================================
+    // KELİMELER & HEDEFLER
+    // ==========================================
+    function renderVocabList() {
+      const vocabs = JSON.parse(localStorage.getItem('emir_os_vocabs') || '[]');
+      const el = document.getElementById('vocabDeck');
+      el.innerHTML = vocabs.map((v, i) => `
+        <div class="vocab-card" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <strong style="color:var(--navy); font-size:14px;">${v.w}</strong>
+            <div style="font-size:12px; color:#444; margin-top:2px;">${v.m}</div>
+          </div>
+          <button style="border:none; background:none; color:#dc2626; cursor:pointer;" onclick="deleteVocabItem(${i})">✕</button>
+        </div>
+      `).join('');
+    }
+    function addVocabDirect() {
+      const w = document.getElementById('vwWord').value.trim();
+      const m = document.getElementById('vwMeaning').value.trim();
+      if (!w) return;
+      let vocabs = JSON.parse(localStorage.getItem('emir_os_vocabs') || '[]');
+      vocabs.unshift({ w, m });
+      localStorage.setItem('emir_os_vocabs', JSON.stringify(vocabs));
+      document.getElementById('vwWord').value = '';
+      document.getElementById('vwMeaning').value = '';
+      renderVocabList();
+      triggerAutoSync();
+    }
+    function deleteVocabItem(idx) {
+      let vocabs = JSON.parse(localStorage.getItem('emir_os_vocabs') || '[]');
+      vocabs.splice(idx, 1);
+      localStorage.setItem('emir_os_vocabs', JSON.stringify(vocabs));
+      renderVocabList();
+      triggerAutoSync();
+    }
+
+    function renderTodos() {
+      let todos = JSON.parse(localStorage.getItem('emir_os_todos') || '[]');
+      const el = document.getElementById('todoList');
+      el.innerHTML = todos.map((t, i) => `
+        <div class="list-item-card">
+          <label style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer;">
+            <input type="checkbox" ${t.d?'checked':''} onchange="toggleT(${i})">
+            <span style="${t.d?'text-decoration:line-through;color:var(--muted)':''}">${t.t}</span>
+          </label>
+          <button style="border:none; background:none; color:#dc2626; cursor:pointer;" onclick="delT(${i})">✕</button>
+        </div>
+      `).join('');
+      renderHomeSummary();
     }
     function addTodo() {
-      const inp = document.getElementById('todoInp');
+      const inp = document.getElementById('tInp');
       if (!inp.value.trim()) return;
+      let todos = JSON.parse(localStorage.getItem('emir_os_todos') || '[]');
       todos.push({ t: inp.value.trim(), d: false });
+      localStorage.setItem('emir_os_todos', JSON.stringify(todos));
       inp.value = ''; renderTodos();
+      triggerAutoSync();
     }
-    function toggleT(i) { todos[i].d = !todos[i].d; renderTodos(); }
-    function delT(i) { todos.splice(i, 1); renderTodos(); }
+    function toggleT(i) {
+      let todos = JSON.parse(localStorage.getItem('emir_os_todos') || '[]');
+      todos[i].d = !todos[i].d;
+      localStorage.setItem('emir_os_todos', JSON.stringify(todos));
+      renderTodos();
+      triggerAutoSync();
+    }
+    function delT(i) {
+      let todos = JSON.parse(localStorage.getItem('emir_os_todos') || '[]');
+      todos.splice(i, 1);
+      localStorage.setItem('emir_os_todos', JSON.stringify(todos));
+      renderTodos();
+      triggerAutoSync();
+    }
 
-    // PDF KÜTÜPHANESİ
-    let books = JSON.parse(localStorage.getItem('emir_os_books') || '[]');
-    function renderBooks() {
-      const el = document.getElementById('booksGrid'); el.innerHTML = '';
-      books.forEach(b => {
-        const d = document.createElement('div'); d.className = 'item-card';
-        d.innerHTML = `<div onclick="selectB('${b.id}')" style="cursor:pointer; flex:1;"><strong>${b.t}</strong> <span style="font-size:12px; color:var(--muted);">(${b.c})</span></div><button style="border:none; background:none; color:#c93b2b; cursor:pointer;" onclick="delB('${b.id}')">✕</button>`;
-        el.appendChild(d);
-      });
-      localStorage.setItem('emir_os_books', JSON.stringify(books));
+    function renderHomeSummary() {
+      const todos = JSON.parse(localStorage.getItem('emir_os_todos') || '[]');
+      const act = todos.filter(x => !x.d);
+      document.getElementById('homeTodos').innerHTML = act.length ? act.map(x => `• ${x.t}`).join('<br>') : 'Tüm hedefler tamamlandı!';
+      if (currentPub) {
+        document.getElementById('homeBookStatus').innerHTML = `<strong>${currentPub.title}</strong><br>Son Sayfa: ${currentPub.lastPage || 1} ${currentPub.isArticle ? `(%${currentPub.progress || 0})` : ''}`;
+      }
     }
-    function addBook() {
-      const t = document.getElementById('bookTitle').value.trim();
-      const a = document.getElementById('bookAuthor').value.trim();
-      const c = document.getElementById('bookCat').value;
-      const f = document.getElementById('pdfFileInput').files[0];
-      if (!t) return alert('Eser adı girin');
-      const id = Date.now().toString();
-      const url = f ? URL.createObjectURL(f) : '';
-      books.unshift({ id, t, a, c, url });
-      document.getElementById('bookTitle').value = ''; document.getElementById('pdfFileInput').value = '';
-      renderBooks(); selectB(id);
-    }
-    function selectB(id) {
-      const b = books.find(x => x.id === id); if(!b) return;
-      document.getElementById('activeBookHeader').textContent = b.t;
-      if (b.url) document.getElementById('pdfFrame').src = b.url;
-    }
-    function delB(id) { books = books.filter(x => x.id !== id); renderBooks(); }
 
-    // BAŞLAT
-    renderNotes(); renderVocab(); renderTodos(); renderBooks();
+    // ==========================================
+    // BAŞLATMA
+    // ==========================================
+    renderTreeMenu();
+    renderNotesList();
+    renderVocabList();
+    renderTodos();
+    pullFromCloud(); // İlk açılışta buluttan verileri otomatik çek
   </script>
 </body>
 </html>
