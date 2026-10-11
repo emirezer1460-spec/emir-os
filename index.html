@@ -41,7 +41,7 @@
       position: relative;
     }
 
-    /* ÜST BAR (ORTADA DÜĞME FORMUNDA EO LOGOSU) */
+    /* ÜST BAR */
     .os-topbar {
       height: 68px;
       background: var(--navy);
@@ -55,11 +55,7 @@
       box-shadow: 0 4px 16px rgba(0,0,0,0.15);
       position: relative;
     }
-    .topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
     .center-logo-wrap {
       position: absolute;
       left: 50%;
@@ -89,7 +85,7 @@
       color: #fbf7ee;
     }
 
-    /* 1. ANA EKRAN (3 DEV BUTON) */
+    /* 1. ANA EKRAN */
     #home-launcher {
       flex: 1;
       display: flex;
@@ -127,10 +123,7 @@
       overflow: hidden;
       user-select: none;
     }
-    .giant-app-card:active {
-      transform: scale(0.95);
-      border-color: var(--gold);
-    }
+    .giant-app-card:active { transform: scale(0.95); border-color: var(--gold); }
     .giant-app-card::before {
       content: "";
       position: absolute;
@@ -157,7 +150,7 @@
       pointer-events: none;
     }
 
-    /* 2. TAM EKRAN AÇILAN MODÜLLER */
+    /* 2. TAM EKRAN MODÜLLER */
     .fullscreen-app-view {
       position: absolute;
       top: 0; left: 0; width: 100vw; height: 100vh;
@@ -169,7 +162,6 @@
     }
     .fullscreen-app-view.active { display: flex !important; }
 
-    /* UYGULAMA İÇİ TOPBAR (HOME BUTONLU) */
     .app-topbar {
       height: 64px;
       padding: 0 24px;
@@ -239,7 +231,6 @@
     .big-folder-icon { font-size: 54px; pointer-events: none; }
     .big-folder-name { font-size: 16px; font-weight: 800; color: var(--navy); text-align: center; pointer-events: none; }
 
-    /* YÜZER (+) BUTONU & MODAL */
     .fab-add-btn {
       position: absolute;
       bottom: 32px;
@@ -372,7 +363,7 @@
       cursor: crosshair;
     }
 
-    /* PDF OKUMA EKRANI */
+    /* PDF OKUMA EKRANI & ÇİZİM TUVALİ */
     .pdf-reader-fullscreen {
       position: absolute;
       top: 0; left: 0; width: 100vw; height: 100vh;
@@ -414,6 +405,20 @@
       touch-action: none !important;
       cursor: crosshair;
     }
+
+    .color-legend-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.12);
+      cursor: pointer;
+      user-select: none;
+    }
+    .color-legend-badge.active { outline: 2px solid #fff; }
 
     .btn {
       background: var(--navy);
@@ -528,7 +533,7 @@
     </div>
     <input type="file" id="hiddenPdfPicker" accept="application/pdf" style="display:none;" onchange="handlePdfSelected(event)">
 
-    <!-- PDF OKUYUCU -->
+    <!-- PDF OKUYUCU (ÜSTÜNE DOĞRUDAN ÇİZİM DESTEĞİ) -->
     <div class="pdf-reader-fullscreen" id="pdfReaderModal">
       <div class="reader-topbar">
         <div class="home-circle-btn" onclick="closePdfReader()" title="Kütüphaneye Dön">
@@ -537,13 +542,34 @@
             <circle cx="64" cy="50" r="24" stroke="#ffffff" stroke-width="8.5"/>
           </svg>
         </div>
-        <div style="display:flex; align-items:center; gap:10px;">
+
+        <div style="display:flex; align-items:center; gap:8px;">
           <button class="btn btn-light" style="padding:6px 12px;" onclick="pdfPrevPage()">◀ Geri</button>
           <span id="pdfPageInfo" style="font-size:13px; font-weight:700;">Sayfa: 0 / 0</span>
           <button class="btn btn-light" style="padding:6px 12px;" onclick="pdfNextPage()">İleri ▶</button>
         </div>
+
+        <!-- RENK & ÇİZİM PALETİ -->
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="color-legend-badge active" id="badgeYellow" onclick="setPdfColor('yellow')">
+            <div style="width:12px; height:12px; border-radius:50%; background:var(--yellow);"></div>
+            <span>🟡 Sarı</span>
+          </div>
+          <div class="color-legend-badge" id="badgeBlue" onclick="setPdfColor('blue')">
+            <div style="width:12px; height:12px; border-radius:50%; background:var(--blue);"></div>
+            <span>🔵 Mavi</span>
+          </div>
+          <div class="color-legend-badge" id="badgeRed" onclick="setPdfColor('red')">
+            <div style="width:12px; height:12px; border-radius:50%; background:var(--red);"></div>
+            <span>🔴 Kırmızı</span>
+          </div>
+          <button class="btn btn-light" style="padding:6px 10px; font-size:12px;" onclick="setPdfEraser()">Silgi</button>
+          <button class="btn btn-light" style="padding:6px 10px; font-size:12px;" onclick="clearPdfDrawing()">Temizle</button>
+        </div>
+
         <button class="btn btn-gold" onclick="finishPdfSession()">🎓 Okumayı Bitir</button>
       </div>
+
       <div class="reader-stage-wrap">
         <div class="pdf-page-box" id="pdfPageBox">
           <canvas id="pdfRenderCanvas"></canvas>
@@ -639,7 +665,7 @@
     setInterval(tick, 1000); tick();
 
     // ==========================================
-    // KÜTÜPHANE MOTORU (SIFIR HATA GARANTİLİ)
+    // KÜTÜPHANE GEZGİNİ
     // ==========================================
     const DEFAULT_FOLDERS = [
       { id: 'f_articles', parent: 'root', name: 'Makaleler', isArticleFolder: true },
@@ -669,7 +695,6 @@
       grid.innerHTML = '';
       breadcrumb.innerHTML = '';
 
-      // Yol haritası
       const path = [];
       let temp = currentFolderId;
       while (temp !== 'root') {
@@ -691,7 +716,6 @@
         breadcrumb.appendChild(span);
       });
 
-      // Alt Klasörleri Listele
       const subFolders = storedFolders.filter(x => x.parent === currentFolderId);
       subFolders.forEach(sf => {
         const card = document.createElement('div');
@@ -701,7 +725,6 @@
         grid.appendChild(card);
       });
 
-      // Dosyaları Listele
       const files = storedFiles.filter(x => x.folderId === currentFolderId);
       files.forEach(file => {
         const card = document.createElement('div');
@@ -735,7 +758,8 @@
           folderId: currentFolderId,
           title: title,
           data: e.target.result,
-          lastPage: 1
+          lastPage: 1,
+          drawings: {}
         };
         storedFiles.unshift(newDoc);
         localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
@@ -769,17 +793,26 @@
     }
 
     // ==========================================
-    // PDF OKUMA
+    // PDF OKUYUCU & ÇİZİM KATMANI
     // ==========================================
     let currentActivePdf = null;
     let pdfDoc = null;
     let currentPdfPage = 1;
+
     const rCanvas = document.getElementById('pdfRenderCanvas');
     const rCtx = rCanvas.getContext('2d');
+    const dCanvas = document.getElementById('pdfDrawCanvas');
+    const dCtx = dCanvas.getContext('2d');
+
+    let isPdfDrawing = false;
+    let pdfPenColor = 'rgba(245, 158, 11, 0.45)';
+    let pdfPenWidth = 18;
 
     function openPdfReader(fileId) {
       currentActivePdf = storedFiles.find(x => x.id === fileId);
       if (!currentActivePdf) return;
+      if (!currentActivePdf.drawings) currentActivePdf.drawings = {};
+
       document.getElementById('pdfReaderModal').classList.add('active');
       currentPdfPage = currentActivePdf.lastPage || 1;
 
@@ -792,6 +825,7 @@
     }
 
     function closePdfReader() {
+      saveCurrentPdfPageDrawing();
       document.getElementById('pdfReaderModal').classList.remove('active');
       renderBrowserView();
     }
@@ -801,16 +835,116 @@
         const viewport = page.getViewport({ scale: 1.35 });
         rCanvas.height = viewport.height;
         rCanvas.width = viewport.width;
-        page.render({ canvasContext: rCtx, viewport: viewport });
+        
+        // Çizim katmanını PDF sayfasıyla milimetrik eşitle
+        dCanvas.height = viewport.height;
+        dCanvas.width = viewport.width;
+
+        page.render({ canvasContext: rCtx, viewport: viewport }).promise.then(() => {
+          restorePdfPageDrawing(num);
+        });
       });
       document.getElementById('pdfPageInfo').textContent = `Sayfa: ${num} / ${pdfDoc.numPages}`;
     }
 
-    function pdfPrevPage() { if (currentPdfPage > 1) { currentPdfPage--; renderReaderPage(currentPdfPage); } }
-    function pdfNextPage() { if (currentPdfPage < pdfDoc.numPages) { currentPdfPage++; renderReaderPage(currentPdfPage); } }
+    function pdfPrevPage() {
+      if (currentPdfPage > 1) {
+        saveCurrentPdfPageDrawing();
+        currentPdfPage--;
+        renderReaderPage(currentPdfPage);
+      }
+    }
+    function pdfNextPage() {
+      if (currentPdfPage < pdfDoc.numPages) {
+        saveCurrentPdfPageDrawing();
+        currentPdfPage++;
+        renderReaderPage(currentPdfPage);
+      }
+    }
+
+    function setPdfColor(mode) {
+      document.querySelectorAll('.color-legend-badge').forEach(b => b.classList.remove('active'));
+      if (mode === 'yellow') {
+        pdfPenColor = 'rgba(245, 158, 11, 0.45)';
+        pdfPenWidth = 18;
+        document.getElementById('badgeYellow').classList.add('active');
+      } else if (mode === 'blue') {
+        pdfPenColor = 'rgba(37, 99, 235, 0.9)';
+        pdfPenWidth = 3;
+        document.getElementById('badgeBlue').classList.add('active');
+      } else if (mode === 'red') {
+        pdfPenColor = 'rgba(220, 38, 38, 0.9)';
+        pdfPenWidth = 3;
+        document.getElementById('badgeRed').classList.add('active');
+      }
+    }
+
+    function setPdfEraser() {
+      pdfPenColor = '#ffffff';
+      pdfPenWidth = 26;
+      document.querySelectorAll('.color-legend-badge').forEach(b => b.classList.remove('active'));
+    }
+
+    function clearPdfDrawing() {
+      dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+      if (currentActivePdf && currentActivePdf.drawings) {
+        delete currentActivePdf.drawings[currentPdfPage];
+        localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
+      }
+    }
+
+    function saveCurrentPdfPageDrawing() {
+      if (!currentActivePdf) return;
+      if (!currentActivePdf.drawings) currentActivePdf.drawings = {};
+      currentActivePdf.drawings[currentPdfPage] = dCanvas.toDataURL();
+      localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
+    }
+
+    function restorePdfPageDrawing(num) {
+      dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+      if (currentActivePdf && currentActivePdf.drawings && currentActivePdf.drawings[num]) {
+        const img = new Image();
+        img.onload = () => dCtx.drawImage(img, 0, 0);
+        img.src = currentActivePdf.drawings[num];
+      }
+    }
+
+    // PDF Çizim Eventleri (Pointer)
+    function getPdfDrawCoords(e) {
+      const r = dCanvas.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: cx - r.left, y: cy - r.top };
+    }
+
+    dCanvas.addEventListener('pointerdown', e => {
+      isPdfDrawing = true;
+      const p = getPdfDrawCoords(e);
+      dCtx.beginPath();
+      dCtx.moveTo(p.x, p.y);
+    });
+
+    dCanvas.addEventListener('pointermove', e => {
+      if (!isPdfDrawing) return;
+      e.preventDefault();
+      const p = getPdfDrawCoords(e);
+      dCtx.lineTo(p.x, p.y);
+      dCtx.strokeStyle = pdfPenColor;
+      dCtx.lineWidth = pdfPenWidth;
+      dCtx.lineCap = 'round';
+      dCtx.stroke();
+    });
+
+    window.addEventListener('pointerup', () => {
+      if (isPdfDrawing) {
+        isPdfDrawing = false;
+        saveCurrentPdfPageDrawing();
+      }
+    });
 
     function finishPdfSession() {
       if (!currentActivePdf) return;
+      saveCurrentPdfPageDrawing();
       let notes = JSON.parse(localStorage.getItem('emir_os_notes_pages') || '[]');
       const block = `
         <div style="border-bottom:2px solid var(--gold); padding-bottom:8px; display:flex; justify-content:space-between; align-items:flex-end;">
@@ -821,8 +955,8 @@
           <div style="font-weight:700; color:var(--red); font-size:15px; margin-bottom:8px;">🔴 Akademik Kavram Haritası & Sentez:</div>
           <div style="background:#fff; border:1.5px solid var(--border); border-left:5px solid var(--red); padding:14px; border-radius:12px; font-family:monospace; font-size:13px; line-height:24px;">
 [${currentActivePdf.title}]
-  ├── Odak Kuram: Pedagojik yaklaşım ve tez analizi
-  └── Temel Çıkarım: Okuma oturumu başarıyla kaydedildi.
+  ├── Odak Kuram: Pedagojik tez ve kuramsal çerçeve analizi
+  └── Temel Çıkarım: Okuma oturumu ve çizimler başarıyla kaydedildi.
           </div>
         </div>
       `;
@@ -836,7 +970,7 @@
     }
 
     // ==========================================
-    // NOTLAR
+    // NOTLAR DEFTERİ
     // ==========================================
     let notesPages = JSON.parse(localStorage.getItem('emir_os_notes_pages') || '[]');
     let currentNotesIdx = 0;
@@ -857,13 +991,13 @@
     function prevNotesPage() { if (currentNotesIdx > 0) { currentNotesIdx--; renderNotesPage(); } }
 
     // ==========================================
-    // KİŞİSEL DEFTER (ÇALIŞMA GARANTİLİ ÇİZİM)
+    // KİŞİSEL DEFTER
     // ==========================================
     let personalSheets = JSON.parse(localStorage.getItem('emir_os_personal_sheets') || '[""]');
     let sheetIdx = 0;
     const pCanvas = document.getElementById('personalCanvas');
     const pCtx = pCanvas.getContext('2d');
-    let isDrawing = false;
+    let isDrawingPersonal = false;
     let currentColor = '#132136';
     let currentLineWidth = 3;
 
@@ -905,46 +1039,37 @@
       document.querySelectorAll('.palette-circle').forEach(c => c.classList.remove('active'));
     }
 
-    function getCoords(e) {
+    function getPersonalCoords(e) {
       const rect = pCanvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
       return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
-    function startDraw(e) {
-      isDrawing = true;
-      const pos = getCoords(e);
+    pCanvas.addEventListener('pointerdown', e => {
+      isDrawingPersonal = true;
+      const pos = getPersonalCoords(e);
       pCtx.beginPath();
       pCtx.moveTo(pos.x, pos.y);
-    }
+    });
 
-    function drawMove(e) {
-      if (!isDrawing) return;
+    pCanvas.addEventListener('pointermove', e => {
+      if (!isDrawingPersonal) return;
       e.preventDefault();
-      const pos = getCoords(e);
+      const pos = getPersonalCoords(e);
       pCtx.lineTo(pos.x, pos.y);
       pCtx.strokeStyle = currentColor;
       pCtx.lineWidth = currentLineWidth;
       pCtx.lineCap = 'round';
-      pCtx.lineJoin = 'round';
       pCtx.stroke();
-    }
+    });
 
-    function stopDraw() {
-      if (isDrawing) {
-        isDrawing = false;
+    window.addEventListener('pointerup', () => {
+      if (isDrawingPersonal) {
+        isDrawingPersonal = false;
         saveCurrentSheet();
       }
-    }
-
-    pCanvas.addEventListener('mousedown', startDraw);
-    pCanvas.addEventListener('mousemove', drawMove);
-    window.addEventListener('mouseup', stopDraw);
-
-    pCanvas.addEventListener('touchstart', startDraw, { passive: false });
-    pCanvas.addEventListener('touchmove', drawMove, { passive: false });
-    window.addEventListener('touchend', stopDraw);
+    });
 
     function nextPersonalSheet() {
       saveCurrentSheet();
