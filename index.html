@@ -346,4 +346,1077 @@
       background: #fff;
       border: 1.5px solid var(--border);
       border-left: 5px solid var(--navy-light);
-      padding: 12px
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .summary-card-box {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-left: 5px solid var(--red);
+      padding: 16px 20px;
+      border-radius: 14px;
+      font-size: 14px;
+      margin-bottom: 14px;
+      line-height: 26px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    /* KİŞİSEL DEFTER */
+    .personal-notebook-shell {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 14px 20px;
+      gap: 10px;
+    }
+    .notes-toolbar {
+      height: 58px;
+      background: #ffffff;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+    .palette-circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: transform 0.12s ease;
+    }
+    .palette-circle.active { border-color: var(--navy); transform: scale(1.2); }
+    .size-slider-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .size-slider-box input[type="range"] { width: 90px; cursor: pointer; }
+    .brush-size-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--navy);
+      display: inline-block;
+      transition: all 0.1s ease;
+    }
+    .personal-sheet-pad {
+      flex: 1;
+      background: #ffffff;
+      background-image: linear-gradient(#f0ece1 1px, transparent 1px);
+      background-size: 100% 30px;
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      position: relative;
+      overflow: hidden;
+      touch-action: none !important;
+    }
+    #personalCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none !important;
+      cursor: crosshair;
+    }
+
+    /* PDF OKUMA EKRANI & SMART HIGHLIGHTER & ZOOM & AUTO-SCROLL */
+    .pdf-reader-fullscreen {
+      position: absolute;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: #3e444c;
+      display: none;
+      flex-direction: column;
+      z-index: 120;
+    }
+    .pdf-reader-fullscreen.active { display: flex; }
+    .reader-topbar {
+      height: 64px;
+      background: #18202c;
+      color: #fff;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .reader-stage-wrap {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 16px;
+      position: relative;
+      user-select: none;
+      touch-action: pan-x pan-y pinch-zoom;
+    }
+    .pdf-page-box {
+      position: relative;
+      background: #fff;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      transform-origin: top center;
+    }
+    #pdfRenderCanvas { display: block; }
+    #pdfDrawCanvas {
+      position: absolute;
+      top: 0; left: 0;
+      mix-blend-mode: multiply;
+      pointer-events: auto !important;
+      touch-action: none !important;
+      cursor: crosshair;
+    }
+
+    .color-legend-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.12);
+      cursor: pointer;
+      user-select: none;
+    }
+    .color-legend-badge.active { outline: 2px solid #fff; }
+
+    .btn {
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-gold { background: var(--gold); color: #fff; }
+    .btn-light { background: #ece6d8; color: var(--navy); }
+  </style>
+
+  <script>
+    function launchApp(appId) {
+      document.querySelectorAll('.fullscreen-app-view').forEach(function(el) {
+        el.classList.remove('active');
+      });
+      var target = document.getElementById(appId);
+      if (target) {
+        target.classList.add('active');
+      }
+      if (appId === 'app-personal') {
+        setTimeout(initPersonalCanvas, 50);
+      }
+      if (appId === 'app-library') {
+        renderBrowserView();
+      }
+      if (appId === 'app-notes') {
+        renderUnifiedNotes();
+      }
+    }
+
+    function returnToHome() {
+      document.querySelectorAll('.fullscreen-app-view').forEach(function(el) {
+        el.classList.remove('active');
+      });
+      document.getElementById('pdfReaderModal').classList.remove('active');
+      stopAutoScroll();
+    }
+  </script>
+</head>
+<body>
+  <div class="os-container">
+    <!-- ÜST BAR -->
+    <div class="os-topbar">
+      <div class="topbar-left">
+        <div id="liveDate" style="font-weight:700; font-size:14px; color:#fbf7ee;">Bugün</div>
+      </div>
+
+      <!-- ORTADA EO DÜĞME LOGOSU -->
+      <div class="center-logo-wrap" onclick="returnToHome()">
+        <div class="eo-circle-logo">
+          <svg class="eo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 24H50M22 50H44M22 76H50M22 24V76" stroke="#c59b4c" stroke-width="8.5" stroke-linecap="round"/>
+            <circle cx="64" cy="50" r="24" stroke="#ffffff" stroke-width="8.5"/>
+          </svg>
+        </div>
+        <span class="os-title-text">EMIR OS</span>
+      </div>
+
+      <div id="liveClock" style="font-size:13px; font-weight:600; opacity:0.85;">--:--</div>
+    </div>
+
+    <!-- 1. ANA EKRAN -->
+    <div id="home-launcher">
+      <div class="tri-app-grid">
+        <div class="giant-app-card" onclick="launchApp('app-library')">
+          <div class="giant-icon-bubble" style="background:#fdf8eb; color:#876719;">📚</div>
+          <div class="giant-label-text">Kütüphane</div>
+        </div>
+
+        <div class="giant-app-card" onclick="launchApp('app-notes')">
+          <div class="giant-icon-bubble" style="background:#fff3eb; color:#b25e1a;">📖</div>
+          <div class="giant-label-text">Notlar</div>
+        </div>
+
+        <div class="giant-app-card" onclick="launchApp('app-personal')">
+          <div class="giant-icon-bubble" style="background:#edf3fc; color:#1b4d89;">✍️</div>
+          <div class="giant-label-text">Kişisel Defter</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A. KÜTÜPHANE -->
+    <div id="app-library" class="fullscreen-app-view">
+      <div class="app-topbar">
+        <div class="home-circle-btn" onclick="returnToHome()" title="Ana Ekrana Dön">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 24H50M22 50H44M22 76H50M22 24V76" stroke="#c59b4c" stroke-width="8.5" stroke-linecap="round"/>
+            <circle cx="64" cy="50" r="24" stroke="#ffffff" stroke-width="8.5"/>
+          </svg>
+        </div>
+        <strong id="libCurrentBreadcrumb" style="font-size:18px; color:#fbf7ee;">Kütüphane</strong>
+        <div style="width:44px;"></div>
+      </div>
+
+      <div class="lib-browser-stage">
+        <!-- BİR SEKME GERİ DÖNME TUŞU & YOL HARİTASI -->
+        <div class="lib-nav-controls">
+          <button class="btn btn-light" id="btnBackFolder" style="padding:6px 14px; font-size:13px; display:none;" onclick="navigateUpFolder()">⮌ Üst Klasör</button>
+          <div class="lib-breadcrumb-bar" id="libBreadcrumbNav"></div>
+        </div>
+
+        <div class="folder-grid" id="folderGridContainer"></div>
+        <button class="fab-add-btn" onclick="openAddMenuModal()">+</button>
+      </div>
+    </div>
+
+    <!-- (+) MODALI -->
+    <div class="modal-overlay" id="addMenuModal">
+      <div class="modal-box">
+        <h3 style="color:var(--navy); font-size:18px;">İçerik Ekle</h3>
+        <p style="font-size:13px; color:var(--muted);">Bu klasör içine ne eklemek istersiniz?</p>
+        <button class="btn btn-gold" style="padding:14px;" onclick="triggerPdfUpload()">📄 PDF Dosyası Yükle</button>
+        <button class="btn btn-light" style="padding:14px;" onclick="promptNewFolder()">📁 Yeni Klasör Oluştur</button>
+        <button class="btn" style="background:#ddd; color:#333;" onclick="closeAddMenuModal()">İptal</button>
+      </div>
+    </div>
+    <input type="file" id="hiddenPdfPicker" accept="application/pdf" style="display:none;" onchange="handlePdfSelected(event)">
+
+    <!-- PDF OKUYUCU (SMART HIGHLIGHTER + OTOMATİK KAYDIRMA + AUTO-SCALE) -->
+    <div class="pdf-reader-fullscreen" id="pdfReaderModal">
+      <div class="reader-topbar">
+        <div class="home-circle-btn" onclick="closePdfReader()" title="Kütüphaneye Dön">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 24H50M22 50H44M22 76H50M22 24V76" stroke="#c59b4c" stroke-width="8.5" stroke-linecap="round"/>
+            <circle cx="64" cy="50" r="24" stroke="#ffffff" stroke-width="8.5"/>
+          </svg>
+        </div>
+
+        <!-- RENK PALETİ -->
+        <div style="display:flex; align-items:center; gap:6px;">
+          <div class="color-legend-badge active" id="badgeYellow" onclick="setPdfColor('yellow')">
+            <div style="width:14px; height:14px; border-radius:50%; background:#f59e0b;"></div>
+            <span>Sarı</span>
+          </div>
+          <div class="color-legend-badge" id="badgeBlue" onclick="setPdfColor('blue')">
+            <div style="width:14px; height:14px; border-radius:50%; background:#2563eb;"></div>
+            <span>Mavi (Kelime)</span>
+          </div>
+          <div class="color-legend-badge" id="badgeRed" onclick="setPdfColor('red')">
+            <div style="width:14px; height:14px; border-radius:50%; background:#dc2626;"></div>
+            <span>Kırmızı (Konu)</span>
+          </div>
+          <button class="btn btn-light" style="padding:6px 10px; font-size:12px;" onclick="setPdfEraser()">Silgi</button>
+        </div>
+
+        <!-- OTOMATİK KAYDIRMA BUTONU -->
+        <button class="btn btn-light" id="btnAutoScroll" style="padding:6px 12px; font-size:12px;" onclick="toggleAutoScroll()">▶ Otomatik Kaydır</button>
+
+        <!-- HIZLI SAYFA ATLAYICI SCRUBBER -->
+        <div class="page-scrubber-box">
+          <button class="btn btn-light" style="padding:4px 8px; font-size:12px;" onclick="pdfPrevPage()">◀</button>
+          <input type="range" id="pageScrubberSlider" min="1" max="1" value="1" oninput="onScrubberSlide(this.value)">
+          <span id="pdfPageInfo" style="font-size:12px; font-weight:800; min-width:65px; text-align:center;">1 / 1</span>
+          <button class="btn btn-light" style="padding:4px 8px; font-size:12px;" onclick="pdfNextPage()">▶</button>
+        </div>
+      </div>
+
+      <div class="reader-stage-wrap" id="readerTouchStage">
+        <div class="pdf-page-box" id="pdfPageBox">
+          <canvas id="pdfRenderCanvas"></canvas>
+          <canvas id="pdfDrawCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- B. NOTLAR (TEK BİRLEŞİK DEFTER - PDF BÖLÜNMEZ) -->
+    <div id="app-notes" class="fullscreen-app-view">
+      <div class="app-topbar">
+        <div class="home-circle-btn" onclick="returnToHome()" title="Ana Ekrana Dön">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 24H50M22 50H44M22 76H50M22 24V76" stroke="#c59b4c" stroke-width="8.5" stroke-linecap="round"/>
+            <circle cx="64" cy="50" r="24" stroke="#ffffff" stroke-width="8.5"/>
+          </svg>
+        </div>
+        <strong style="font-size:18px; color:#fbf7ee;">📖 Notlar (Ders & Okuma Sentezi Defteri)</strong>
+        <div style="width:44px;"></div>
+      </div>
+      <div class="unified-notebook-stage">
+        <div class="unified-notebook-paper">
+          <div style="border-bottom:2px solid var(--gold); padding-bottom:12px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:flex-end;">
+            <div style="font-size:24px; font-weight:800; color:var(--navy);">Akademik Çalışma Defteri</div>
+            <div style="font-size:13px; color:var(--muted); font-weight:700;">Tüm Kayıtlar</div>
+          </div>
+          <div id="unifiedNotesBody"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C. KİŞİSEL DEFTER (AUTO-SAVE & VEKTÖREL SIKIŞTIRMA) -->
+    <div id="app-personal" class="fullscreen-app-view">
+      <div class="app-topbar">
+        <div class="home-circle-btn" onclick="returnToHome()" title="Ana Ekrana Dön">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 24H50M22 50H44M22 76H50M22 24V76" stroke="#c59b4c" stroke-width="8.5" stroke-linecap="round"/>
+            <circle cx="64" cy="50" r="24" stroke="#ffffff" stroke-width="8.5"/>
+          </svg>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <strong style="font-size:18px; color:#fbf7ee;">✍️ Kişisel Defter</strong>
+          
+          <div class="page-scrubber-box">
+            <button class="btn btn-light" style="padding:4px 8px; font-size:12px;" onclick="prevPersonalSheet()">◀</button>
+            <input type="range" id="personalScrubberSlider" min="1" max="1" value="1" oninput="onPersonalScrubberSlide(this.value)">
+            <span id="personalSheetIndex" style="font-size:12px; font-weight:800; min-width:65px; text-align:center;">1 / 1</span>
+            <button class="btn btn-light" style="padding:4px 8px; font-size:12px;" onclick="nextPersonalSheet()">▶</button>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-gold" style="padding:6px 14px;" onclick="addPersonalSheet()">+ Yeni Sayfa</button>
+          <button class="btn btn-light" style="padding:6px 10px;" onclick="clearPersonalPad()">Sil</button>
+        </div>
+      </div>
+
+      <div class="personal-notebook-shell">
+        <div class="notes-toolbar">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:13px; font-weight:700; color:var(--navy);">Renk:</span>
+            <div class="palette-circle active" style="background:#132136;" onclick="selectPenColor('#132136', this)"></div>
+            <div class="palette-circle" style="background:#2563eb;" onclick="selectPenColor('#2563eb', this)"></div>
+            <div class="palette-circle" style="background:#dc2626;" onclick="selectPenColor('#dc2626', this)"></div>
+            <div class="palette-circle" style="background:#c59b4c;" onclick="selectPenColor('#c59b4c', this)"></div>
+            <div class="palette-circle" style="background:rgba(245, 158, 11, 0.45); border:1px solid #e0a324;" title="Fosforlu Sarı" onclick="selectPenColor('rgba(245, 158, 11, 0.45)', this)"></div>
+            <button class="btn btn-light" id="eraserToggleBtn" style="padding:6px 14px; font-size:13px; margin-left:6px;" onclick="toggleEraser(this)">🧹 Silgi</button>
+          </div>
+
+          <div class="size-slider-box">
+            <span id="brushSizeLabel">Kalınlık: 3px</span>
+            <input type="range" id="sizeRangeInput" min="1" max="45" value="3" oninput="onBrushSizeChange(this.value)">
+            <span class="brush-size-dot" id="sizePreviewDot"></span>
+          </div>
+        </div>
+
+        <div class="personal-sheet-pad" id="personalPadWrap">
+          <canvas id="personalCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
+    function tick() {
+      const n = new Date();
+      document.getElementById('liveDate').textContent = n.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
+      document.getElementById('liveClock').textContent = n.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    }
+    setInterval(tick, 1000); tick();
+
+    // ==========================================
+    // KÜTÜPHANE GEZGİNİ
+    // ==========================================
+    const DEFAULT_FOLDERS = [
+      { id: 'f_articles', parent: 'root', name: 'Makaleler', isArticleFolder: true },
+      { id: 'f_books', parent: 'root', name: 'Kitaplar', isArticleFolder: false },
+      { id: 'f_coursebooks', parent: 'f_books', name: 'Ders Kitapları', isArticleFolder: false },
+      { id: 'f_serkan', parent: 'f_coursebooks', name: 'Serkan Hoca', isArticleFolder: false },
+      { id: 'f_serkan_art', parent: 'f_serkan', name: 'Makaleler', isArticleFolder: true },
+      { id: 'f_dogan', parent: 'f_coursebooks', name: 'Doğan Hoca', isArticleFolder: false },
+      { id: 'f_dogan_art', parent: 'f_dogan', name: 'Makaleler', isArticleFolder: true },
+      { id: 'f_banu', parent: 'f_coursebooks', name: 'Banu Hoca', isArticleFolder: false },
+      { id: 'f_banu_art', parent: 'f_banu', name: 'Makaleler', isArticleFolder: true },
+      { id: 'f_mehmet', parent: 'f_coursebooks', name: 'Mehmet Hoca', isArticleFolder: false },
+      { id: 'f_mehmet_art', parent: 'f_mehmet', name: 'Makaleler', isArticleFolder: true }
+    ];
+
+    let currentFolderId = 'root';
+    let storedFolders = JSON.parse(localStorage.getItem('emir_os_folders') || 'null');
+    if (!storedFolders || !Array.isArray(storedFolders) || storedFolders.length === 0) {
+      storedFolders = DEFAULT_FOLDERS;
+      localStorage.setItem('emir_os_folders', JSON.stringify(storedFolders));
+    }
+    let storedFiles = JSON.parse(localStorage.getItem('emir_os_files') || '[]');
+
+    function isFolderArticle(folderId) {
+      const f = storedFolders.find(x => x.id === folderId);
+      return f ? (f.isArticleFolder || f.name.toLowerCase().includes('makale')) : false;
+    }
+
+    function getProgressColor(percent) {
+      if (percent < 35) return '#207849';
+      if (percent < 70) return '#d97706';
+      return '#dc2626';
+    }
+
+    function navigateUpFolder() {
+      if (currentFolderId === 'root') return;
+      const current = storedFolders.find(x => x.id === currentFolderId);
+      if (current && current.parent) {
+        currentFolderId = current.parent;
+        renderBrowserView();
+      }
+    }
+
+    function renderBrowserView() {
+      const grid = document.getElementById('folderGridContainer');
+      const breadcrumb = document.getElementById('libBreadcrumbNav');
+      const backBtn = document.getElementById('btnBackFolder');
+      grid.innerHTML = '';
+      breadcrumb.innerHTML = '';
+
+      if (currentFolderId !== 'root') {
+        backBtn.style.display = 'inline-block';
+      } else {
+        backBtn.style.display = 'none';
+      }
+
+      const path = [];
+      let temp = currentFolderId;
+      while (temp !== 'root') {
+        const found = storedFolders.find(x => x.id === temp);
+        if (found) { path.unshift(found); temp = found.parent; } else break;
+      }
+
+      const rootSpan = document.createElement('span');
+      rootSpan.textContent = 'Kütüphane';
+      rootSpan.style.cursor = 'pointer';
+      rootSpan.onclick = () => { currentFolderId = 'root'; renderBrowserView(); };
+      breadcrumb.appendChild(rootSpan);
+
+      path.forEach(p => {
+        const arrow = document.createElement('span'); arrow.textContent = ' ➔ '; arrow.style.color = '#888';
+        const span = document.createElement('span'); span.textContent = p.name; span.style.cursor = 'pointer';
+        span.onclick = () => { currentFolderId = p.id; renderBrowserView(); };
+        breadcrumb.appendChild(arrow);
+        breadcrumb.appendChild(span);
+      });
+
+      const subFolders = storedFolders.filter(x => x.parent === currentFolderId);
+      subFolders.forEach(sf => {
+        const card = document.createElement('div');
+        card.className = 'big-folder-card';
+        card.innerHTML = `<div class="big-folder-icon">📁</div><div class="big-folder-name">${sf.name}</div>`;
+        card.onclick = () => { currentFolderId = sf.id; renderBrowserView(); };
+        grid.appendChild(card);
+      });
+
+      let files = [];
+      if (currentFolderId === 'f_articles') {
+        files = storedFiles.filter(file => isFolderArticle(file.folderId));
+      } else {
+        files = storedFiles.filter(file => file.folderId === currentFolderId);
+      }
+
+      files.forEach(file => {
+        const card = document.createElement('div');
+        card.className = 'big-folder-card';
+        const progress = file.progress || 0;
+        const color = getProgressColor(progress);
+
+        const progressBarHtml = `
+          <div class="reading-progress-wrap">
+            <div class="reading-progress-bar-bg">
+              <div class="reading-progress-bar-fill" style="width: ${progress}%; background-color: ${color};"></div>
+            </div>
+            <div class="reading-progress-text" style="color: ${color};">%${progress} okundu</div>
+          </div>
+        `;
+
+        card.innerHTML = `
+          <div class="big-folder-icon">📄</div>
+          <div class="big-folder-name">${file.title}</div>
+          ${progressBarHtml}
+          <button style="border:none; background:none; color:#dc2626; font-size:12px; margin-top:6px; cursor:pointer;" onclick="deletePdfFile(event, '${file.id}')">✕ Sil</button>
+        `;
+        card.onclick = () => openPdfReader(file.id);
+        grid.appendChild(card);
+      });
+
+      if (subFolders.length === 0 && files.length === 0) {
+        grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px; color:#888; font-size:16px;">Bu klasör boş. Sağ alttaki (+) butonuyla PDF ekleyebilirsiniz.</div>';
+      }
+    }
+
+    function openAddMenuModal() { document.getElementById('addMenuModal').classList.add('active'); }
+    function closeAddMenuModal() { document.getElementById('addMenuModal').classList.remove('active'); }
+    function triggerPdfUpload() { closeAddMenuModal(); document.getElementById('hiddenPdfPicker').click(); }
+
+    function handlePdfSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const title = prompt('Eser veya makale başlığı:', file.name.replace('.pdf', '')) || file.name;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const newDoc = {
+          id: Date.now().toString(),
+          folderId: currentFolderId,
+          title: title,
+          data: e.target.result,
+          lastPage: 1,
+          progress: 0,
+          maxYellowPage: 0,
+          drawings: {}
+        };
+        storedFiles.unshift(newDoc);
+        localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
+        renderBrowserView();
+        openPdfReader(newDoc.id);
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    function promptNewFolder() {
+      closeAddMenuModal();
+      const name = prompt('Yeni Klasör Adı:');
+      if (!name || !name.trim()) return;
+      storedFolders.push({
+        id: 'folder_' + Date.now(),
+        parent: currentFolderId,
+        name: name.trim(),
+        isArticleFolder: name.toLowerCase().includes('makale')
+      });
+      localStorage.setItem('emir_os_folders', JSON.stringify(storedFolders));
+      renderBrowserView();
+    }
+
+    function deletePdfFile(e, id) {
+      e.stopPropagation();
+      if (!confirm('Bu PDF silinsin mi?')) return;
+      storedFiles = storedFiles.filter(x => x.id !== id);
+      localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
+      renderBrowserView();
+    }
+
+    // ==========================================
+    // PDF OKUYUCU (AUTO-SCALE, KALEM/PARMAK AYRIMI, AUTO-SCROLL)
+    // ==========================================
+    let currentActivePdf = null;
+    let pdfDoc = null;
+    let currentPdfPage = 1;
+
+    const rCanvas = document.getElementById('pdfRenderCanvas');
+    const rCtx = rCanvas.getContext('2d');
+    const dCanvas = document.getElementById('pdfDrawCanvas');
+    const dCtx = dCanvas.getContext('2d');
+
+    let isDrawingPdfStroke = false;
+    let pdfToolMode = 'yellow';
+    let pdfPenColor = 'rgba(255, 225, 53, 0.65)';
+    let pdfPenWidth = 24;
+
+    let currentStrokePoints = [];
+    let pageTextItems = [];
+
+    // OTOMATİK KAYDIRMA
+    let autoScrollInterval = null;
+    let isAutoScrolling = false;
+
+    function toggleAutoScroll() {
+      const btn = document.getElementById('btnAutoScroll');
+      if (!isAutoScrolling) {
+        isAutoScrolling = true;
+        btn.textContent = '⏸ Durdur';
+        btn.classList.add('btn-gold');
+        const stage = document.getElementById('readerTouchStage');
+        autoScrollInterval = setInterval(() => {
+          stage.scrollTop += 2;
+          if (stage.scrollTop + stage.clientHeight >= stage.scrollHeight - 5) {
+            pdfNextPage();
+            stage.scrollTop = 0;
+          }
+        }, 35);
+      } else {
+        stopAutoScroll();
+      }
+    }
+
+    function stopAutoScroll() {
+      isAutoScrolling = false;
+      const btn = document.getElementById('btnAutoScroll');
+      if (btn) {
+        btn.textContent = '▶ Otomatik Kaydır';
+        btn.classList.remove('btn-gold');
+      }
+      if (autoScrollInterval) {
+        clearInterval(autoScrollInterval);
+        autoScrollInterval = null;
+      }
+    }
+
+    function openPdfReader(fileId) {
+      currentActivePdf = storedFiles.find(x => x.id === fileId);
+      if (!currentActivePdf) return;
+      if (!currentActivePdf.drawings) currentActivePdf.drawings = {};
+
+      document.getElementById('pdfReaderModal').classList.add('active');
+      currentPdfPage = currentActivePdf.lastPage || 1;
+
+      pdfjsLib.getDocument(currentActivePdf.data).promise.then(pdf => {
+        pdfDoc = pdf;
+        const slider = document.getElementById('pageScrubberSlider');
+        slider.max = pdf.numPages;
+        slider.value = currentPdfPage;
+        renderReaderPage(currentPdfPage);
+      }).catch(err => {
+        alert('PDF açılamadı.');
+      });
+    }
+
+    function closePdfReader() {
+      saveCurrentPdfPageDrawing();
+      stopAutoScroll();
+      document.getElementById('pdfReaderModal').classList.remove('active');
+      renderBrowserView();
+    }
+
+    function renderReaderPage(num) {
+      if (currentActivePdf) {
+        currentActivePdf.lastPage = num;
+        localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
+      }
+
+      pdfDoc.getPage(num).then(page => {
+        const stage = document.getElementById('readerTouchStage');
+        const unscaledViewport = page.getViewport({ scale: 1.0 });
+
+        // DİKEY MODDA TAM EKRANA SIĞDIRMA (FIT-TO-WIDTH)
+        const stageWidth = stage.clientWidth - 32;
+        let dynamicScale = stageWidth / unscaledViewport.width;
+        if (dynamicScale < 1.0) dynamicScale = 1.0;
+        if (dynamicScale > 2.2) dynamicScale = 2.2;
+
+        const viewport = page.getViewport({ scale: dynamicScale });
+        rCanvas.height = viewport.height;
+        rCanvas.width = viewport.width;
+        dCanvas.height = viewport.height;
+        dCanvas.width = viewport.width;
+
+        page.render({ canvasContext: rCtx, viewport: viewport }).promise.then(() => {
+          restorePdfPageDrawing(num);
+          page.getTextContent().then(textContent => {
+            extractPageTextCoordinates(textContent, viewport);
+          });
+        });
+      });
+
+      document.getElementById('pdfPageInfo').textContent = `${num} / ${pdfDoc.numPages}`;
+      document.getElementById('pageScrubberSlider').value = num;
+    }
+
+    function extractPageTextCoordinates(textContent, viewport) {
+      pageTextItems = [];
+      textContent.items.forEach(item => {
+        const tx = pdfjsLib.Util.transform(viewport.transform, item.transform);
+        const fontHeight = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
+        const width = item.width * (viewport.scale || 1.35);
+        const x = tx[4];
+        const y = tx[5] - fontHeight;
+
+        if (item.str && item.str.trim().length > 0) {
+          pageTextItems.push({
+            text: item.str,
+            rect: { x: x, y: y, w: width, h: fontHeight }
+          });
+        }
+      });
+    }
+
+    function onScrubberSlide(val) {
+      const pageIndex = parseInt(val, 10);
+      if (pageIndex !== currentPdfPage && pageIndex >= 1 && pageIndex <= pdfDoc.numPages) {
+        saveCurrentPdfPageDrawing();
+        currentPdfPage = pageIndex;
+        renderReaderPage(currentPdfPage);
+      }
+    }
+    function pdfPrevPage() {
+      if (currentPdfPage > 1) {
+        saveCurrentPdfPageDrawing();
+        currentPdfPage--;
+        renderReaderPage(currentPdfPage);
+      }
+    }
+    function pdfNextPage() {
+      if (currentPdfPage < pdfDoc.numPages) {
+        saveCurrentPdfPageDrawing();
+        currentPdfPage++;
+        renderReaderPage(currentPdfPage);
+      }
+    }
+
+    function setPdfColor(mode) {
+      pdfToolMode = mode;
+      dCtx.globalCompositeOperation = 'source-over';
+      document.querySelectorAll('.color-legend-badge').forEach(b => b.classList.remove('active'));
+      pdfPenWidth = 24;
+
+      if (mode === 'yellow') {
+        pdfPenColor = 'rgba(255, 225, 53, 0.65)';
+        document.getElementById('badgeYellow').classList.add('active');
+      } else if (mode === 'blue') {
+        pdfPenColor = 'rgba(56, 148, 255, 0.55)';
+        document.getElementById('badgeBlue').classList.add('active');
+      } else if (mode === 'red') {
+        pdfPenColor = 'rgba(255, 71, 87, 0.55)';
+        document.getElementById('badgeRed').classList.add('active');
+      }
+    }
+
+    function setPdfEraser() {
+      pdfToolMode = 'eraser';
+      dCtx.globalCompositeOperation = 'destination-out';
+      pdfPenWidth = 36;
+      document.querySelectorAll('.color-legend-badge').forEach(b => b.classList.remove('active'));
+    }
+
+    function saveCurrentPdfPageDrawing() {
+      if (!currentActivePdf) return;
+      if (!currentActivePdf.drawings) currentActivePdf.drawings = {};
+      currentActivePdf.drawings[currentPdfPage] = dCanvas.toDataURL();
+      localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
+    }
+
+    function restorePdfPageDrawing(num) {
+      dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+      dCtx.globalCompositeOperation = 'source-over';
+      if (currentActivePdf && currentActivePdf.drawings && currentActivePdf.drawings[num]) {
+        const img = new Image();
+        img.onload = () => dCtx.drawImage(img, 0, 0);
+        img.src = currentActivePdf.drawings[num];
+      }
+    }
+
+    function getPdfDrawCoords(e) {
+      const r = dCanvas.getBoundingClientRect();
+      const cx = e.clientX;
+      const cy = e.clientY;
+      return { x: cx - r.left, y: cy - r.top };
+    }
+
+    // KALEM VE PARMAK OTOMATİK AYRIMI
+    // Kalem gelirse -> Doğrudan Fosforlu Çizim
+    // Parmak gelirse -> Serbest Kaydırma / Zoom (Çizim iptal)
+    dCanvas.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'touch') {
+        // Parmak ile çizim yapılmaz, kaydırma ve zoom serbest
+        isDrawingPdfStroke = false;
+        return;
+      }
+
+      isDrawingPdfStroke = true;
+      currentStrokePoints = [];
+      const p = getPdfDrawCoords(e);
+      currentStrokePoints.push(p);
+
+      dCtx.beginPath();
+      dCtx.moveTo(p.x, p.y);
+      dCtx.lineCap = 'round';
+      dCtx.lineJoin = 'round';
+      dCtx.strokeStyle = pdfToolMode === 'eraser' ? 'rgba(0,0,0,1)' : pdfPenColor;
+      dCtx.lineWidth = pdfPenWidth;
+    });
+
+    dCanvas.addEventListener('pointermove', e => {
+      if (!isDrawingPdfStroke) return;
+      const p = getPdfDrawCoords(e);
+      currentStrokePoints.push(p);
+
+      dCtx.lineTo(p.x, p.y);
+      dCtx.stroke();
+    });
+
+    window.addEventListener('pointerup', e => {
+      if (isDrawingPdfStroke) {
+        isDrawingPdfStroke = false;
+        saveCurrentPdfPageDrawing();
+
+        // 1. En son sarı çizilen sayfaya göre oran hesapla
+        if (pdfToolMode === 'yellow' && currentActivePdf && pdfDoc) {
+          currentActivePdf.maxYellowPage = Math.max(currentActivePdf.maxYellowPage || 0, currentPdfPage);
+          const total = pdfDoc.numPages || 1;
+          const pct = Math.min(100, Math.round((currentActivePdf.maxYellowPage / total) * 100));
+          currentActivePdf.progress = pct;
+          localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
+        }
+
+        // 2. Mavi ve Kırmızı çizimleri tek birleşik deftere ekle
+        if (pdfToolMode === 'blue' || pdfToolMode === 'red') {
+          detectAndAppendUnifiedNote(pdfToolMode);
+        }
+      }
+    });
+
+    // TEK BİRLEŞİK DEFTERE OTOMATİK EKLEME
+    function detectAndAppendUnifiedNote(mode) {
+      if (!currentActivePdf || currentStrokePoints.length < 1) return;
+
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      currentStrokePoints.forEach(p => {
+        if (p.x < minX) minX = p.x;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.y > maxY) maxY = p.y;
+      });
+
+      const pad = pdfPenWidth / 2;
+      minX -= pad; maxX += pad; minY -= pad; maxY += pad;
+
+      let matchedWords = pageTextItems.filter(item => {
+        const r = item.rect;
+        return (r.x <= maxX && r.x + r.w >= minX && r.y <= maxY && r.y + r.h >= minY);
+      }).map(m => m.text).join(' ');
+
+      if (!matchedWords || matchedWords.trim().length === 0) {
+        matchedWords = `İşaretlenen Kavram`;
+      }
+
+      let vocabStore = JSON.parse(localStorage.getItem('emir_os_unified_vocabs') || '[]');
+      let summaryStore = JSON.parse(localStorage.getItem('emir_os_unified_summaries') || '[]');
+
+      if (mode === 'blue') {
+        vocabStore.unshift({ text: matchedWords.trim(), date: new Date().toLocaleDateString('tr-TR') });
+        localStorage.setItem('emir_os_unified_vocabs', JSON.stringify(vocabStore));
+      } else if (mode === 'red') {
+        summaryStore.unshift({ text: matchedWords.trim(), date: new Date().toLocaleDateString('tr-TR') });
+        localStorage.setItem('emir_os_unified_summaries', JSON.stringify(summaryStore));
+      }
+    }
+
+    // ==========================================
+    // TEK BİRLEŞİK NOTLAR DEFTERİ GÖRÜNÜMÜ
+    // ==========================================
+    function renderUnifiedNotes() {
+      const body = document.getElementById('unifiedNotesBody');
+      const vocabs = JSON.parse(localStorage.getItem('emir_os_unified_vocabs') || '[]');
+      const summaries = JSON.parse(localStorage.getItem('emir_os_unified_summaries') || '[]');
+
+      if (vocabs.length === 0 && summaries.length === 0) {
+        body.innerHTML = `
+          <div style="font-style:italic; color:#777; padding:20px 0;">
+            Henüz not eklenmedi. Kütüphanede herhangi bir PDF okurken MAVİ renkle kelime çizdiğinde sözlüğe, KIRMIZI renkle çizdiğinde ise konu anlatımına otomatik olarak buraya tek bir defter gibi işlenecektir.
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+
+      // 1. ÖZET KONU ANLATIMI BÖLÜMÜ (KIRMIZI ÇİZİLENLER)
+      if (summaries.length > 0) {
+        html += `<h3 style="color:var(--red); font-size:18px; margin-bottom:12px; border-bottom:1.5px solid rgba(220,38,38,0.3); padding-bottom:6px;">🔴 Konu Anlatımı & Temel Kavramlar</h3>`;
+        summaries.forEach((s, idx) => {
+          html += `
+            <div class="summary-card-box">
+              <strong>Kavram ${idx + 1}:</strong> ${s.text}
+            </div>
+          `;
+        });
+      }
+
+      // 2. KELİME SÖZLÜĞÜ BÖLÜMÜ (MAVİ ÇİZİLENLER)
+      if (vocabs.length > 0) {
+        html += `<h3 style="color:var(--navy-light); font-size:18px; margin-top:24px; margin-bottom:12px; border-bottom:1.5px solid rgba(33,53,84,0.3); padding-bottom:6px;">🔵 Akademik Kelimeler & Terimler</h3>`;
+        vocabs.forEach(v => {
+          html += `
+            <div class="vocab-card-box">
+              <strong>${v.text}:</strong> Metin içi bağlamsal terim.
+            </div>
+          `;
+        });
+      }
+
+      body.innerHTML = html;
+    }
+
+    // ==========================================
+    // KİŞİSEL DEFTER (AUTO-SAVE & M-PENCIL BASINÇ DUYARLILIĞI)
+    // ==========================================
+    let personalSheets = JSON.parse(localStorage.getItem('emir_os_personal_sheets') || '[""]');
+    let sheetIdx = 0;
+    const pCanvas = document.getElementById('personalCanvas');
+    const pCtx = pCanvas.getContext('2d');
+    let isDrawingPersonal = false;
+    let isPersonalEraserActive = false;
+    let currentColor = '#132136';
+    let currentPenWidth = 3;
+    let autoSaveTimer = null;
+
+    function initPersonalCanvas() {
+      const wrap = document.getElementById('personalPadWrap');
+      if (pCanvas.width !== wrap.clientWidth || pCanvas.height !== wrap.clientHeight) {
+        pCanvas.width = wrap.clientWidth;
+        pCanvas.height = wrap.clientHeight;
+        loadCurrentSheet();
+      }
+    }
+
+    function loadCurrentSheet() {
+      pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+      pCtx.globalCompositeOperation = 'source-over';
+      const data = personalSheets[sheetIdx];
+      if (data && data.length > 10) {
+        const img = new Image();
+        img.onload = () => pCtx.drawImage(img, 0, 0);
+        img.src = data;
+      }
+      
+      const slider = document.getElementById('personalScrubberSlider');
+      slider.max = personalSheets.length;
+      slider.value = sheetIdx + 1;
+      document.getElementById('personalSheetIndex').textContent = `${sheetIdx + 1} / ${personalSheets.length}`;
+    }
+
+    function onPersonalScrubberSlide(val) {
+      saveCurrentSheetImmediate();
+      const idx = parseInt(val, 10) - 1;
+      if (idx >= 0 && idx < personalSheets.length) {
+        sheetIdx = idx;
+        loadCurrentSheet();
+      }
+    }
+
+    function saveCurrentSheetImmediate() {
+      personalSheets[sheetIdx] = pCanvas.toDataURL('image/webp', 0.85); // Bellek taşmasını önleyen hafif format
+      localStorage.setItem('emir_os_personal_sheets', JSON.stringify(personalSheets));
+    }
+
+    function triggerAutoSave() {
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(saveCurrentSheetImmediate, 1500); // 1.5 saniyede bir sessiz arka plan kaydı
+    }
+
+    function selectPenColor(col, el) {
+      isPersonalEraserActive = false;
+      pCtx.globalCompositeOperation = 'source-over';
+      currentColor = col;
+      document.getElementById('eraserToggleBtn').style.background = '#ece6d8';
+      document.getElementById('eraserToggleBtn').style.color = '#132136';
+      document.querySelectorAll('.palette-circle').forEach(c => c.classList.remove('active'));
+      if (el) el.classList.add('active');
+      updateSizeDisplay();
+    }
+
+    function toggleEraser(el) {
+      isPersonalEraserActive = true;
+      pCtx.globalCompositeOperation = 'destination-out';
+      document.querySelectorAll('.palette-circle').forEach(c => c.classList.remove('active'));
+      el.style.background = '#132136';
+      el.style.color = '#ffffff';
+      updateSizeDisplay();
+    }
+
+    function onBrushSizeChange(val) {
+      currentPenWidth = parseInt(val, 10);
+      updateSizeDisplay();
+    }
+
+    function updateSizeDisplay() {
+      const label = document.getElementById('brushSizeLabel');
+      const dot = document.getElementById('sizePreviewDot');
+      label.textContent = isPersonalEraserActive ? `Silgi: ${currentPenWidth * 1.5}px` : `Kalınlık: ${currentPenWidth}px`;
+      dot.style.width = Math.min(26, Math.max(6, currentPenWidth)) + 'px';
+      dot.style.height = dot.style.width;
+      dot.style.background = isPersonalEraserActive ? '#dc2626' : (currentColor.includes('rgba') ? '#f59e0b' : currentColor);
+    }
+
+    function getPersonalCoords(e) {
+      const rect = pCanvas.getBoundingClientRect();
+      return { 
+        x: e.clientX - rect.left, 
+        y: e.clientY - rect.top,
+        pressure: e.pressure || 0.5
+      };
+    }
+
+    pCanvas.addEventListener('pointerdown', e => {
+      isDrawingPersonal = true;
+      const pos = getPersonalCoords(e);
+      pCtx.beginPath();
+      pCtx.moveTo(pos.x, pos.y);
+    });
+
+    pCanvas.addEventListener('pointermove', e => {
+      if (!isDrawingPersonal) return;
+      const pos = getPersonalCoords(e);
+      pCtx.lineTo(pos.x, pos.y);
+
+      // M-Pencil Basınç Algısı
+      let calculatedWidth = currentPenWidth;
+      if (e.pointerType === 'pen' && e.pressure > 0) {
+        calculatedWidth = currentPenWidth * (e.pressure * 1.6);
+      }
+
+      pCtx.strokeStyle = isPersonalEraserActive ? 'rgba(0,0,0,1)' : currentColor;
+      pCtx.lineWidth = isPersonalEraserActive ? (currentPenWidth * 1.8) : calculatedWidth;
+      pCtx.lineCap = 'round';
+      pCtx.lineJoin = 'round';
+      pCtx.stroke();
+      triggerAutoSave();
+    });
+
+    window.addEventListener('pointerup', () => {
+      if (isDrawingPersonal) {
+        isDrawingPersonal = false;
+        saveCurrentSheetImmediate();
+      }
+    });
+
+    function nextPersonalSheet() {
+      saveCurrentSheetImmediate();
+      if (sheetIdx < personalSheets.length - 1) { sheetIdx++; loadCurrentSheet(); }
+    }
+    function prevPersonalSheet() {
+      saveCurrentSheetImmediate();
+      if (sheetIdx > 0) { sheetIdx--; loadCurrentSheet(); }
+    }
+    function addPersonalSheet() {
+      saveCurrentSheetImmediate();
+      personalSheets.push("");
+      sheetIdx = personalSheets.length - 1;
+      loadCurrentSheet();
+    }
+    function clearPersonalPad() {
+      pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+      saveCurrentSheetImmediate();
+    }
+  </script>
+</body>
+</html>
