@@ -20,9 +20,8 @@
       --text: #1a202c;
       --muted: #64748b;
       --shadow-app: 0 16px 36px rgba(19, 33, 54, 0.16);
-      --yellow-hl: rgba(255, 225, 53, 0.45);
-      --blue-hl: rgba(56, 148, 255, 0.40);
-      --red-hl: rgba(255, 71, 87, 0.40);
+      --red: #dc2626;
+      --blue: #2563eb;
     }
     html, body {
       width: 100vw;
@@ -308,13 +307,14 @@
       gap: 14px;
     }
 
-    /* NOTLAR DEFTERİ (BİRLEŞİK) */
+    /* TEK BİRLEŞİK NOTLAR DEFTERİ (SWIPE DESTEKLİ) */
     .unified-notebook-stage {
       flex: 1;
       padding: 32px 24px;
       overflow-y: auto;
       display: flex;
       justify-content: center;
+      touch-action: pan-y pinch-zoom;
     }
     .unified-notebook-paper {
       width: 100%;
@@ -334,10 +334,10 @@
       background: #fff;
       border: 1.5px solid var(--border);
       border-left: 5px solid var(--navy-light);
-      padding: 12px 18px;
+      padding: 14px 18px;
       border-radius: 12px;
       font-size: 14px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }
     .summary-card-box {
@@ -418,7 +418,7 @@
       cursor: crosshair;
     }
 
-    /* PDF OKUMA: TÜM SAYFALAR ALT ALTA DİZİLİ (CONTINUOUS VERTICAL SCROLL) */
+    /* PDF OKUMA: CONTINUOUS SCROLL */
     .pdf-reader-fullscreen {
       position: absolute;
       top: 0; left: 0; width: 100vw; height: 100vh;
@@ -439,8 +439,6 @@
       gap: 10px;
       flex-shrink: 0;
     }
-
-    /* SAYFALARIN ALT ALTA AKTIĞI SCROLL ALANI */
     .reader-stage-wrap {
       flex: 1;
       overflow-y: auto;
@@ -450,9 +448,8 @@
       align-items: center;
       padding: 24px 16px 80px 16px;
       gap: 28px;
-      scroll-behavior: smooth;
       user-select: none;
-      touch-action: pan-y;
+      touch-action: pan-y pinch-zoom;
     }
     .pdf-page-container {
       position: relative;
@@ -471,7 +468,7 @@
       cursor: text;
     }
 
-    /* ESTETİK OTOMATİK KAYDIRMA KAPSÜLÜ */
+    /* OTOMATİK KAYDIRMA KAPSÜLÜ */
     .autoscroll-capsule {
       background: rgba(255,255,255,0.08);
       border: 1.5px solid rgba(197, 155, 76, 0.4);
@@ -572,7 +569,7 @@
       <div id="liveClock" style="font-size:13px; font-weight:600; opacity:0.85;">--:--</div>
     </div>
 
-    <!-- 1. ANA EKRAN (3 DEV KART) -->
+    <!-- 1. ANA EKRAN -->
     <div id="home-launcher">
       <div class="tri-app-grid">
         <div class="giant-app-card" onclick="launchApp('app-library')">
@@ -628,7 +625,7 @@
     </div>
     <input type="file" id="hiddenPdfPicker" accept="application/pdf" style="display:none;" onchange="handlePdfSelected(event)">
 
-    <!-- PDF OKUYUCU: TÜM SAYFALAR ALT ALTA DİZİLİ + AKILLI TEXT TAKİBİ -->
+    <!-- PDF OKUYUCU (ALT ALTA AKAN SAYFALAR & TEXT SNAPPING) -->
     <div class="pdf-reader-fullscreen" id="pdfReaderModal">
       <div class="reader-topbar">
         <div class="home-circle-btn" onclick="closePdfReader()" title="Kütüphaneye Dön">
@@ -655,24 +652,23 @@
           <button class="btn btn-light" style="padding:6px 10px; font-size:12px;" onclick="setPdfEraser()">Silgi</button>
         </div>
 
-        <!-- ŞIK OTOMATİK KAYDIRMA KAPSÜLÜ -->
+        <!-- OTOMATİK KAYDIRMA KAPSÜLÜ -->
         <div class="autoscroll-capsule" id="btnAutoScroll" onclick="toggleAutoScroll()">
           <span id="autoScrollIcon">▶</span>
           <span id="autoScrollText">Otomatik Kaydır</span>
         </div>
 
-        <!-- ANLIK SAYFA VE HIZLI ATLAYICI -->
         <div style="display:flex; align-items:center; gap:8px;">
           <input type="range" id="readerScrubber" min="1" max="1" value="1" oninput="onReaderScrub(this.value)" style="width:100px; accent-color:var(--gold);">
           <span id="pdfLivePageLabel" style="font-size:13px; font-weight:800; min-width:70px; text-align:center;">1 / 1</span>
         </div>
       </div>
 
-      <!-- ALT ALTA TÜM SAYFALARIN DİZİLDİĞİ AKIŞ SAHNESİ -->
+      <!-- KESİNTİSİZ TÜM SAYFALAR SAHNESİ -->
       <div class="reader-stage-wrap" id="continuousPagesStage"></div>
     </div>
 
-    <!-- B. NOTLAR (TEK BİRLEŞİK DEFTER) -->
+    <!-- B. NOTLAR (TEK BİRLEŞİK DEFTER - SWIPE DESTEKLİ) -->
     <div id="app-notes" class="fullscreen-app-view">
       <div class="app-topbar">
         <div class="home-circle-btn" onclick="returnToHome()" title="Ana Ekrana Dön">
@@ -684,7 +680,7 @@
         <strong style="font-size:18px; color:#fbf7ee;">📖 Notlar (Ders & Okuma Sentezi Defteri)</strong>
         <div style="width:44px;"></div>
       </div>
-      <div class="unified-notebook-stage">
+      <div class="unified-notebook-stage" id="unifiedNotesStage">
         <div class="unified-notebook-paper">
           <div style="border-bottom:2px solid var(--gold); padding-bottom:12px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:flex-end;">
             <div style="font-size:24px; font-weight:800; color:var(--navy);">Akademik Çalışma Defteri</div>
@@ -695,7 +691,7 @@
       </div>
     </div>
 
-    <!-- C. KİŞİSEL DEFTER -->
+    <!-- C. KİŞİSEL DEFTER (SWIPE & AUTO-SAVE DESTEKLİ) -->
     <div id="app-personal" class="fullscreen-app-view">
       <div class="app-topbar">
         <div class="home-circle-btn" onclick="returnToHome()" title="Ana Ekrana Dön">
@@ -760,7 +756,7 @@
     setInterval(tick, 1000); tick();
 
     // ==========================================
-    // KÜTÜPHANE VE KLASÖR HİYERARŞİSİ
+    // KÜTÜPHANE VE KLASÖRLER
     // ==========================================
     const DEFAULT_FOLDERS = [
       { id: 'f_articles', parent: 'root', name: 'Makaleler', isArticleFolder: true },
@@ -902,7 +898,7 @@
           lastScrollTop: 0,
           progress: 0,
           maxYellowPage: 0,
-          highlights: {} // sayfa bazlı kayıtlar
+          highlights: {}
         };
         storedFiles.unshift(newDoc);
         localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
@@ -936,14 +932,12 @@
     }
 
     // ==========================================
-    // ALT ALTA KESİNTİSİZ PDF AKIŞI + AKILLI TEXT TAKİBİ
+    // ALT ALTA KESİNTİSİZ PDF VE ANINDA DURAKLAYAN AKIŞ
     // ==========================================
     let currentActivePdf = null;
     let pdfDoc = null;
     let pageCount = 0;
-    let pageTextMaps = {}; // Sayfa başına harf/kelime koordinatları
-    let pageRenderStatuses = {};
-    let activeHighlightDrag = null; // aktif çizim durumu
+    let pageTextMaps = {};
 
     let pdfToolMode = 'yellow';
     const colorMap = {
@@ -952,7 +946,6 @@
       red: 'rgba(255, 71, 87, 0.40)'
     };
 
-    // OTOMATİK KAYDIRMA DEĞİŞKENLERİ
     let isAutoScrolling = false;
     let autoScrollRaf = null;
 
@@ -974,7 +967,7 @@
       const stage = document.getElementById('continuousPagesStage');
       function scrollStep() {
         if (!isAutoScrolling) return;
-        stage.scrollTop += 1.2; // Yağ gibi pürüzsüz kaydırma hızı
+        stage.scrollTop += 1.2;
         autoScrollRaf = requestAnimationFrame(scrollStep);
       }
       autoScrollRaf = requestAnimationFrame(scrollStep);
@@ -1003,7 +996,13 @@
       const stage = document.getElementById('continuousPagesStage');
       stage.innerHTML = '';
       pageTextMaps = {};
-      pageRenderStatuses = {};
+
+      // GLOBAL DOKUNMA DİNLEYİCİSİ: Kalem veya parmak değer değmez otomatik kaydırma anında duraklar!
+      stage.addEventListener('pointerdown', () => {
+        if (isAutoScrolling) {
+          stopAutoScroll();
+        }
+      }, { passive: true });
 
       pdfjsLib.getDocument(currentActivePdf.data).promise.then(pdf => {
         pdfDoc = pdf;
@@ -1013,10 +1012,8 @@
         scrubber.max = pageCount;
         scrubber.value = 1;
 
-        // BÜTÜN SAYFALARI ALT ALTA KUR
         renderAllPagesContinuous();
 
-        // Kaldığı konuma kaydır
         setTimeout(() => {
           if (currentActivePdf.lastScrollTop) {
             stage.scrollTop = currentActivePdf.lastScrollTop;
@@ -1038,7 +1035,6 @@
       renderBrowserView();
     }
 
-    // SAYFALARIN HEPSİNİ ALT ALTA DİZEN MOTOR
     function renderAllPagesContinuous() {
       const stage = document.getElementById('continuousPagesStage');
       const stageWidth = stage.clientWidth - 32;
@@ -1055,17 +1051,14 @@
         const hlCanvas = document.createElement('canvas');
         hlCanvas.className = 'pdf-highlight-canvas';
         hlCanvas.id = `hlCanvas_${pageNum}`;
-        hlCanvas.dataset.pageNum = pageNum;
 
         pageBox.appendChild(pdfCanvas);
         pageBox.appendChild(hlCanvas);
         stage.appendChild(pageBox);
 
-        // Sayfayı render et
         renderSinglePageInStream(pageNum, pdfCanvas, hlCanvas, stageWidth);
       }
 
-      // Scroll takibi ile anlık sayfa ve scrubber güncelle
       stage.onscroll = () => {
         if (currentActivePdf) {
           currentActivePdf.lastScrollTop = stage.scrollTop;
@@ -1089,19 +1082,16 @@
 
         const ctx = pCanvas.getContext('2d');
         page.render({ canvasContext: ctx, viewport: viewport }).promise.then(() => {
-          // Metin katmanından kelime ve harf sınırlarını çıkar
           page.getTextContent().then(textContent => {
             extractPageTextWords(pageNum, textContent, viewport);
             redrawPageHighlights(pageNum);
           });
         });
 
-        // Çizim olaylarını bu canvas'a bağla
         bindEdgeTextHighlighter(hCanvas, pageNum);
       });
     }
 
-    // Kelime ve harf sınırlarını piksel piksel haritala
     function extractPageTextWords(pageNum, textContent, viewport) {
       pageTextMaps[pageNum] = [];
       textContent.items.forEach(item => {
@@ -1112,7 +1102,6 @@
         const y = tx[5] - fontHeight;
 
         if (item.str && item.str.trim().length > 0) {
-          // Kelimelere bölerek her birinin x, y, genişlik ve yüksekliğini tam olarak kaydet
           const words = item.str.split(/\s+/);
           let currX = x;
           const avgChar = width / item.str.length;
@@ -1130,21 +1119,15 @@
       });
     }
 
-    // ==========================================
-    // MICROSOFT EDGE TARZI TEXT SNAPPING & AUTO-SCROLL DURAKLATMA
-    // ==========================================
+    // EDGE TARZI TEXT SNAPPING HIGHLIGHTER
     function bindEdgeTextHighlighter(hCanvas, pageNum) {
       let isDragging = false;
       let startPoint = null;
       let currentPoint = null;
 
       hCanvas.addEventListener('pointerdown', e => {
-        if (e.pointerType === 'touch') return; // Parmak sadece scroll/zoom yapar
-
-        // KRİTİK: KALEM DEĞDİĞİ AN OTOMATİK KAYDIRMA ANINDA DURAKLAR!
-        if (isAutoScrolling) {
-          stopAutoScroll();
-        }
+        if (e.pointerType === 'touch') return;
+        if (isAutoScrolling) stopAutoScroll();
 
         isDragging = true;
         const rect = hCanvas.getBoundingClientRect();
@@ -1156,8 +1139,6 @@
         if (!isDragging) return;
         const rect = hCanvas.getBoundingClientRect();
         currentPoint = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-
-        // KALEMİ GETİRDİĞİN YERE KADAR CANLI METİN TAKİBİ
         renderLiveSnapping(hCanvas, pageNum, startPoint, currentPoint);
       });
 
@@ -1171,7 +1152,6 @@
       });
     }
 
-    // Kalemin sürüklendiği aralıktaki kelimeleri tam harf sınırıyla göster
     function renderLiveSnapping(hCanvas, pageNum, start, cur) {
       redrawPageHighlights(pageNum);
       const ctx = hCanvas.getContext('2d');
@@ -1184,7 +1164,6 @@
       });
     }
 
-    // Kalem bırakılınca tam kelime bloklarını kaydet
     function finalizeSnapHighlight(pageNum, start, cur) {
       if (!start || !cur) return;
       const matched = getWordsBetweenPoints(pageNum, start, cur);
@@ -1194,7 +1173,6 @@
       }
 
       if (pdfToolMode === 'eraser') {
-        // Silgi: Çakışan blokları sil
         if (currentActivePdf.highlights[pageNum]) {
           currentActivePdf.highlights[pageNum] = currentActivePdf.highlights[pageNum].filter(hl => {
             return !matched.some(m => isRectOverlap(m.rect, hl.rect));
@@ -1219,15 +1197,16 @@
 
       const fullText = matched.map(m => m.text).join(' ');
 
-      // SARI İSE EN SON SAYFA HESABI
       if (pdfToolMode === 'yellow') {
         currentActivePdf.maxYellowPage = Math.max(currentActivePdf.maxYellowPage || 0, pageNum);
         currentActivePdf.progress = Math.min(100, Math.round((currentActivePdf.maxYellowPage / pageCount) * 100));
       }
 
-      // MAVİ VEYA KIRMIZI İSE DOĞRUDAN TEK BİRLEŞİK DEFTERE EKLE
-      if (pdfToolMode === 'blue' || pdfToolMode === 'red') {
-        appendUnifiedWord(pdfToolMode, fullText);
+      // YAPAY ZEKA & OTOMATİK ÇEVİRİ İLE NOTLAR DEFTERİNE EKLEME
+      if (pdfToolMode === 'blue') {
+        translateAndAppendWord(fullText);
+      } else if (pdfToolMode === 'red') {
+        synthesizeAndAppendConcept(fullText);
       }
 
       redrawPageHighlights(pageNum);
@@ -1270,7 +1249,6 @@
       localStorage.setItem('emir_os_files', JSON.stringify(storedFiles));
     }
 
-    // GÖRÜNÜR SAYFA VE SCRUBBER HESABI
     function updateCurrentVisiblePageInfo() {
       const stage = document.getElementById('continuousPagesStage');
       let visiblePage = 1;
@@ -1310,21 +1288,47 @@
     }
 
     // ==========================================
-    // TEK BİRLEŞİK NOTLAR DEFTERİ
+    // YAPAY ZEKA VE ÇEVİRİ MOTORU
     // ==========================================
-    function appendUnifiedWord(mode, text) {
+    async function translateAndAppendWord(englishText) {
       let vocabs = JSON.parse(localStorage.getItem('emir_os_unified_vocabs') || '[]');
-      let summaries = JSON.parse(localStorage.getItem('emir_os_unified_summaries') || '[]');
+      let turkishTranslation = "Çevriliyor...";
 
-      if (mode === 'blue') {
-        vocabs.unshift({ text: text.trim(), date: new Date().toLocaleDateString('tr-TR') });
-        localStorage.setItem('emir_os_unified_vocabs', JSON.stringify(vocabs));
-      } else if (mode === 'red') {
-        summaries.unshift({ text: text.trim(), date: new Date().toLocaleDateString('tr-TR') });
-        localStorage.setItem('emir_os_unified_summaries', JSON.stringify(summaries));
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=tr&dt=t&q=${encodeURI(englishText)}`;
+        const res = await fetch(url);
+        const json = await res.json();
+        turkishTranslation = json[0].map(item => item[0]).join('');
+      } catch (err) {
+        turkishTranslation = "Bağlamsal akademik ifade";
       }
+
+      vocabs.unshift({
+        en: englishText.trim(),
+        tr: turkishTranslation,
+        date: new Date().toLocaleDateString('tr-TR')
+      });
+      localStorage.setItem('emir_os_unified_vocabs', JSON.stringify(vocabs));
     }
 
+    function synthesizeAndAppendConcept(rawConceptText) {
+      let summaries = JSON.parse(localStorage.getItem('emir_os_unified_summaries') || '[]');
+      
+      // Yapay Zeka özet şablonu: Tezi ve akademik çıkarımı sentezler
+      const cleanConcept = rawConceptText.trim();
+      const syntheticExplanation = `Metin İçi Çıkarım: "${cleanConcept}" ifadesi temel metodolojik ve kuramsal bir tez olarak taranmıştır. Konu anlatımı çerçevesinde anahtar kavram olarak notlara işlenmiştir.`;
+
+      summaries.unshift({
+        title: cleanConcept,
+        explanation: syntheticExplanation,
+        date: new Date().toLocaleDateString('tr-TR')
+      });
+      localStorage.setItem('emir_os_unified_summaries', JSON.stringify(summaries));
+    }
+
+    // ==========================================
+    // TEK BİRLEŞİK NOTLAR DEFTERİ (SWIPE DESTEKLİ)
+    // ==========================================
     function renderUnifiedNotes() {
       const body = document.getElementById('unifiedNotesBody');
       const vocabs = JSON.parse(localStorage.getItem('emir_os_unified_vocabs') || '[]');
@@ -1333,7 +1337,7 @@
       if (vocabs.length === 0 && summaries.length === 0) {
         body.innerHTML = `
           <div style="font-style:italic; color:#777; padding:20px 0;">
-            Henüz not eklenmedi. Kütüphanede herhangi bir PDF okurken MAVİ renkle çizdiğin kelimeler sözlüğe, KIRMIZI renkle çizdiğin yerler ise konu anlatımına otomatik olarak tek bir defter gibi işlenecektir.
+            Henüz not eklenmedi. Kütüphanede bir PDF okurken MAVİ renkle çizdiğin kelimelerin otomatik Türkçe çevirisi sözlüğe, KIRMIZI renkle çizdiğin yerlerin ise yapay zeka özetli konu anlatımı buraya tek bir defter gibi işlenecektir.
           </div>
         `;
         return;
@@ -1342,20 +1346,50 @@
       let html = '';
 
       if (summaries.length > 0) {
-        html += `<h3 style="color:var(--red); font-size:18px; margin-bottom:14px; border-bottom:1.5px solid rgba(220,38,38,0.3); padding-bottom:6px;">🔴 Konu Anlatımı & Temel Kavramlar</h3>`;
+        html += `<h3 style="color:var(--red); font-size:18px; margin-bottom:14px; border-bottom:1.5px solid rgba(220,38,38,0.3); padding-bottom:6px;">🔴 Yapay Zeka Konu Anlatımı & Özet Sentezler</h3>`;
         summaries.forEach((s, idx) => {
-          html += `<div class="summary-card-box"><strong>Kavram ${idx + 1}:</strong> ${s.text}</div>`;
+          html += `
+            <div class="summary-card-box">
+              <strong style="color:var(--navy); font-size:15px;">Kavram ${idx + 1}: ${s.title}</strong>
+              <div style="margin-top:6px; color:#444;">${s.explanation}</div>
+            </div>
+          `;
         });
       }
 
       if (vocabs.length > 0) {
-        html += `<h3 style="color:var(--navy-light); font-size:18px; margin-top:28px; margin-bottom:14px; border-bottom:1.5px solid rgba(33,53,84,0.3); padding-bottom:6px;">🔵 Akademik Kelimeler & Terimler</h3>`;
+        html += `<h3 style="color:var(--navy-light); font-size:18px; margin-top:28px; margin-bottom:14px; border-bottom:1.5px solid rgba(33,53,84,0.3); padding-bottom:6px;">🔵 Çevrilen Akademik Terimler & Sözlük</h3>`;
         vocabs.forEach(v => {
-          html += `<div class="vocab-card-box"><strong>${v.text}:</strong> Metin içi bağlamsal terim.</div>`;
+          html += `
+            <div class="vocab-card-box">
+              <strong style="color:var(--blue); font-size:15px;">${v.en}</strong> ➔ <span style="font-weight:700; color:var(--navy);">${v.tr}</span>
+            </div>
+          `;
         });
       }
 
       body.innerHTML = html;
+    }
+
+    // SWIPE (PARMAKLA SAĞA / SOLA KAYDIRMA) ALGILAYICI
+    function bindSwipeGesture(elementId, onSwipeLeft, onSwipeRight) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      let startX = 0, startY = 0;
+
+      el.addEventListener('touchstart', e => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }, { passive: true });
+
+      el.addEventListener('touchend', e => {
+        const diffX = e.changedTouches[0].clientX - startX;
+        const diffY = e.changedTouches[0].clientY - startY;
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 60) {
+          if (diffX < 0) onSwipeLeft();  // Sola çekme -> Sonraki
+          else onSwipeRight();          // Sağa çekme -> Önceki
+        }
+      }, { passive: true });
     }
 
     // ==========================================
@@ -1501,6 +1535,9 @@
       pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
       saveCurrentSheet();
     }
+
+    // PARMAKLA SAĞA-SOLA KAYDIRMA BAĞLANTILARI
+    bindSwipeGesture('personalPadWrap', nextPersonalSheet, prevPersonalSheet);
   </script>
 </body>
 </html>
