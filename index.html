@@ -307,14 +307,13 @@
       gap: 14px;
     }
 
-    /* TEK BİRLEŞİK NOTLAR DEFTERİ (SWIPE DESTEKLİ) */
+    /* TEK BİRLEŞİK NOTLAR DEFTERİ */
     .unified-notebook-stage {
       flex: 1;
       padding: 32px 24px;
       overflow-y: auto;
       display: flex;
       justify-content: center;
-      touch-action: pan-y pinch-zoom;
     }
     .unified-notebook-paper {
       width: 100%;
@@ -458,11 +457,10 @@
       border-radius: 4px;
       overflow: hidden;
     }
-    .pdf-page-canvas { display: block; }
+    .pdf-page-canvas { display: block; image-rendering: auto; }
     .pdf-highlight-canvas {
       position: absolute;
       top: 0; left: 0;
-      mix-blend-mode: multiply;
       pointer-events: auto !important;
       touch-action: none !important;
       cursor: text;
@@ -625,7 +623,7 @@
     </div>
     <input type="file" id="hiddenPdfPicker" accept="application/pdf" style="display:none;" onchange="handlePdfSelected(event)">
 
-    <!-- PDF OKUYUCU (ALT ALTA AKAN SAYFALAR & TEXT SNAPPING) -->
+    <!-- PDF OKUYUCU -->
     <div class="pdf-reader-fullscreen" id="pdfReaderModal">
       <div class="reader-topbar">
         <div class="home-circle-btn" onclick="closePdfReader()" title="Kütüphaneye Dön">
@@ -635,7 +633,6 @@
           </svg>
         </div>
 
-        <!-- RENK PALETİ -->
         <div style="display:flex; align-items:center; gap:6px;">
           <div class="color-legend-badge active" id="badgeYellow" onclick="setPdfColor('yellow')">
             <div style="width:14px; height:14px; border-radius:50%; background:#f59e0b;"></div>
@@ -652,7 +649,6 @@
           <button class="btn btn-light" style="padding:6px 10px; font-size:12px;" onclick="setPdfEraser()">Silgi</button>
         </div>
 
-        <!-- OTOMATİK KAYDIRMA KAPSÜLÜ -->
         <div class="autoscroll-capsule" id="btnAutoScroll" onclick="toggleAutoScroll()">
           <span id="autoScrollIcon">▶</span>
           <span id="autoScrollText">Otomatik Kaydır</span>
@@ -664,11 +660,10 @@
         </div>
       </div>
 
-      <!-- KESİNTİSİZ TÜM SAYFALAR SAHNESİ -->
       <div class="reader-stage-wrap" id="continuousPagesStage"></div>
     </div>
 
-    <!-- B. NOTLAR (TEK BİRLEŞİK DEFTER - SWIPE DESTEKLİ) -->
+    <!-- B. NOTLAR -->
     <div id="app-notes" class="fullscreen-app-view">
       <div class="app-topbar">
         <div class="home-circle-btn" onclick="returnToHome()" title="Ana Ekrana Dön">
@@ -691,7 +686,7 @@
       </div>
     </div>
 
-    <!-- C. KİŞİSEL DEFTER (SWIPE & AUTO-SAVE DESTEKLİ) -->
+    <!-- C. KİŞİSEL DEFTER -->
     <div id="app-personal" class="fullscreen-app-view">
       <div class="app-topbar">
         <div class="home-circle-btn" onclick="returnToHome()" title="Ana Ekrana Dön">
@@ -932,12 +927,14 @@
     }
 
     // ==========================================
-    // ALT ALTA KESİNTİSİZ PDF VE ANINDA DURAKLAYAN AKIŞ
+    // ALT ALTA KESİNTİSİZ PDF VE ÇİZGİSİZ NET RENDER KUYRUĞU
     // ==========================================
     let currentActivePdf = null;
     let pdfDoc = null;
     let pageCount = 0;
     let pageTextMaps = {};
+    let renderQueue = [];
+    let isRenderingPage = false;
 
     let pdfToolMode = 'yellow';
     const colorMap = {
@@ -996,12 +993,11 @@
       const stage = document.getElementById('continuousPagesStage');
       stage.innerHTML = '';
       pageTextMaps = {};
+      renderQueue = [];
+      isRenderingPage = false;
 
-      // GLOBAL DOKUNMA DİNLEYİCİSİ: Kalem veya parmak değer değmez otomatik kaydırma anında duraklar!
       stage.addEventListener('pointerdown', () => {
-        if (isAutoScrolling) {
-          stopAutoScroll();
-        }
+        if (isAutoScrolling) stopAutoScroll();
       }, { passive: true });
 
       pdfjsLib.getDocument(currentActivePdf.data).promise.then(pdf => {
@@ -1056,8 +1052,11 @@
         pageBox.appendChild(hlCanvas);
         stage.appendChild(pageBox);
 
-        renderSinglePageInStream(pageNum, pdfCanvas, hlCanvas, stageWidth);
+        // Sayfaları sıralı render kuyruğuna al (GPU buffer taşmasını ve çizgi çizgi yırtılmayı önler)
+        renderQueue.push({ pageNum, pCanvas: pdfCanvas, hCanvas: hlCanvas, stageWidth });
       }
+
+      processRenderQueue();
 
       stage.onscroll = () => {
         if (currentActivePdf) {
@@ -1067,28 +1066,57 @@
       };
     }
 
-    function renderSinglePageInStream(pageNum, pCanvas, hCanvas, stageWidth) {
-      pdfDoc.getPage(pageNum).then(page => {
+    // SIRALI KUYRUK MOTORU: Sayfalar tek tek temizce çizilir, GPU çökmez
+    function processRenderQueue() {
+      if (isRenderingPage || renderQueue.length === 0) return;
+      isRenderingPage = true;
+      const item = renderQueue.shift();
+
+      renderSinglePageClean(item.pageNum, item.pCanvas, item.hCanvas, item.stageWidth).then(() => {
+        isRenderingPage = false;
+        processRenderQueue();
+      });
+    }
+
+    // ÇİZGİ ÇİZGİ GÖRÜNMEYİ ÖNLEYEN DÜZGÜN CANVAS MOTORU
+    function renderSinglePageClean(pageNum, pCanvas, hCanvas, stageWidth) {
+      return pdfDoc.getPage(pageNum).then(page => {
         const unscaledViewport = page.getViewport({ scale: 1.0 });
         let dynamicScale = stageWidth / unscaledViewport.width;
         if (dynamicScale < 1.0) dynamicScale = 1.0;
         if (dynamicScale > 2.2) dynamicScale = 2.2;
 
+        // Tablet HiDPI (Retina) Piksel Oranı
+        const dpr = window.devicePixelRatio || 1;
         const viewport = page.getViewport({ scale: dynamicScale });
-        pCanvas.width = viewport.width;
-        pCanvas.height = viewport.height;
-        hCanvas.width = viewport.width;
-        hCanvas.height = viewport.height;
+
+        // CSS boyutu
+        pCanvas.style.width = `${viewport.width}px`;
+        pCanvas.style.height = `${viewport.height}px`;
+        hCanvas.style.width = `${viewport.width}px`;
+        hCanvas.style.height = `${viewport.height}px`;
+
+        // Gerçek piksel boyutu (Çizgi çizgi artefaktları engeller)
+        pCanvas.width = Math.floor(viewport.width * dpr);
+        pCanvas.height = Math.floor(viewport.height * dpr);
+        hCanvas.width = Math.floor(viewport.width * dpr);
+        hCanvas.height = Math.floor(viewport.height * dpr);
 
         const ctx = pCanvas.getContext('2d');
-        page.render({ canvasContext: ctx, viewport: viewport }).promise.then(() => {
-          page.getTextContent().then(textContent => {
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        const hCtx = hCanvas.getContext('2d');
+        hCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        return page.render({ canvasContext: ctx, viewport: viewport }).promise.then(() => {
+          return page.getTextContent().then(textContent => {
             extractPageTextWords(pageNum, textContent, viewport);
             redrawPageHighlights(pageNum);
+            bindEdgeTextHighlighter(hCanvas, pageNum);
           });
         });
-
-        bindEdgeTextHighlighter(hCanvas, pageNum);
       });
     }
 
@@ -1202,7 +1230,6 @@
         currentActivePdf.progress = Math.min(100, Math.round((currentActivePdf.maxYellowPage / pageCount) * 100));
       }
 
-      // YAPAY ZEKA & OTOMATİK ÇEVİRİ İLE NOTLAR DEFTERİNE EKLEME
       if (pdfToolMode === 'blue') {
         translateAndAppendWord(fullText);
       } else if (pdfToolMode === 'red') {
@@ -1313,8 +1340,6 @@
 
     function synthesizeAndAppendConcept(rawConceptText) {
       let summaries = JSON.parse(localStorage.getItem('emir_os_unified_summaries') || '[]');
-      
-      // Yapay Zeka özet şablonu: Tezi ve akademik çıkarımı sentezler
       const cleanConcept = rawConceptText.trim();
       const syntheticExplanation = `Metin İçi Çıkarım: "${cleanConcept}" ifadesi temel metodolojik ve kuramsal bir tez olarak taranmıştır. Konu anlatımı çerçevesinde anahtar kavram olarak notlara işlenmiştir.`;
 
@@ -1327,7 +1352,7 @@
     }
 
     // ==========================================
-    // TEK BİRLEŞİK NOTLAR DEFTERİ (SWIPE DESTEKLİ)
+    // TEK BİRLEŞİK NOTLAR DEFTERİ
     // ==========================================
     function renderUnifiedNotes() {
       const body = document.getElementById('unifiedNotesBody');
@@ -1369,27 +1394,6 @@
       }
 
       body.innerHTML = html;
-    }
-
-    // SWIPE (PARMAKLA SAĞA / SOLA KAYDIRMA) ALGILAYICI
-    function bindSwipeGesture(elementId, onSwipeLeft, onSwipeRight) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      let startX = 0, startY = 0;
-
-      el.addEventListener('touchstart', e => {
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-      }, { passive: true });
-
-      el.addEventListener('touchend', e => {
-        const diffX = e.changedTouches[0].clientX - startX;
-        const diffY = e.changedTouches[0].clientY - startY;
-        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 60) {
-          if (diffX < 0) onSwipeLeft();  // Sola çekme -> Sonraki
-          else onSwipeRight();          // Sağa çekme -> Önceki
-        }
-      }, { passive: true });
     }
 
     // ==========================================
@@ -1535,9 +1539,6 @@
       pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
       saveCurrentSheet();
     }
-
-    // PARMAKLA SAĞA-SOLA KAYDIRMA BAĞLANTILARI
-    bindSwipeGesture('personalPadWrap', nextPersonalSheet, prevPersonalSheet);
   </script>
 </body>
 </html>
